@@ -1,0 +1,324 @@
+[gd_scene load_steps=16 format=3 uid="uid://cpa2s3ipluc7n"]
+
+[ext_resource type="Texture2D" uid="uid://cf8e83esb27si" path="res://Assets/graphics/characters/larva/larva_atlas_gray.svg" id="1_31ath"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vxobd"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s478e"]
+atlas = ExtResource("1_31ath")
+region = Rect2(56, 296, 144, 176)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h6efp"]
+atlas = ExtResource("1_31ath")
+region = Rect2(400, 8, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m30d0"]
+atlas = ExtResource("1_31ath")
+region = Rect2(472, 48, 32, 72)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q8xni"]
+atlas = ExtResource("1_31ath")
+region = Rect2(400, 144, 32, 56)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ua6qc"]
+atlas = ExtResource("1_31ath")
+region = Rect2(464, 176, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2c8b8"]
+atlas = ExtResource("1_31ath")
+region = Rect2(400, 144, 32, 56)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6atd7"]
+atlas = ExtResource("1_31ath")
+region = Rect2(75, 85, 125, 139)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_thes1"]
+atlas = ExtResource("1_31ath")
+region = Rect2(276, 336, 24, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ulq7y"]
+atlas = ExtResource("1_31ath")
+region = Rect2(339, 335, 25, 34)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fhsaf"]
+atlas = ExtResource("1_31ath")
+region = Rect2(275, 262, 26, 52)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_004di"]
+atlas = ExtResource("1_31ath")
+region = Rect2(338, 263, 28, 50)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qlw3m"]
+atlas = ExtResource("1_31ath")
+region = Rect2(474, 257, 12, 61)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lm20k"]
+atlas = ExtResource("1_31ath")
+region = Rect2(394, 263, 44, 50)
+
+[node name="Larva" type="CharacterBody2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource("CapsuleShape2D_vxobd")
+
+[node name="Body" type="Node2D" parent="."]
+position = Vector2(-1, 62)
+
+[node name="Bones" type="Node2D" parent="."]
+
+[node name="Skeleton2D" type="Skeleton2D" parent="Bones"]
+
+[node name="body" type="Bone2D" parent="Bones/Skeleton2D"]
+position = Vector2(-1, 62)
+rest = Transform2D(1, 0, 0, 1, -1, 62)
+
+[node name="Body" type="Sprite2D" parent="Bones/Skeleton2D/body"]
+z_index = 10
+position = Vector2(1302, -208.24)
+texture = SubResource("AtlasTexture_s478e")
+offset = Vector2(-1301, 145)
+
+[node name="legF" type="Bone2D" parent="Bones/Skeleton2D/body"]
+position = Vector2(27.6487, 5)
+rotation = -0.0304476
+rest = Transform2D(0.999537, -0.0304429, 0.0304429, 0.999537, 27.6487, 5)
+
+[node name="LegF_2" type="Sprite2D" parent="Bones/Skeleton2D/body/legF"]
+z_index = 15
+position = Vector2(4.33238, 18.4065)
+rotation = -0.0427005
+texture = SubResource("AtlasTexture_h6efp")
+
+[node name="feetF" type="Bone2D" parent="Bones/Skeleton2D/body/legF"]
+position = Vector2(7.48663, 41.4544)
+rest = Transform2D(1, 0, 0, 1, 7.48663, 41.4544)
+auto_calculate_length_and_angle = false
+length = 43.674
+bone_angle = 80.516
+
+[node name="LegF_1" type="Sprite2D" parent="Bones/Skeleton2D/body/legF/feetF"]
+z_index = 15
+position = Vector2(2.75562, 21.9624)
+rotation = -0.0520352
+scale = Vector2(1, 1)
+texture = SubResource("AtlasTexture_m30d0")
+
+[node name="legB" type="Bone2D" parent="Bones/Skeleton2D/body"]
+position = Vector2(-25.6487, 3.35135)
+rest = Transform2D(1, 0, 0, 1, -25.6487, 3.35135)
+
+[node name="LegB_2" type="Sprite2D" parent="Bones/Skeleton2D/body/legB"]
+z_index = 5
+position = Vector2(-2.26456, 20.91)
+rotation = 0.26971
+texture = SubResource("AtlasTexture_h6efp")
+
+[node name="feetB" type="Bone2D" parent="Bones/Skeleton2D/body/legB"]
+position = Vector2(-6.26486, 40.4703)
+rest = Transform2D(1, 0, 0, 1, -6.26486, 40.4703)
+auto_calculate_length_and_angle = false
+length = 44.304
+bone_angle = 96.759
+
+[node name="LegB_1" type="Sprite2D" parent="Bones/Skeleton2D/body/legB/feetB"]
+z_index = 5
+position = Vector2(-4.18628, 22.4631)
+rotation = 0.258142
+texture = SubResource("AtlasTexture_m30d0")
+
+[node name="armF_1" type="Bone2D" parent="Bones/Skeleton2D/body"]
+position = Vector2(52.3838, -95.6702)
+rest = Transform2D(1, 0, 0, 1, 52.3838, -95.6702)
+
+[node name="ArmFU_2" type="Sprite2D" parent="Bones/Skeleton2D/body/armF_1"]
+z_index = 25
+position = Vector2(10.6162, 16.4306)
+rotation = -0.21146
+texture = SubResource("AtlasTexture_q8xni")
+
+[node name="handF_1" type="Bone2D" parent="Bones/Skeleton2D/body/armF_1"]
+position = Vector2(18.881, 32.7621)
+rest = Transform2D(1, 0, 0, 1, 18.881, 32.7621)
+auto_calculate_length_and_angle = false
+length = 43.0
+bone_angle = 71.439
+
+[node name="ArmFU_1" type="Sprite2D" parent="Bones/Skeleton2D/body/armF_1/handF_1"]
+z_index = 25
+position = Vector2(1.73517, 17.6685)
+rotation = -0.21146
+texture = SubResource("AtlasTexture_ua6qc")
+
+[node name="armB_1" type="Bone2D" parent="Bones/Skeleton2D/body"]
+position = Vector2(-43.8865, -101.054)
+rest = Transform2D(1, 0, 0, 1, -43.8865, -101.054)
+
+[node name="ArmBU_2" type="Sprite2D" parent="Bones/Skeleton2D/body/armB_1"]
+position = Vector2(-12.1059, 16.8144)
+rotation = -2.94902
+scale = Vector2(1, -1)
+texture = SubResource("AtlasTexture_q8xni")
+
+[node name="handB_1" type="Bone2D" parent="Bones/Skeleton2D/body/armB_1"]
+position = Vector2(-18.146, 31.8811)
+rest = Transform2D(1, 0, 0, 1, -18.146, 31.8811)
+auto_calculate_length_and_angle = false
+length = 44.304
+bone_angle = 108.142
+
+[node name="ArmBU_1" type="Sprite2D" parent="Bones/Skeleton2D/body/armB_1/handB_1"]
+position = Vector2(-3.96753, 18.9334)
+rotation = -2.94902
+scale = Vector2(1, -1)
+texture = SubResource("AtlasTexture_ua6qc")
+
+[node name="armF_2" type="Bone2D" parent="Bones/Skeleton2D/body"]
+position = Vector2(44.6162, -53.7297)
+rest = Transform2D(1, 0, 0, 1, 44.6162, -53.7297)
+
+[node name="ArmFD_2" type="Sprite2D" parent="Bones/Skeleton2D/body/armF_2"]
+z_index = 20
+position = Vector2(6.38379, 18.4901)
+texture = SubResource("AtlasTexture_q8xni")
+
+[node name="handF_2" type="Bone2D" parent="Bones/Skeleton2D/body/armF_2"]
+position = Vector2(10.2054, 34.4973)
+rest = Transform2D(1, 0, 0, 1, 10.2054, 34.4973)
+auto_calculate_length_and_angle = false
+length = 43.186
+bone_angle = 81.086
+
+[node name="ArmFD_1" type="Sprite2D" parent="Bones/Skeleton2D/body/armF_2/handF_2"]
+z_index = 20
+position = Vector2(-0.821625, 17.9928)
+texture = SubResource("AtlasTexture_ua6qc")
+
+[node name="armB_2" type="Bone2D" parent="Bones/Skeleton2D/body"]
+position = Vector2(-47.0595, -60.9946)
+rest = Transform2D(1, 0, 0, 1, -47.0595, -60.9946)
+
+[node name="ArmBD_2" type="Sprite2D" parent="Bones/Skeleton2D/body/armB_2"]
+z_index = -5
+position = Vector2(-7.93298, 18.755)
+rotation = 3.09805
+scale = Vector2(1, -1)
+texture = SubResource("AtlasTexture_2c8b8")
+
+[node name="handB_2" type="Bone2D" parent="Bones/Skeleton2D/body/armB_2"]
+position = Vector2(-8.94054, 32.7621)
+rest = Transform2D(1, 0, 0, 1, -8.94054, 32.7621)
+auto_calculate_length_and_angle = false
+length = 43.186
+bone_angle = 95.3145
+
+[node name="ArmBD_1" type="Sprite2D" parent="Bones/Skeleton2D/body/armB_2/handB_2"]
+z_index = -5
+position = Vector2(3.8147e-06, 19.9928)
+rotation = 3.09805
+scale = Vector2(1, -1)
+texture = SubResource("AtlasTexture_ua6qc")
+
+[node name="head" type="Bone2D" parent="Bones/Skeleton2D/body"]
+position = Vector2(2, -111)
+rest = Transform2D(1, 0, 0, 1, 2, -111)
+
+[node name="Head" type="Sprite2D" parent="Bones/Skeleton2D/body/head"]
+z_index = 15
+position = Vector2(-3, -35.2396)
+texture = SubResource("AtlasTexture_6atd7")
+
+[node name="EyeB" type="Sprite2D" parent="Bones/Skeleton2D/body/head/Head"]
+z_index = 16
+position = Vector2(-50, -11)
+texture = SubResource("AtlasTexture_thes1")
+
+[node name="EyeF" type="Sprite2D" parent="Bones/Skeleton2D/body/head/Head"]
+z_index = 16
+position = Vector2(13, -2)
+texture = SubResource("AtlasTexture_ulq7y")
+
+[node name="jaw" type="Bone2D" parent="Bones/Skeleton2D/body/head"]
+position = Vector2(-37, -15)
+rest = Transform2D(1, 0, 0, 1, -37, -15)
+auto_calculate_length_and_angle = false
+length = 61.559
+bone_angle = 0.0
+
+[node name="mandibleB" type="Bone2D" parent="Bones/Skeleton2D/body/head/jaw"]
+position = Vector2(-4, 20)
+rest = Transform2D(1, 0, 0, 1, -4, 20)
+auto_calculate_length_and_angle = false
+length = 24.087
+bone_angle = 99.37
+
+[node name="MandibleB" type="Sprite2D" parent="Bones/Skeleton2D/body/head/jaw/mandibleB"]
+z_index = 14
+position = Vector2(-0.992447, 13.7604)
+texture = SubResource("AtlasTexture_fhsaf")
+
+[node name="mandibleF" type="Bone2D" parent="Bones/Skeleton2D/body/head/jaw"]
+position = Vector2(28, 24)
+rest = Transform2D(1, 0, 0, 1, 28, 24)
+auto_calculate_length_and_angle = false
+length = 28.13
+bone_angle = 99.605
+
+[node name="MandibleF" type="Sprite2D" parent="Bones/Skeleton2D/body/head/jaw/mandibleF"]
+z_index = 16
+position = Vector2(-3, 14.7604)
+texture = SubResource("AtlasTexture_004di")
+
+[node name="fellerB_1" type="Bone2D" parent="Bones/Skeleton2D/body/head/jaw"]
+position = Vector2(19, -66)
+rest = Transform2D(1, 0, 0, 1, 19, -66)
+auto_calculate_length_and_angle = false
+length = 28.13
+bone_angle = 99.605
+
+[node name="FellerB_1" type="Sprite2D" parent="Bones/Skeleton2D/body/head/jaw/fellerB_1"]
+z_index = 17
+position = Vector2(-6.19762, -27.3322)
+rotation = -0.266232
+texture = SubResource("AtlasTexture_qlw3m")
+
+[node name="fellerB_2" type="Bone2D" parent="Bones/Skeleton2D/body/head/jaw/fellerB_1"]
+position = Vector2(-11, -54)
+rest = Transform2D(1, 0, 0, 1, -11, -54)
+auto_calculate_length_and_angle = false
+length = 60.0
+bone_angle = 212.771
+
+[node name="FellerB_2" type="Sprite2D" parent="Bones/Skeleton2D/body/head/jaw/fellerB_1/fellerB_2"]
+z_index = 17
+position = Vector2(-25.1976, -18.3322)
+rotation = -0.266232
+texture = SubResource("AtlasTexture_lm20k")
+
+[node name="fellerF_2" type="Bone2D" parent="Bones/Skeleton2D/body/head/jaw"]
+position = Vector2(47, -64)
+rest = Transform2D(1, 0, 0, 1, 47, -64)
+auto_calculate_length_and_angle = false
+length = 28.13
+bone_angle = 99.605
+
+[node name="FellerF_1" type="Sprite2D" parent="Bones/Skeleton2D/body/head/jaw/fellerF_2"]
+z_index = 18
+position = Vector2(-1, -27.2396)
+rotation = -0.0272526
+scale = Vector2(1, 1)
+texture = SubResource("AtlasTexture_qlw3m")
+
+[node name="fellerF_2" type="Bone2D" parent="Bones/Skeleton2D/body/head/jaw/fellerF_2"]
+position = Vector2(2, -54)
+rest = Transform2D(1, 0, 0, 1, 2, -54)
+auto_calculate_length_and_angle = false
+length = 60.0
+bone_angle = 227.669
+
+[node name="FellerF_2" type="Sprite2D" parent="Bones/Skeleton2D/body/head/jaw/fellerF_2/fellerF_2"]
+z_index = 18
+position = Vector2(-21, -23.2396)
+rotation = -0.0272526
+scale = Vector2(1, 1)
+texture = SubResource("AtlasTexture_lm20k")
