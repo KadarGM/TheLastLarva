@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cf8e83esb27si"
-path="res://.godot/imported/larva_atlas_gray.svg-256569570b53e37faf7bbafc444f8cbe.ctex"
+uid="uid://bygtb821ge70j"
+path="res://.godot/imported/mandible_f.svg-a40652475ce76e14550c03e32bda614c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/graphics/characters/larva/larva_atlas_gray.svg"
-dest_files=["res://.godot/imported/larva_atlas_gray.svg-256569570b53e37faf7bbafc444f8cbe.ctex"]
+source_file="res://Assets/graphics/characters/larva/mandible_f.svg"
+dest_files=["res://.godot/imported/mandible_f.svg-a40652475ce76e14550c03e32bda614c.ctex"]
 
 [params]
 
