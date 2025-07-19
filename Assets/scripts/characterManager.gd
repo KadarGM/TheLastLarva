@@ -10,7 +10,8 @@ enum State {
 	DASHING,
 	CHARGING_JUMP,
 	STUNNED,
-	ATTACKING
+	ATTACKING,
+	BIG_ATTACK
 }
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
@@ -48,6 +49,7 @@ var can_wall_jump: bool = true
 var wall_jump_used: bool = false
 var has_wall_jumped: bool = false
 var s_was_clicked: bool = false
+var big_attack_pending: bool = false
 
 
 func _ready() -> void:
@@ -111,6 +113,11 @@ func change_state(new_state: State) -> void:
 				can_double_jump = true
 		State.DASHING:
 			print("Dash! Stamina: ", character_data.stamina_current)
+		State.BIG_ATTACK:
+			big_attack_pending = true
+			hide_weapon = false
+			hide_weapon_timer.stop()
+			print("Big attack prepared!")
 
 func handle_state_transitions() -> void:
 	if current_state == State.STUNNED:
@@ -136,8 +143,11 @@ func handle_state_transitions() -> void:
 			var input_direction = Input.get_axis("A_left", "D_right")
 			if input_direction != 0 and sign(input_direction) != sign(wall_normal):
 				change_state(State.WALL_SLIDING)
-		elif current_state != State.WALL_JUMPING:
-			change_state(State.JUMPING)
+		elif current_state != State.WALL_JUMPING and current_state != State.BIG_ATTACK:
+			if current_state == State.DOUBLE_JUMPING:
+				change_state(State.DOUBLE_JUMPING)
+			else:
+				change_state(State.JUMPING)
 
 func handle_current_state() -> void:
 	var input_direction = Input.get_axis("A_left", "D_right")
@@ -162,6 +172,8 @@ func handle_current_state() -> void:
 			handle_charge_jump()
 		State.STUNNED:
 			pass
+		State.BIG_ATTACK:
+			handle_air_movement(input_direction)
 
 func handle_ground_movement(input_direction: float) -> void:
 	if input_direction:
@@ -202,6 +214,14 @@ func handle_air_actions() -> void:
 	
 	if Input.is_action_just_pressed("I_attack"):
 		perform_attack()
+	
+	if Input.is_action_just_pressed("S_charge_jump"):
+		if character_data.stamina_current >= character_data.big_attack_stamina_cost:
+			change_state(State.BIG_ATTACK)
+			character_data.stamina_current -= character_data.big_attack_stamina_cost
+			stamina_regen_timer = character_data.stamina_regen_delay
+		else:
+			print("Not enough stamina for big attack!")
 
 func handle_wall_actions() -> void:
 	if Input.is_action_just_pressed("W_jump") and can_wall_jump:
@@ -225,7 +245,7 @@ func handle_gravity(delta: float) -> void:
 	if not is_on_floor():
 		if current_state == State.WALL_SLIDING:
 			velocity.y += gravity * delta * character_data.wall_slide_gravity_multiplier
-		elif Input.is_action_pressed("S_charge_jump") and velocity.y > 0:
+		elif big_attack_pending and velocity.y > 0:
 			velocity.y += gravity * delta * character_data.landing_multiplier
 		else:
 			velocity.y += gravity * delta
@@ -298,7 +318,7 @@ func cancel_big_jump_charge() -> void:
 func handle_air_time(delta: float) -> void:
 	if not is_on_floor() and not is_on_wall():
 		air_time += delta
-		if Input.is_action_pressed("S_charge_jump"):
+		if big_attack_pending:
 			s_was_clicked = true
 			effective_air_time += delta * character_data.landing_multiplier
 		else:
@@ -313,14 +333,17 @@ func handle_air_time(delta: float) -> void:
 func check_stun_on_landing() -> void:
 	print("Total air time: ", air_time, "s")
 	print("Effective air time: ", effective_air_time, "s")
-	if s_was_clicked:
+	
+	if big_attack_pending:
+		animation_player.play("Landing")
 		animation_player_2.play("Attack_1")
 		hide_weapon = false
 		hide_weapon_timer.stop()
 		hide_weapon_timer.start()
-	if effective_air_time > character_data.stun_after_land_treshold:
-		change_state(State.STUNNED)
-		stun_timer.start()
+		if effective_air_time > character_data.stun_after_land_treshold:
+			change_state(State.STUNNED)
+			stun_timer.start()
+		big_attack_pending = false
 
 func reset_air_time() -> void:
 	air_time = 0
@@ -333,7 +356,7 @@ func handle_animations() -> void:
 		State.WALKING:
 			animation_player.play("Walk")
 			flip_body()
-		State.JUMPING, State.DOUBLE_JUMPING, State.WALL_JUMPING:
+		State.JUMPING, State.DOUBLE_JUMPING, State.WALL_JUMPING, State.BIG_ATTACK:
 			animation_player.play("Jump")
 			flip_body()
 		State.WALL_SLIDING:

@@ -21,35 +21,35 @@ metadata/_edit_vertical_guides_ = [-61.0304, 60.4157]
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(577.25, 481)
+position = Vector2(830, 547)
 shape = SubResource("RectangleShape2D_ihnug")
 
 [node name="CollisionShape2D6" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(1095, 1974)
+position = Vector2(1084, 2021)
 shape = SubResource("RectangleShape2D_ihnug")
 
 [node name="CollisionShape2D7" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(894, 1645)
+position = Vector2(888, 1699)
 shape = SubResource("RectangleShape2D_ihnug")
 
 [node name="CollisionShape2D3" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(1444, 2321)
+position = Vector2(1427, 2353)
 shape = SubResource("RectangleShape2D_ihnug")
 
 [node name="CollisionShape2D8" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(2316, 1388)
+position = Vector2(2211, 1444)
 shape = SubResource("RectangleShape2D_ihnug")
 
 [node name="CollisionShape2D9" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(2515, 1063)
+position = Vector2(2457, 1157)
 shape = SubResource("RectangleShape2D_ihnug")
 
 [node name="CollisionShape2D11" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(2665, 771)
+position = Vector2(2644, 837)
 shape = SubResource("RectangleShape2D_ihnug")
 
 [node name="CollisionShape2D12" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(2824, 474)
+position = Vector2(2796, 538)
 shape = SubResource("RectangleShape2D_ihnug")
 
 [node name="CollisionShape2D10" type="CollisionShape2D" parent="StaticBody2D"]
@@ -57,7 +57,7 @@ position = Vector2(2113.63, 2645)
 shape = SubResource("RectangleShape2D_xhv1s")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(302, 333)
+position = Vector2(818, 723)
 rotation = 1.59388
 shape = SubResource("RectangleShape2D_ihnug")
 
