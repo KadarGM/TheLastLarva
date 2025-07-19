@@ -1,10 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://ey8sm6xs8cp3"]
+[gd_scene load_steps=5 format=3 uid="uid://ey8sm6xs8cp3"]
 
 [ext_resource type="Script" uid="uid://q76rbpfs2ftj" path="res://Assets/scripts/gameManager.gd" id="1_48yxf"]
 [ext_resource type="PackedScene" uid="uid://cpa2s3ipluc7n" path="res://Assets/scenes/characters/larva.tscn" id="1_hjtmn"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ihnug"]
 size = Vector2(1153.5, 134)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xhv1s"]
+size = Vector2(2030.75, 134)
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_48yxf")
@@ -22,16 +25,36 @@ position = Vector2(577.25, 481)
 shape = SubResource("RectangleShape2D_ihnug")
 
 [node name="CollisionShape2D6" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(1082, 1973)
+position = Vector2(1095, 1974)
 shape = SubResource("RectangleShape2D_ihnug")
 
 [node name="CollisionShape2D7" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(810, 1231)
+position = Vector2(894, 1645)
 shape = SubResource("RectangleShape2D_ihnug")
 
 [node name="CollisionShape2D3" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(1678, 2683)
+position = Vector2(1444, 2321)
 shape = SubResource("RectangleShape2D_ihnug")
+
+[node name="CollisionShape2D8" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(2316, 1388)
+shape = SubResource("RectangleShape2D_ihnug")
+
+[node name="CollisionShape2D9" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(2515, 1063)
+shape = SubResource("RectangleShape2D_ihnug")
+
+[node name="CollisionShape2D11" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(2665, 771)
+shape = SubResource("RectangleShape2D_ihnug")
+
+[node name="CollisionShape2D12" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(2824, 474)
+shape = SubResource("RectangleShape2D_ihnug")
+
+[node name="CollisionShape2D10" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(2113.63, 2645)
+shape = SubResource("RectangleShape2D_xhv1s")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(302, 333)
