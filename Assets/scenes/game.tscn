@@ -15,15 +15,18 @@ scale = Vector2(0.3, 0.3)
 metadata/_edit_horizontal_guides_ = [70.0]
 metadata/_edit_vertical_guides_ = [-61.0304, 60.4157]
 
-[node name="Camera2D" type="Camera2D" parent="Larva"]
-position = Vector2(-1986.67, -1120)
-scale = Vector2(3.33333, 3.33333)
-anchor_mode = 0
-
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(577.25, 481)
+shape = SubResource("RectangleShape2D_ihnug")
+
+[node name="CollisionShape2D6" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(1082, 1973)
+shape = SubResource("RectangleShape2D_ihnug")
+
+[node name="CollisionShape2D7" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(810, 1231)
 shape = SubResource("RectangleShape2D_ihnug")
 
 [node name="CollisionShape2D3" type="CollisionShape2D" parent="StaticBody2D"]

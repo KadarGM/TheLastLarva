@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3 uid="uid://dp02l272xjb0c"]
+
+[ext_resource type="Script" uid="uid://dd13ispm08l6a" path="res://Assets/scripts/characterData.gd" id="1_72438"]
+
+[resource]
+script = ExtResource("1_72438")
+speed = 600.0
+jump_velocity = -400.0
+gravity = 2000.0
+dash_speed = 1200.0
+dash_duration = 0.2
+dash_cooldown_time = 0.5
+wall_jump_force = 800.0
+wall_slide_gravity_multiplier = 0.8
+wall_jump_control_delay = 0.2
+big_jump_charge_time = 3.0
+big_jump_multiplier = 1.5
+stun_after_land_treshold = 2.0
+stun_time = 0.5
+landing_multiplier = 10.0
+hide_weapon_time = 2.0
+double_jump_multiplier = 0.8
+health_max = 100
+stamina_max = 100
+stamina_cost = 20
+stamina_regen_rate = 1.25
+stamina_regen_delay = 2.0
+metadata/_custom_type_script = "uid://dd13ispm08l6a"
