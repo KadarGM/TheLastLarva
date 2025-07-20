@@ -240,6 +240,10 @@ func handle_ground_movement(input_direction: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, character_data.speed)
 
 func handle_air_movement(input_direction: float) -> void:
+	if current_state == State.BIG_ATTACK or current_state == State.BIG_ATTACK_LANDING:
+		velocity.x = move_toward(velocity.x, 0, character_data.speed * 0.1)
+		return
+		
 	if input_direction:
 		velocity.x = input_direction * character_data.speed
 	else:
@@ -466,6 +470,7 @@ func handle_animations() -> void:
 			animation_set = true
 		State.WALL_SLIDING:
 			animation_player.play("Sliding_wall")
+			handle_body_flipping()
 			animation_set = true
 		State.DASHING:
 			animation_player.play("Dash")
