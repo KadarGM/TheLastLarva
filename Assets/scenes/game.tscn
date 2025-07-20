@@ -13,7 +13,7 @@ size = Vector2(2030.75, 134)
 script = ExtResource("1_48yxf")
 
 [node name="Larva" parent="." instance=ExtResource("1_hjtmn")]
-position = Vector2(596, 336)
+position = Vector2(1255, 435)
 scale = Vector2(0.3, 0.3)
 metadata/_edit_horizontal_guides_ = [70.0]
 metadata/_edit_vertical_guides_ = [-61.0304, 60.4157]

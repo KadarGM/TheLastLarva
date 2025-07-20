@@ -4,6 +4,7 @@ class_name CharacterData
 @export_group("Movement")
 @export var speed: float = 600.0
 @export var jump_velocity: float = -400.0
+@export var jump_release_multiplier: float = 0.5
 
 @export_group("Dash")
 @export var dash_speed: float = 1200.0
@@ -16,14 +17,15 @@ class_name CharacterData
 @export var wall_jump_control_delay: float = 0.2
 
 @export_group("Big Jump")
-@export var big_jump_charge_time: float = 0.3
-@export var big_jump_multiplier: float = 2.2
+@export var big_jump_charge_time: float = 0.5
+@export var big_jump_multiplier: float = 2.0
 @export var big_jump_stamina_cost: float = 200.0
+@export var big_jump_dash_multiplier: float = 3.0
 
 @export_group("Air Time & Stun")
 @export var stun_after_land_treshold: float = 0.2
 @export var stun_time: float = 0.5
-@export var landing_multiplier: float = 3.0
+@export var landing_multiplier: float = 5.0
 
 @export_group("Combat")
 @export var hide_weapon_time: float = 2.0

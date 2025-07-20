@@ -50,6 +50,9 @@ var wall_jump_used: bool = false
 var has_wall_jumped: bool = false
 var s_was_clicked: bool = false
 var big_attack_pending: bool = false
+var is_jump_held: bool = false
+var is_double_jump_held: bool = false
+var double_jump_animation_played: bool = false
 
 
 func _ready() -> void:
@@ -63,6 +66,7 @@ func _process(delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	handle_gravity(delta)
+	handle_jump_release()
 	handle_state_transitions()
 	handle_current_state()
 	handle_air_time(delta)
@@ -100,6 +104,8 @@ func change_state(new_state: State) -> void:
 	previous_state = current_state
 	current_state = new_state	
 	match new_state:
+		State.IDLE, State.WALKING:
+			double_jump_animation_played = false
 		State.STUNNED:
 			velocity.x = 0
 			print("STUNNED for ", character_data.stun_time, "s!")
@@ -144,9 +150,7 @@ func handle_state_transitions() -> void:
 			if input_direction != 0 and sign(input_direction) != sign(wall_normal):
 				change_state(State.WALL_SLIDING)
 		elif current_state != State.WALL_JUMPING and current_state != State.BIG_ATTACK:
-			if current_state == State.DOUBLE_JUMPING:
-				change_state(State.DOUBLE_JUMPING)
-			else:
+			if current_state != State.DOUBLE_JUMPING and current_state != State.JUMPING:
 				change_state(State.JUMPING)
 
 func handle_current_state() -> void:
@@ -250,6 +254,15 @@ func handle_gravity(delta: float) -> void:
 		else:
 			velocity.y += gravity * delta
 
+func handle_jump_release() -> void:
+	if Input.is_action_just_released("W_jump") or is_on_ceiling():
+		if is_jump_held and velocity.y < 0:
+			velocity.y *= character_data.jump_release_multiplier
+			is_jump_held = false
+		elif is_double_jump_held and velocity.y < 0:
+			velocity.y *= character_data.jump_release_multiplier
+			is_double_jump_held = false
+
 func perform_jump() -> void:
 	if big_jump_charged:
 		velocity.y = character_data.jump_velocity * character_data.big_jump_multiplier
@@ -257,14 +270,18 @@ func perform_jump() -> void:
 		print("BIG JUMP EXECUTED! Force: ", character_data.jump_velocity * character_data.big_jump_multiplier)
 	else:
 		velocity.y = character_data.jump_velocity
+		is_jump_held = true
 		print("Jump!")
 	change_state(State.JUMPING)
 
 func perform_double_jump() -> void:
 	velocity.y = character_data.jump_velocity * character_data.double_jump_multiplier
 	can_double_jump = false
+	is_double_jump_held = true
 	reset_air_time()
 	change_state(State.DOUBLE_JUMPING)
+	animation_player.play("Double_jump")
+	animation_player.queue("Jump")
 	print("Double jump!")
 
 func perform_wall_jump() -> void:
@@ -292,6 +309,14 @@ func attempt_dash() -> void:
 	can_dash = false
 	character_data.stamina_current -= character_data.stamina_cost
 	stamina_regen_timer = character_data.stamina_regen_delay
+	
+	if big_jump_charged:
+		dash_timer.wait_time = character_data.dash_duration * character_data.big_jump_dash_multiplier
+		big_jump_charged = false
+		print("BIG DASH!")
+	else:
+		dash_timer.wait_time = character_data.dash_duration
+	
 	dash_timer.start()
 	dash_cooldown_timer.start()
 	change_state(State.DASHING)
@@ -335,8 +360,9 @@ func check_stun_on_landing() -> void:
 	print("Effective air time: ", effective_air_time, "s")
 	
 	if big_attack_pending:
+		flip_body()
 		animation_player.play("Landing")
-		animation_player_2.play("Attack_1")
+		#animation_player_2.play("Attack_1")
 		hide_weapon = false
 		hide_weapon_timer.stop()
 		hide_weapon_timer.start()
@@ -348,6 +374,7 @@ func check_stun_on_landing() -> void:
 func reset_air_time() -> void:
 	air_time = 0
 	effective_air_time = 0
+	double_jump_animation_played = false
 
 func handle_animations() -> void:
 	match current_state:
@@ -356,8 +383,14 @@ func handle_animations() -> void:
 		State.WALKING:
 			animation_player.play("Walk")
 			flip_body()
-		State.JUMPING, State.DOUBLE_JUMPING, State.WALL_JUMPING, State.BIG_ATTACK:
+		State.JUMPING, State.WALL_JUMPING:
 			animation_player.play("Jump")
+			flip_body()
+		State.BIG_ATTACK:
+			flip_body()
+			animation_player.play("Big_attack")
+			flip_body()
+		State.DOUBLE_JUMPING:
 			flip_body()
 		State.WALL_SLIDING:
 			animation_player.play("Jump")
@@ -369,7 +402,6 @@ func handle_animations() -> void:
 		State.STUNNED:
 			if animation_player.current_animation != "Landing":
 				animation_player.play("Landing")
-
 
 func handle_stamina_regeneration(delta: float) -> void:
 	if character_data.stamina_current >= character_data.stamina_max:
@@ -414,3 +446,7 @@ func _on_dash_cooldown_timer_timeout() -> void:
 
 func _on_wall_jump_control_timer_timeout() -> void:
 	pass
+
+func _on_double_jump_animation_finished(anim_name: String) -> void:
+	if anim_name == "Double_jump" and current_state == State.DOUBLE_JUMPING:
+		animation_player.play("Jump")
