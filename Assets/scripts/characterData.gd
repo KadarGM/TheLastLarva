@@ -15,6 +15,7 @@ class_name CharacterData
 @export var wall_jump_force: float = 300.0
 @export var wall_slide_gravity_multiplier: float = 0.5
 @export var wall_jump_control_delay: float = 0.2
+@export var wall_ray_cast: float = 150.0
 
 @export_group("Big Jump")
 @export var big_jump_charge_time: float = 0.5
@@ -23,13 +24,14 @@ class_name CharacterData
 @export var big_jump_dash_multiplier: float = 3.0
 
 @export_group("Air Time & Stun")
-@export var stun_after_land_treshold: float = 0.2
+@export var stun_after_land_treshold: float = 0.8
 @export var stun_time: float = 0.5
 @export var landing_multiplier: float = 5.0
 
 @export_group("Combat")
 @export var hide_weapon_time: float = 2.0
 @export var big_attack_stamina_cost: float = 150.0
+@export var big_attack_distance_treshold: float = 2000.0
 
 @export_group("Double Jump")
 @export var double_jump_multiplier: float = 0.8
