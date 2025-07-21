@@ -8,14 +8,14 @@ class_name CharacterData
 
 @export_group("Dash")
 @export var dash_speed: float = 1200.0
-@export var dash_duration: float = 0.2
+@export var dash_duration: float = 0.3
 @export var dash_cooldown_time: float = 0.7
 
 @export_group("Wall Movement")
 @export var wall_jump_force: float = 300.0
 @export var wall_slide_gravity_multiplier: float = 0.5
 @export var wall_jump_control_delay: float = 0.2
-@export var wall_ray_cast: float = 150.0
+@export var wall_ray_cast: float = 130.0
 
 @export_group("Big Jump")
 @export var big_jump_charge_time: float = 0.5
@@ -31,7 +31,8 @@ class_name CharacterData
 @export_group("Combat")
 @export var hide_weapon_time: float = 2.0
 @export var big_attack_stamina_cost: float = 150.0
-@export var big_attack_distance_treshold: float = 2000.0
+@export var big_attack_distance_treshold: float = 200.0
+@export var attack_cooldown: float = 0.5
 
 @export_group("Double Jump")
 @export var double_jump_multiplier: float = 0.8
