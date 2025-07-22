@@ -15,6 +15,7 @@ script = ExtResource("1_48yxf")
 [node name="Larva" parent="." instance=ExtResource("1_hjtmn")]
 position = Vector2(1255, 435)
 scale = Vector2(0.3, 0.3)
+character_data = null
 metadata/_edit_horizontal_guides_ = [70.0]
 metadata/_edit_vertical_guides_ = [-61.0304, 60.4157]
 
@@ -63,6 +64,16 @@ shape = SubResource("RectangleShape2D_ihnug")
 
 [node name="CollisionShape2D4" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(1064, 1058)
+rotation = 1.5708
+shape = SubResource("RectangleShape2D_ihnug")
+
+[node name="CollisionShape2D13" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(1796, 1030)
+rotation = 1.5708
+shape = SubResource("RectangleShape2D_ihnug")
+
+[node name="CollisionShape2D14" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(1796, 1776)
 rotation = 1.5708
 shape = SubResource("RectangleShape2D_ihnug")
 

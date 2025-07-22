@@ -3,7 +3,7 @@ class_name CharacterData
 
 @export_group("Movement")
 @export var speed: float = 600.0
-@export var jump_velocity: float = -1500.0
+@export var jump_velocity: float = -400.0
 @export var jump_release_multiplier: float = 0.5
 
 @export_group("Dash")
@@ -12,9 +12,9 @@ class_name CharacterData
 @export var dash_cooldown_time: float = 0.7
 
 @export_group("Wall Movement")
-@export var wall_jump_force: float = 200.0
-@export var wall_slide_gravity_multiplier: float = 0.4
-@export var wall_jump_control_delay: float = 0.2
+@export var wall_jump_force: float = 300.0
+@export var wall_slide_gravity_multiplier: float = 0.5
+@export var wall_jump_control_delay: float = 0.5
 @export var wall_ray_cast_length: float = 130.0
 
 @export_group("Big Jump")
