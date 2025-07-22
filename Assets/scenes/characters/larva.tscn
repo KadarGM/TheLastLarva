@@ -3668,8 +3668,6 @@ target_position = Vector2(0, 200)
 
 [node name="WallJumpControlTimer" type="Timer" parent="Timers"]
 
-[node name="BigJumpDurationTimer" type="Timer" parent="Timers"]
-
 [node name="Body" type="Node2D" parent="."]
 
 [node name="body" type="Sprite2D" parent="Body"]
