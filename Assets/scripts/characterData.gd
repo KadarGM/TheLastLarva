@@ -8,7 +8,7 @@ class_name CharacterData
 
 @export_group("Dash")
 @export var dash_speed: float = 1200.0
-@export var dash_duration: float = 0.3
+@export var dash_duration: float = 0.2
 @export var dash_cooldown_time: float = 0.7
 
 @export_group("Wall Movement")
@@ -18,12 +18,12 @@ class_name CharacterData
 @export var wall_ray_cast_length: float = 100.0
 
 @export_group("Big Jump")
-@export var big_jump_charge_time: float = 0.5
+@export var big_jump_charge_time: float = 3.0
 @export var big_jump_multiplier: float = 2.0
 @export var big_jump_stamina_cost: float = 200.0
 @export var big_jump_dash_multiplier: float = 3.0
-@export var big_jump_horizontal_speed: float = 1200.0
-@export var big_jump_vertical_speed: float = 1200.0
+@export var big_jump_horizontal_speed: float = 1500.0
+@export var big_jump_vertical_speed: float = 1500.0
 @export var big_jump_duration: float = 1.0
 @export var big_jump_stamina_drain_rate: float = 1000.0
 
