@@ -30,10 +30,16 @@ enum State {
 @onready var before_attack_timer = $Timers/BeforeAttackTimer
 
 @onready var ground_check_ray: RayCast2D = $RayCasts/GroundCheckRay
+@onready var ground_check_ray_2: RayCast2D = $RayCasts/GroundCheckRay2
+@onready var ground_check_ray_3: RayCast2D = $RayCasts/GroundCheckRay3
 @onready var near_ground_ray: RayCast2D = $RayCasts/NearGroundRay
+@onready var near_ground_ray_2: RayCast2D = $RayCasts/NearGroundRay2
+@onready var near_ground_ray_3: RayCast2D = $RayCasts/NearGroundRay3
 @onready var left_wall_ray: RayCast2D = $RayCasts/LeftWallRay
 @onready var right_wall_ray: RayCast2D = $RayCasts/RightWallRay
 @onready var ceiling_ray: RayCast2D = $RayCasts/CeilingRay
+@onready var ceiling_ray_2: RayCast2D = $RayCasts/CeilingRay2
+@onready var ceiling_ray_3: RayCast2D = $RayCasts/CeilingRay3
 
 @onready var sword_f: Sprite2D = $Body/body/armF_1/handF_1/swordF
 @onready var sword_b: Sprite2D = $Body/body/armB_1/handB_1/swordB
@@ -52,32 +58,31 @@ var stamina_regen_timer: float = 0.0
 var air_time: float = 0.0
 var effective_air_time: float = 0.0
 var big_jump_charged: bool = false
-var is_holding_charged_jump: bool = false
-var hide_weapon: bool = true
 var can_dash: bool = true
 var can_double_jump: bool = true
 var can_triple_jump: bool = false
 var can_wall_jump: bool = true
 var has_wall_jumped: bool = false
-var s_was_clicked: bool = false
 var big_attack_pending: bool = false
 var is_jump_held: bool = false
 var is_double_jump_held: bool = false
 var is_triple_jump_held: bool = false
-var double_jump_animation_played: bool = false
 var is_high_big_attack: bool = false
-var animation_set: bool = false
 var count_of_attack: int = 0
 var big_jump_direction: Vector2 = Vector2.ZERO
 var jump_count: int = 0
 var was_on_wall: bool = false
-var current_animation: String = ""
+var velocity_before_attack: float = 0.0
+var facing_before_big_attack: float = 1.0
+var attack_movement_applied: bool = false
 
 func _ready() -> void:
 	if not character_data:
 		character_data = CharacterData.new()
 	init_timers()
 	setup_raycasts()
+	animation_player.animation_finished.connect(_on_animation_finished)
+	update_weapon_visibility("hide")
 
 func _process(delta: float) -> void:
 	handle_stamina_regeneration(delta)
@@ -99,8 +104,20 @@ func setup_raycasts() -> void:
 	ground_check_ray.target_position = Vector2(0, character_data.ground_check_ray_length)
 	ground_check_ray.enabled = true
 	
+	ground_check_ray_2.target_position = Vector2(0, character_data.ground_check_ray_length)
+	ground_check_ray_2.enabled = true
+	
+	ground_check_ray_3.target_position = Vector2(0, character_data.ground_check_ray_length)
+	ground_check_ray_3.enabled = true
+	
 	near_ground_ray.target_position = Vector2(0, character_data.near_ground_ray_length)
 	near_ground_ray.enabled = true
+	
+	near_ground_ray_2.target_position = Vector2(0, character_data.near_ground_ray_length)
+	near_ground_ray_2.enabled = true
+	
+	near_ground_ray_3.target_position = Vector2(0, character_data.near_ground_ray_length)
+	near_ground_ray_3.enabled = true
 	
 	left_wall_ray.target_position = Vector2(-character_data.wall_ray_cast_length, 0)
 	left_wall_ray.enabled = true
@@ -108,27 +125,29 @@ func setup_raycasts() -> void:
 	right_wall_ray.target_position = Vector2(character_data.wall_ray_cast_length, 0)
 	right_wall_ray.enabled = true
 	
-	if ceiling_ray:
-		ceiling_ray.target_position = Vector2(0, -character_data.ceiling_ray_length)
-		ceiling_ray.enabled = true
+	ceiling_ray.target_position = Vector2(0, -character_data.ceiling_ray_length)
+	ceiling_ray.enabled = true
+	
+	ceiling_ray_2.target_position = Vector2(0, -character_data.ceiling_ray_length)
+	ceiling_ray_2.enabled = true
+	
+	ceiling_ray_3.target_position = Vector2(0, -character_data.ceiling_ray_length)
+	ceiling_ray_3.enabled = true
 
 func check_big_attack_landing() -> void:
-	if current_state == State.BIG_ATTACK and is_high_big_attack and near_ground_ray.is_colliding():
+	var near = near_ground_ray.is_colliding() or near_ground_ray_2.is_colliding() or near_ground_ray_3.is_colliding()
+	if current_state == State.BIG_ATTACK and big_attack_pending and near:
 		change_state(State.BIG_ATTACK_LANDING)
 
-func is_wall_sliding_left() -> bool:
-	return left_wall_ray.is_colliding() and velocity.y > 0
-
-func is_wall_sliding_right() -> bool:
-	return right_wall_ray.is_colliding() and velocity.y > 0
-
 func is_wall_hanging_left() -> bool:
+	var colliding = left_wall_ray.is_colliding()
 	var input_direction = Input.get_axis("A_left", "D_right")
-	return left_wall_ray.is_colliding() and input_direction < 0
+	return colliding and input_direction < 0
 
 func is_wall_hanging_right() -> bool:
+	var colliding = right_wall_ray.is_colliding()
 	var input_direction = Input.get_axis("A_left", "D_right")
-	return right_wall_ray.is_colliding() and input_direction > 0
+	return colliding and input_direction > 0
 
 func get_wall_jump_direction() -> float:
 	if left_wall_ray.is_colliding():
@@ -171,11 +190,9 @@ func change_state(new_state: State) -> void:
 	
 	previous_state = current_state
 	current_state = new_state
-	animation_set = false
 	
 	match new_state:
 		State.IDLE, State.WALKING:
-			double_jump_animation_played = false
 			jump_count = 0
 		State.STUNNED:
 			velocity.x = 0
@@ -203,16 +220,26 @@ func change_state(new_state: State) -> void:
 			print("Dash! Stamina: ", character_data.stamina_current)
 		State.BIG_ATTACK:
 			big_attack_pending = true
-			hide_weapon = false
+			facing_before_big_attack = body.scale.x
 			hide_weapon_timer.stop()
+			if air_time == 0:
+				air_time = 0.01
+				effective_air_time = 0.01
 			print("Big attack prepared!")
 		State.BIG_ATTACK_LANDING:
 			print("Big attack landing!")
 		State.BIG_JUMPING:
 			print("Big jump executed! Direction: ", big_jump_direction)
+		State.ATTACKING:
+			if is_on_floor():
+				velocity_before_attack = velocity.x
+				attack_movement_applied = false
+			else:
+				velocity_before_attack = velocity.x
+				attack_movement_applied = true
 
 func handle_state_transitions() -> void:
-	if current_state == State.STUNNED:
+	if current_state == State.STUNNED or current_state == State.ATTACKING:
 		return
 	
 	if current_state == State.BIG_JUMPING:
@@ -229,6 +256,9 @@ func handle_state_transitions() -> void:
 		can_wall_jump = true
 		was_on_wall = false
 		
+		if current_state == State.BIG_ATTACK_LANDING:
+			return
+		
 		if abs(velocity.x) > 10:
 			change_state(State.WALKING)
 		elif big_jump_timer.time_left > 0:
@@ -236,9 +266,17 @@ func handle_state_transitions() -> void:
 		else:
 			change_state(State.IDLE)
 	else:
+		var left = false
+		var right = false
+		
+		if left_wall_ray.is_colliding():
+			left = true
+		
+		if right_wall_ray.is_colliding():
+			right = true
+		
 		var can_wall_slide = false
-		var is_touching_wall = left_wall_ray.is_colliding() or right_wall_ray.is_colliding()
-
+		var is_touching_wall = left or right
 		if is_touching_wall:
 			if not was_on_wall:
 				can_wall_jump = true
@@ -247,7 +285,7 @@ func handle_state_transitions() -> void:
 			was_on_wall = false
 
 		if is_touching_wall and velocity.y > 0:
-			if current_state == State.BIG_ATTACK:
+			if current_state == State.BIG_ATTACK or current_state == State.BIG_ATTACK_LANDING:
 				can_wall_slide = false
 			else:
 				can_wall_slide = true
@@ -258,12 +296,16 @@ func handle_state_transitions() -> void:
 			if current_state != State.DOUBLE_JUMPING and current_state != State.JUMPING and current_state != State.TRIPLE_JUMPING:
 				change_state(State.JUMPING)
 
+
 func check_big_jump_collision() -> void:
-	if big_jump_direction.y < 0 and ceiling_ray.is_colliding():
+	var _ceil = ceiling_ray.is_colliding() or ceiling_ray_2.is_colliding() or ceiling_ray_3.is_colliding()
+	var left = left_wall_ray.is_colliding()
+	var right = right_wall_ray.is_colliding()
+	if big_jump_direction.y < 0 and _ceil:
 		end_big_jump()
-	elif big_jump_direction.x < 0 and left_wall_ray.is_colliding():
+	elif big_jump_direction.x < 0 and left:
 		end_big_jump()
-	elif big_jump_direction.x > 0 and right_wall_ray.is_colliding():
+	elif big_jump_direction.x > 0 and right:
 		end_big_jump()
 
 func check_big_jump_input_release() -> void:
@@ -307,7 +349,19 @@ func handle_current_state(delta) -> void:
 		State.BIG_ATTACK:
 			handle_air_movement(input_direction)
 		State.BIG_ATTACK_LANDING:
-			handle_air_movement(input_direction)
+			velocity.x = 0
+		State.ATTACKING:
+			handle_attack_movement()
+
+func handle_attack_movement() -> void:
+	if not attack_movement_applied:
+		var attack_force = character_data.attack_movement_force
+		if count_of_attack == 3:
+			attack_force *= character_data.attack_movement_multiplier
+		velocity.x = -body.scale.x * attack_force
+		attack_movement_applied = true
+	
+	velocity.x = move_toward(velocity.x, 0, character_data.attack_movement_friction)
 
 func handle_big_jump_movement() -> void:
 	if big_jump_direction.y < 0:
@@ -413,16 +467,25 @@ func handle_air_actions() -> void:
 		perform_attack()
 	
 	if Input.is_action_just_pressed("S_charge_jump"):
+		var ground = ground_check_ray.is_colliding() or ground_check_ray_2.is_colliding() or ground_check_ray_3.is_colliding()
 		if character_data.stamina_current >= character_data.big_attack_stamina_cost:
 			character_data.stamina_current -= character_data.big_attack_stamina_cost
 			stamina_regen_timer = character_data.stamina_regen_delay
-			is_high_big_attack = not ground_check_ray.is_colliding()
+			is_high_big_attack = not ground
 			change_state(State.BIG_ATTACK)
 		else:
 			print("Not enough stamina for big attack!")
 
 func handle_wall_actions(delta) -> void:
 	var input_direction = Input.get_axis("A_left", "D_right")
+	
+	if big_jump_charged and Input.is_action_pressed("J_dash"):
+		if Input.is_action_just_pressed("A_left"):
+			perform_directional_big_jump(Vector2(-1, 0))
+			return
+		elif Input.is_action_just_pressed("D_right"):
+			perform_directional_big_jump(Vector2(1, 0))
+			return
 	
 	if input_direction != 0 and can_wall_jump:
 		var wall_direction = get_wall_jump_direction()
@@ -471,6 +534,7 @@ func handle_charge_jump() -> void:
 	if velocity.x != 0 and not big_jump_charged:
 		cancel_big_jump_charge()
 		print("Big jump cancelled - movement detected!")
+
 func handle_gravity(delta: float) -> void:
 	if current_state == State.BIG_JUMPING:
 		return
@@ -482,9 +546,9 @@ func handle_gravity(delta: float) -> void:
 			if Input.is_action_pressed("S_charge_jump"):
 				velocity.y += gravity * delta * character_data.wall_slide_gravity_multiplier
 			elif  Input.is_action_just_released("S_charge_jump"):
-				velocity.y = gravity * delta / 10
+				velocity.y = gravity * delta / 1000
 			else:
-				velocity.y = gravity * delta / 10
+				velocity.y = gravity * delta / 1000
 		elif big_attack_pending and velocity.y > 0:
 			velocity.y += gravity * delta * character_data.landing_multiplier
 		else:
@@ -524,7 +588,7 @@ func perform_triple_jump() -> void:
 	is_triple_jump_held = true
 	reset_air_time()
 	change_state(State.TRIPLE_JUMPING)
-	animation_player.play("Double_jump")
+	animation_player.play("Triple_jump")
 	animation_player.queue("Jump")
 	print("Triple jump!")
 
@@ -566,22 +630,24 @@ func attempt_dash() -> void:
 func perform_attack() -> void:
 	if not before_attack_timer.is_stopped():
 		return
-	if count_of_attack < 2:
+	
+	var max_count_of_attack
+	
+	if is_on_floor():
+		max_count_of_attack = 3
+	else:
+		max_count_of_attack = 2
+	change_state(State.ATTACKING)
+	
+	if count_of_attack < max_count_of_attack:
 		count_of_attack += 1
 	else:
-		count_of_attack = 0
-	set_attack(count_of_attack)
-	hide_weapon = false
+		count_of_attack = 1
+	
 	hide_weapon_timer.stop()
 	hide_weapon_timer.start()
 	before_attack_timer.start()
-	print("Attack! Played animation: ", animation_player_2.assigned_animation)
-
-func set_attack(count) -> void:
-	match count:
-		0: animation_player_2.play("Attack_1")
-		1: animation_player_2.play("Attack_2")
-		2: animation_player_2.play("Attack_3")
+	print("Attack!")
 
 func start_big_jump_charge() -> void:
 	if big_jump_charged or big_jump_timer.time_left > 0:
@@ -596,86 +662,85 @@ func cancel_big_jump_charge() -> void:
 		print("BIG JUMP CANCELLED - Time left: ", big_jump_timer.time_left, "s")
 
 func handle_air_time(delta: float) -> void:
-	if not is_on_floor() and not (left_wall_ray.is_colliding() or right_wall_ray.is_colliding()):
+	if not is_on_floor():
 		air_time += delta
-		if big_attack_pending:
-			s_was_clicked = true
+		if current_state == State.BIG_ATTACK or big_attack_pending:
 			effective_air_time += delta * character_data.landing_multiplier
 		else:
-			s_was_clicked = false
 			effective_air_time += delta
-	elif is_on_floor() and air_time > 0:
-		check_stun_on_landing()
-		reset_air_time()
-	elif left_wall_ray.is_colliding() or right_wall_ray.is_colliding():
+	elif is_on_floor():
+		if current_state == State.BIG_ATTACK_LANDING or big_attack_pending:
+			check_stun_on_landing()
 		reset_air_time()
 
 func check_stun_on_landing() -> void:
 	print("Total air time: ", air_time, "s")
 	print("Effective air time: ", effective_air_time, "s")
 	
-	if big_attack_pending:
-		body.scale.x = 1 if velocity.x < 0 else -1
-		animation_player.play("Landing")
-		
-		animation_player_2.play("Big_attack")
-		animation_player_2.queue("Big_attack_rotate_weapons")
-		
-		hide_weapon = false
-		hide_weapon_timer.stop()
-		hide_weapon_timer.start()
-		if effective_air_time > character_data.stun_after_land_treshold:
-			change_state(State.STUNNED)
-			stun_timer.start()
-		big_attack_pending = false
+	body.scale.x = facing_before_big_attack
+	hide_weapon_timer.stop()
+	hide_weapon_timer.start()
+	
+	big_attack_pending = false
 
 func reset_air_time() -> void:
 	air_time = 0
 	effective_air_time = 0
-	double_jump_animation_played = false
 
 func handle_animations() -> void:
-	var target_animation = ""
-	
 	match current_state:
 		State.IDLE:
 			if big_jump_charged and Input.is_action_pressed("J_dash"):
-				target_animation = "Big_jump_charge"
+				animation_player.play("Big_jump_charge")
 			else:
-				target_animation = "Idle"
+				animation_player.play("Idle")
 		State.WALKING:
-			target_animation = "Walk"
+			animation_player.play("Walk")
 		State.JUMPING, State.WALL_JUMPING:
-			target_animation = "Jump"
+			animation_player.play("Jump")
 		State.BIG_JUMPING:
-			target_animation = "Dash"
+			animation_player.play("Dash")
 		State.BIG_ATTACK:
-			if is_high_big_attack:
-				target_animation = "Big_attack_prepare"
+			if is_high_big_attack and animation_player.current_animation != "Big_attack":
+				animation_player.play("Big_attack_prepare")
+				update_weapon_visibility("both")
 		State.BIG_ATTACK_LANDING:
-			target_animation = "Big_attack_landing"
+			if animation_player.current_animation != "Big_attack_landing":
+				animation_player.play("Big_attack_landing")
 		State.WALL_SLIDING:
 			if (big_jump_timer.time_left > 0) or (big_jump_charged and Input.is_action_pressed("J_dash")):
-				target_animation = "Big_jump_wall_charge"
+				animation_player.play("Big_jump_wall_charge")
 			else:
-				target_animation = "Sliding_wall"
+				animation_player.play("Sliding_wall")
 		State.DASHING:
-			target_animation = "Dash"
+			animation_player.play("Dash")
 		State.CHARGING_JUMP:
-			target_animation = "Big_jump_charge"
+			animation_player.play("Big_jump_charge")
 		State.STUNNED:
-			target_animation = "Landing"
+			pass
 		State.DOUBLE_JUMPING, State.TRIPLE_JUMPING:
-			target_animation = "Jump"
-	
-	if target_animation != "" and target_animation != current_animation:
-		current_animation = target_animation
-		animation_player.play(target_animation)
-		
-		if current_state == State.BIG_ATTACK and is_high_big_attack:
-			animation_player.queue("Big_attack")
-		elif current_state == State.BIG_ATTACK_LANDING:
-			animation_player.queue("Landing")
+			pass
+		State.ATTACKING:
+			match count_of_attack:
+				1: 
+					if is_on_floor():
+						animation_player.play("Attack_ground_1")
+						update_weapon_visibility("back")
+					if not is_on_floor():
+						animation_player.play("Attack_air_1")
+						update_weapon_visibility("back")
+				2:  
+					if is_on_floor():
+						animation_player.play("Attack_ground_2")
+						update_weapon_visibility("front")
+					if not is_on_floor():
+						animation_player.play("Attack_air_2")
+						update_weapon_visibility("front")
+				3:  
+					if is_on_floor():
+						animation_player.play("Attack_ground_3")
+						update_weapon_visibility("both")
+
 
 func handle_stamina_regeneration(delta: float) -> void:
 	if character_data.stamina_current >= character_data.stamina_max:
@@ -691,13 +756,29 @@ func handle_stamina_regeneration(delta: float) -> void:
 func update_ui() -> void:
 	stamina_bar.value = character_data.stamina_current
 	stamina_bar.max_value = character_data.stamina_max
-	update_weapon_visibility()
 
-func update_weapon_visibility() -> void:
-	sword_f.visible = not hide_weapon
-	sword_b.visible = not hide_weapon
-	sword_body_2.visible = hide_weapon
-	sword_body.visible = hide_weapon
+func update_weapon_visibility(state: String) -> void:
+	match state:
+		"hide":
+			sword_f.visible = false
+			sword_b.visible = false
+			sword_body_2.visible = true
+			sword_body.visible = true
+		"front":
+			sword_f.visible = true
+			sword_b.visible = false
+			sword_body_2.visible = true
+			sword_body.visible = false
+		"back":
+			sword_f.visible = false
+			sword_b.visible = true
+			sword_body_2.visible = false
+			sword_body.visible = true
+		"both":
+			sword_f.visible = true
+			sword_b.visible = true
+			sword_body_2.visible = false
+			sword_body.visible = false
 
 func handle_body_flipping() -> void:
 	match current_state:
@@ -720,6 +801,10 @@ func handle_body_flipping() -> void:
 		State.BIG_JUMPING:
 			if big_jump_direction.x != 0:
 				body.scale.x = 1 if big_jump_direction.x < 0 else -1
+		State.ATTACKING:
+			pass
+		State.BIG_ATTACK, State.BIG_ATTACK_LANDING, State.STUNNED:
+			body.scale.x = facing_before_big_attack
 		_:
 			var input_direction = Input.get_axis("A_left", "D_right")
 			if input_direction != 0:
@@ -728,8 +813,8 @@ func handle_body_flipping() -> void:
 				body.scale.x = 1 if velocity.x < 0 else -1
 
 func _on_hide_weapon_timer_timeout() -> void:
-	hide_weapon = true
-	count_of_attack = 0
+	update_weapon_visibility("hide")
+	count_of_attack = 1
 
 func _on_big_jump_timer_timeout() -> void:
 	big_jump_charged = true
@@ -749,6 +834,23 @@ func _on_wall_jump_control_timer_timeout() -> void:
 func _on_before_attack_timer_timeout() -> void:
 	pass
 
-func _on_double_jump_animation_finished(anim_name: String) -> void:
-	if anim_name == "Double_jump" and (current_state == State.DOUBLE_JUMPING or current_state == State.TRIPLE_JUMPING):
-		animation_player.play("Jump")
+func _on_animation_finished(anim_name: String) -> void:
+	if current_state == State.ATTACKING:
+		if anim_name == "Attack_ground_1" or anim_name == "Attack_ground_2" or anim_name == "Attack_ground_3":
+			if is_on_floor():
+				velocity.x = velocity_before_attack
+				change_state(State.IDLE)
+		elif anim_name == "Attack_air_1" or anim_name == "Attack_air_2": 
+			if not is_on_floor():
+				change_state(State.JUMPING)
+	elif current_state == State.BIG_ATTACK and anim_name == "Big_attack_prepare":
+		animation_player.play("Big_attack")
+	elif anim_name == "Big_attack" and (current_state == State.BIG_ATTACK_LANDING or is_on_floor()):
+		if not animation_player.is_playing() or animation_player.current_animation != "Big_attack_landing":
+			animation_player.play("Big_attack_landing")
+	elif anim_name == "Big_attack_landing":
+		if effective_air_time > character_data.stun_after_land_treshold:
+			change_state(State.STUNNED)
+			stun_timer.start()
+		else:
+			change_state(State.IDLE)

@@ -12,9 +12,9 @@ class_name CharacterData
 @export var dash_cooldown_time: float = 0.7
 
 @export_group("Wall Movement")
-@export var wall_jump_force: float = 200.0
-@export var wall_slide_gravity_multiplier: float = 0.8
-@export var wall_jump_control_delay: float = 0.2
+@export var wall_jump_force: float = 250.0
+@export var wall_slide_gravity_multiplier: float = 0.5
+@export var wall_jump_control_delay: float = 0.15
 @export var wall_ray_cast_length: float = 100.0
 
 @export_group("Big Jump")
@@ -34,13 +34,16 @@ class_name CharacterData
 
 @export_group("Combat")
 @export var hide_weapon_time: float = 2.0
-@export var big_attack_stamina_cost: float = 150.0
+@export var big_attack_stamina_cost: float = 500.0
 @export var big_attack_distance_treshold: float = 200.0
-@export var attack_cooldown: float = 0.5
+@export var attack_cooldown: float = 0.28
+@export var attack_movement_force: float = 850.0
+@export var attack_movement_friction: float = 180.0
+@export var attack_movement_multiplier: float = 1.2
 
 @export_group("Multi Jump")
-@export var double_jump_multiplier: float = 0.8
-@export var triple_jump_multiplier: float = 0.6
+@export var double_jump_multiplier: float = 0.9
+@export var triple_jump_multiplier: float = 0.8
 
 @export_group("Health & Stamina")
 @export var health_max: int = 100
@@ -50,7 +53,7 @@ class_name CharacterData
 @export var stamina_regen_delay: float = 1.0
 
 @export_group("Raycasts")
-@export var ground_check_ray_length: float = 200.0
+@export var ground_check_ray_length: float = 100.0
 @export var near_ground_ray_length: float = 100.0
 @export var ceiling_ray_length: float = 200.0
 
