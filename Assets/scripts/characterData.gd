@@ -12,7 +12,7 @@ class_name CharacterData
 @export var dash_cooldown_time: float = 0.7
 
 @export_group("Wall Movement")
-@export var wall_jump_force: float = 100.0
+@export var wall_jump_force: float = 200.0
 @export var wall_slide_gravity_multiplier: float = 0.8
 @export var wall_jump_control_delay: float = 0.2
 @export var wall_ray_cast_length: float = 100.0

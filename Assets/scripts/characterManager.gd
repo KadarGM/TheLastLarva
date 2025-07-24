@@ -52,6 +52,7 @@ var stamina_regen_timer: float = 0.0
 var air_time: float = 0.0
 var effective_air_time: float = 0.0
 var big_jump_charged: bool = false
+var is_holding_charged_jump: bool = false
 var hide_weapon: bool = true
 var can_dash: bool = true
 var can_double_jump: bool = true
@@ -346,17 +347,20 @@ func handle_ground_actions() -> void:
 	if current_state == State.STUNNED:
 		return
 	
-	if big_jump_charged:
-		if Input.is_action_pressed("J_dash"):
-			if Input.is_action_pressed("A_left"):
-				perform_directional_big_jump(Vector2(-1, 0))
-				return
-			elif Input.is_action_pressed("D_right"):
-				perform_directional_big_jump(Vector2(1, 0))
-				return
-			elif Input.is_action_pressed("W_jump"):
-				perform_directional_big_jump(Vector2(0, -1))
-				return
+	if big_jump_charged and Input.is_action_pressed("J_dash"):
+		if Input.is_action_just_pressed("A_left"):
+			perform_directional_big_jump(Vector2(-1, 0))
+			return
+		elif Input.is_action_just_pressed("D_right"):
+			perform_directional_big_jump(Vector2(1, 0))
+			return
+		elif Input.is_action_just_pressed("W_jump"):
+			perform_directional_big_jump(Vector2(0, -1))
+			return
+	
+	if big_jump_charged and Input.is_action_just_released("J_dash"):
+		cancel_big_jump_charge()
+		big_jump_charged = false
 	
 	if Input.is_action_just_pressed("W_jump"):
 		perform_jump()
@@ -390,14 +394,17 @@ func handle_air_actions() -> void:
 			elif can_triple_jump:
 				perform_triple_jump()
 	
-	if big_jump_charged:
-		if Input.is_action_pressed("J_dash"):
-			if Input.is_action_pressed("A_left"):
-				perform_directional_big_jump(Vector2(-1, 0))
-				return
-			elif Input.is_action_pressed("D_right"):
-				perform_directional_big_jump(Vector2(1, 0))
-				return
+	if big_jump_charged and Input.is_action_pressed("J_dash"):
+		if Input.is_action_just_pressed("A_left"):
+			perform_directional_big_jump(Vector2(-1, 0))
+			return
+		elif Input.is_action_just_pressed("D_right"):
+			perform_directional_big_jump(Vector2(1, 0))
+			return
+	
+	if big_jump_charged and Input.is_action_just_released("J_dash"):
+		cancel_big_jump_charge()
+		big_jump_charged = false
 	
 	if Input.is_action_just_pressed("J_dash"):
 		attempt_dash()
@@ -422,6 +429,10 @@ func handle_wall_actions(delta) -> void:
 		if (input_direction > 0 and wall_direction > 0) or (input_direction < 0 and wall_direction < 0):
 			perform_wall_jump_away()
 	
+	if big_jump_charged and Input.is_action_just_released("J_dash"):
+		cancel_big_jump_charge()
+		big_jump_charged = false
+	
 	if Input.is_action_pressed("J_dash") and velocity.y < gravity * delta:
 		if Input.is_action_just_pressed("S_charge_jump"):
 			cancel_big_jump_charge()
@@ -443,13 +454,23 @@ func perform_wall_jump_away() -> void:
 	print("Wall jump away executed!")
 
 func handle_charge_jump() -> void:
-	if Input.is_action_just_released("J_dash"):
+	if not Input.is_action_pressed("J_dash"):
 		cancel_big_jump_charge()
 	
-	if velocity.x != 0:
+	if big_jump_charged and Input.is_action_pressed("J_dash"):
+		if Input.is_action_just_pressed("A_left"):
+			perform_directional_big_jump(Vector2(-1, 0))
+			return
+		elif Input.is_action_just_pressed("D_right"):
+			perform_directional_big_jump(Vector2(1, 0))
+			return
+		elif Input.is_action_just_pressed("W_jump"):
+			perform_directional_big_jump(Vector2(0, -1))
+			return
+	
+	if velocity.x != 0 and not big_jump_charged:
 		cancel_big_jump_charge()
 		print("Big jump cancelled - movement detected!")
-
 func handle_gravity(delta: float) -> void:
 	if current_state == State.BIG_JUMPING:
 		return
@@ -461,9 +482,9 @@ func handle_gravity(delta: float) -> void:
 			if Input.is_action_pressed("S_charge_jump"):
 				velocity.y += gravity * delta * character_data.wall_slide_gravity_multiplier
 			elif  Input.is_action_just_released("S_charge_jump"):
-				velocity.y = gravity * delta / 2
+				velocity.y = gravity * delta / 10
 			else:
-				velocity.y = gravity * delta / 2
+				velocity.y = gravity * delta / 10
 		elif big_attack_pending and velocity.y > 0:
 			velocity.y += gravity * delta * character_data.landing_multiplier
 		else:
@@ -534,7 +555,7 @@ func attempt_dash() -> void:
 	if big_jump_charged:
 		dash_timer.wait_time = character_data.dash_duration * character_data.big_jump_dash_multiplier
 		big_jump_charged = false
-		print("BIG DASH!")
+		print("BIG JUMP!")
 	else:
 		dash_timer.wait_time = character_data.dash_duration
 	
@@ -618,18 +639,23 @@ func handle_animations() -> void:
 	
 	match current_state:
 		State.IDLE:
-			target_animation = "Idle"
+			if big_jump_charged and Input.is_action_pressed("J_dash"):
+				target_animation = "Big_jump_charge"
+			else:
+				target_animation = "Idle"
 		State.WALKING:
 			target_animation = "Walk"
-		State.JUMPING, State.WALL_JUMPING, State.BIG_JUMPING:
+		State.JUMPING, State.WALL_JUMPING:
 			target_animation = "Jump"
+		State.BIG_JUMPING:
+			target_animation = "Dash"
 		State.BIG_ATTACK:
 			if is_high_big_attack:
 				target_animation = "Big_attack_prepare"
 		State.BIG_ATTACK_LANDING:
 			target_animation = "Big_attack_landing"
 		State.WALL_SLIDING:
-			if big_jump_timer.time_left > 0:
+			if (big_jump_timer.time_left > 0) or (big_jump_charged and Input.is_action_pressed("J_dash")):
 				target_animation = "Big_jump_wall_charge"
 			else:
 				target_animation = "Sliding_wall"
