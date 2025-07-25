@@ -37,9 +37,10 @@ class_name CharacterData
 @export var big_attack_stamina_cost: float = 500.0
 @export var big_attack_distance_treshold: float = 200.0
 @export var attack_cooldown: float = 0.28
-@export var attack_movement_force: float = 850.0
+@export var attack_movement_force: float = 1800.0
 @export var attack_movement_friction: float = 180.0
-@export var attack_movement_multiplier: float = 1.2
+@export var attack_movement_multiplier: float = 1.3
+@export var attack_area_radius: float = 150.0
 
 @export_category("Combat dmg")
 @export var attack_1_dmg: int = 30
@@ -48,10 +49,10 @@ class_name CharacterData
 @export var big_attack_dmg: int = 80
 
 @export_group("Knockback")
-@export var knockback_force: float = 300.0
+@export var knockback_force: float = 150.0
 @export var knockback_force_multiplier: float = 1.1
-@export var knockback_reaction_multiplier: float = 0.5
-@export var knockback_duration: float = 0.2
+@export var knockback_reaction_multiplier: float = 0.3
+@export var knockback_duration: float = 0.1
 @export var knockback_friction: float = 30.0
 
 @export_group("Multi Jump")

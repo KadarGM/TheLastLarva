@@ -8,22 +8,39 @@ var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 var knockback_velocity: Vector2 = Vector2.ZERO
 var knockback_timer: float = 0.0
 var knockback_duration: float = 0.3
+var knockback_friction: float = 800.0
 
 func _ready() -> void:
 	current_health = max_health
 
 func _physics_process(delta: float) -> void:
-	if not is_on_floor():
-		velocity.y += gravity * delta
-	
+	handle_knockback(delta)
+	handle_gravity(delta)
+	handle_normal_movement()
+	move_and_slide()
+
+func handle_knockback(delta: float) -> void:
 	if knockback_timer > 0:
 		knockback_timer -= delta
 		velocity = knockback_velocity
-		knockback_velocity = knockback_velocity.lerp(Vector2.ZERO, delta * 8)
-	else:
-		velocity.x = 0
-	
-	move_and_slide()
+		knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, knockback_friction * delta)
+		
+		if knockback_timer <= 0 or knockback_velocity.length() < 20:
+			knockback_velocity = Vector2.ZERO
+			knockback_timer = 0.0
+
+func handle_gravity(delta: float) -> void:
+	if knockback_timer > 0:
+		return
+		
+	if not is_on_floor():
+		velocity.y += gravity * delta
+
+func handle_normal_movement() -> void:
+	if knockback_timer > 0:
+		return
+		
+	velocity.x = 0
 
 func take_damage(amount: int) -> void:
 	current_health -= amount
@@ -36,6 +53,7 @@ func take_damage(amount: int) -> void:
 func apply_knockback(force: Vector2) -> void:
 	knockback_velocity = force
 	knockback_timer = knockback_duration
+	print(name, " knocked back with force: ", force)
 
 func die() -> void:
 	print(name, " died!")
