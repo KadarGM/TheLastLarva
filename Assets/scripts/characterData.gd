@@ -41,6 +41,19 @@ class_name CharacterData
 @export var attack_movement_friction: float = 180.0
 @export var attack_movement_multiplier: float = 1.2
 
+@export_category("Combat dmg")
+@export var attack_1_dmg: int = 30
+@export var attack_2_dmg: int = 30
+@export var attack_3_dmg: int = 40
+@export var big_attack_dmg: int = 80
+
+@export_group("Knockback")
+@export var knockback_force: float = 300.0
+@export var knockback_force_multiplier: float = 1.1
+@export var knockback_reaction_multiplier: float = 0.5
+@export var knockback_duration: float = 0.2
+@export var knockback_friction: float = 30.0
+
 @export_group("Multi Jump")
 @export var double_jump_multiplier: float = 0.9
 @export var triple_jump_multiplier: float = 0.8
@@ -56,6 +69,7 @@ class_name CharacterData
 @export var ground_check_ray_length: float = 100.0
 @export var near_ground_ray_length: float = 100.0
 @export var ceiling_ray_length: float = 200.0
+@export var target_ray_length: float = 300.0
 
 var health_current: int = health_max
 var stamina_current: float = stamina_max
