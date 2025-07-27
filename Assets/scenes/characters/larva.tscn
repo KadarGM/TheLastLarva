@@ -5999,13 +5999,15 @@ _data = {
 }
 
 [node name="Larva" type="CharacterBody2D"]
-collision_mask = 3
+collision_layer = 2
+collision_mask = 7
 script = ExtResource("1_rtki4")
 metadata/_edit_horizontal_guides_ = [69.6705]
 metadata/_edit_vertical_guides_ = [-28.4933, 35.2966]
 
 [node name="AttackArea" type="Area2D" parent="."]
-collision_mask = 2
+collision_layer = 4
+collision_mask = 6
 
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="AttackArea"]
 position = Vector2(0, -69.091)
