@@ -1,7 +1,8 @@
 extends CharacterBody2D
 
-@export var max_health: int = 200000
+@export var max_health: float = 200000.0
 @export var move_speed: float = 200.0
+@export var dmg: float = 30.0
 
 var current_health: int
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")

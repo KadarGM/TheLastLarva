@@ -1,0 +1,5 @@
+[gd_resource type="Theme" format=3 uid="uid://b0msrjqj7lkth"]
+
+[resource]
+ProgressBar/styles/background = null
+ProgressBar/styles/fill = null
