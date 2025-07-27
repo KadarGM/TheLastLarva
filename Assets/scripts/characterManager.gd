@@ -123,8 +123,20 @@ func _physics_process(delta: float) -> void:
 	handle_state_transitions()
 	handle_current_state(delta)
 	handle_air_time(delta)
+	handle_flipping()
 	handle_animations()
 	move_and_slide()
+
+func handle_flipping() -> void:
+	var input_direction = Input.get_axis("A_left", "D_right")
+	
+	if current_state == State.WALL_SLIDING:
+		if left_wall_ray.is_colliding():
+			body.scale.x = 1
+		elif right_wall_ray.is_colliding():
+			body.scale.x = -1
+	elif input_direction != 0:
+		body.scale.x = -sign(input_direction)
 
 func setup_raycasts() -> void:
 	ground_check_ray.target_position = Vector2(0, character_data.ground_check_ray_length)
