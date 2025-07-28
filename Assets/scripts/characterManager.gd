@@ -20,7 +20,8 @@ enum State {
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var body: Node2D = $Body
-@onready var attack_area: Area2D = $AttackArea
+@onready var attack_area: Area2D = $Body/AttackArea
+@onready var damage_area: Area2D = $DamageArea
 @onready var camera_2d: Camera2D = $Camera2D
 
 @onready var big_jump_timer: Timer = $Timers/BigJumpTimer
@@ -29,9 +30,8 @@ enum State {
 @onready var stun_timer: Timer = $Timers/StunTimer
 @onready var dash_cooldown_timer: Timer = $Timers/DashCooldownTimer
 @onready var wall_jump_control_timer: Timer = $Timers/WallJumpControlTimer
-@onready var before_attack_timer = $Timers/BeforeAttackTimer
-
-var damage_timer: Timer
+@onready var before_attack_timer: Timer = $Timers/BeforeAttackTimer
+@onready var damage_timer: Timer = $Timers/DamageTimer
 
 @onready var ground_check_ray: RayCast2D = $RayCasts/GroundCheckRay
 @onready var ground_check_ray_2: RayCast2D = $RayCasts/GroundCheckRay2
@@ -51,6 +51,7 @@ var damage_timer: Timer
 @onready var sword_body_2: Sprite2D = $Body/body/swordBody2
 
 @onready var stamina_bar: ProgressBar = $GameUI/MarginContainer/HBoxContainer/VBoxContainer/StaminaBar
+@onready var health_bar: ProgressBar = $GameUI/MarginContainer/HBoxContainer/VBoxContainer/HealthBar
 
 @export var character_data: CharacterData
 
@@ -77,32 +78,20 @@ var big_jump_direction: Vector2 = Vector2.ZERO
 var jump_count: int = 0
 var was_on_wall: bool = false
 var velocity_before_attack: float = 0.0
-var knockback_applied_during_attack: bool = false
 var pending_knockback_force: Vector2 = Vector2.ZERO
 var damage_applied_this_attack: bool = false
 
 var knockback_velocity: Vector2 = Vector2.ZERO
 var knockback_timer: float = 0.0
 
-var last_frame_state: State = State.IDLE
-var last_frame_facing: float = 1.0
-
 func _ready() -> void:
 	if not character_data:
 		character_data = CharacterData.new()
 	init_timers()
 	setup_raycasts()
-	setup_attack_area()
 	animation_player.animation_finished.connect(_on_animation_finished)
 	
 	update_weapon_visibility("hide")
-
-func setup_attack_area() -> void:
-	var collision_shape = CollisionShape2D.new()
-	var circle_shape = CircleShape2D.new()
-	circle_shape.radius = character_data.attack_area_radius
-	collision_shape.shape = circle_shape
-	attack_area.add_child(collision_shape)
 
 func _process(delta: float) -> void:
 	handle_stamina_regeneration(delta)
@@ -194,7 +183,6 @@ func has_nearby_enemy() -> bool:
 	for entity in overlapping_bodies:
 		if entity == self:
 			continue
-		print("Enemy in attack area - should not use attack movement")
 		return true
 	return false
 
@@ -249,12 +237,8 @@ func apply_damage_to_entities() -> void:
 	if hit_count > 0 and total_reaction_force.length() > 0:
 		if current_state == State.ATTACKING:
 			pending_knockback_force = total_reaction_force
-			print("Pending knockback after animation! Force: ", pending_knockback_force)
 		else:
-			print("Applying knockback immediately! Force: ", total_reaction_force)
 			apply_knockback(total_reaction_force)
-	else:
-		print("No knockback - hit_count: ", hit_count, " force_length: ", total_reaction_force.length())
 
 func apply_knockback(force: Vector2) -> void:
 	if current_state == State.BIG_ATTACK or current_state == State.BIG_ATTACK_LANDING or current_state == State.BIG_JUMPING or current_state == State.KNOCKBACK:
@@ -264,12 +248,10 @@ func apply_knockback(force: Vector2) -> void:
 	knockback_timer = character_data.knockback_duration
 	
 	change_state(State.KNOCKBACK)
-	print("Knockback applied: ", knockback_velocity)
 
 func take_damage(amount: int) -> void:
 	character_data.health_current -= amount
 	character_data.health_current = max(0, character_data.health_current)
-	print("Player took ", amount, " damage! Health: ", character_data.health_current, "/", character_data.health_max)
 
 func check_big_attack_landing() -> void:
 	var near = near_ground_ray.is_colliding() or near_ground_ray_2.is_colliding() or near_ground_ray_3.is_colliding()
@@ -315,23 +297,17 @@ func init_timers() -> void:
 	
 	wall_jump_control_timer.wait_time = character_data.wall_jump_control_delay
 	wall_jump_control_timer.one_shot = true
-	wall_jump_control_timer.timeout.connect(_on_wall_jump_control_timer_timeout)
 	
 	before_attack_timer.wait_time = character_data.attack_cooldown
 	before_attack_timer.one_shot = true
-	before_attack_timer.timeout.connect(_on_before_attack_timer_timeout)
 	
-	damage_timer = Timer.new()
 	damage_timer.wait_time = character_data.damage_delay
 	damage_timer.one_shot = true
 	damage_timer.timeout.connect(_on_damage_timer_timeout)
-	add_child(damage_timer)
 
 func change_state(new_state: State) -> void:
 	if current_state == new_state:
 		return
-	
-	print("[STATE CHANGE] ", State.keys()[current_state], " -> ", State.keys()[new_state])
 	
 	if current_state == State.ATTACKING and new_state != State.KNOCKBACK:
 		pending_knockback_force = Vector2.ZERO
@@ -349,7 +325,6 @@ func change_state(new_state: State) -> void:
 			wall_jump_control_timer.start()
 			has_wall_jumped = true
 			jump_count = 0
-			print("Wall jump executed!")
 		State.WALL_SLIDING:
 			jump_count = 0
 			can_wall_jump = true
@@ -364,7 +339,7 @@ func change_state(new_state: State) -> void:
 		State.TRIPLE_JUMPING:
 			jump_count = 3
 		State.DASHING:
-			print("Dash! Stamina: ", character_data.stamina_current)
+			pass
 		State.BIG_ATTACK:
 			big_attack_pending = true
 			hide_weapon_timer.stop()
@@ -372,13 +347,11 @@ func change_state(new_state: State) -> void:
 				air_time = character_data.air_time_initial
 				effective_air_time = character_data.air_time_initial
 		State.BIG_ATTACK_LANDING:
-			print("Big attack landing!")
 			apply_damage_to_entities()
 		State.BIG_JUMPING:
-			print("Big jump executed! Direction: ", big_jump_direction)
+			pass
 		State.ATTACKING:
 			velocity_before_attack = velocity.x
-			knockback_applied_during_attack = false
 			damage_applied_this_attack = false
 			damage_timer.start()
 		State.KNOCKBACK:
@@ -537,7 +510,6 @@ func handle_big_jump_stamina(delta: float) -> void:
 		if character_data.stamina_current <= 0:
 			character_data.stamina_current = 0
 			end_big_jump()
-			print("Big jump ended - out of stamina!")
 
 func handle_ground_movement(input_direction: float) -> void:
 	if input_direction:
@@ -593,7 +565,6 @@ func perform_directional_big_jump(direction: Vector2) -> void:
 	big_jump_direction = direction
 	
 	change_state(State.BIG_JUMPING)
-	print("BIG JUMP! Direction: ", direction)
 
 func handle_air_actions() -> void:
 	if Input.is_action_just_pressed("W_jump"):
@@ -637,6 +608,10 @@ func handle_air_actions() -> void:
 func handle_wall_actions(delta) -> void:
 	var input_direction = Input.get_axis("A_left", "D_right")
 	
+	if Input.is_action_just_pressed("W_jump") and can_wall_jump:
+		perform_wall_jump()
+		return
+	
 	if big_jump_charged and Input.is_action_pressed("J_dash"):
 		if Input.is_action_just_pressed("A_left"):
 			perform_directional_big_jump(Vector2(-1, 0))
@@ -665,6 +640,14 @@ func handle_wall_actions(delta) -> void:
 	if Input.is_action_just_pressed("J_dash"):
 		attempt_dash()
 
+func perform_wall_jump() -> void:
+	var wall_direction = get_wall_jump_direction()
+	velocity.y = character_data.jump_velocity * 0.5
+	velocity.x = wall_direction * character_data.wall_jump_force * 1.2
+	reset_air_time()
+	change_state(State.WALL_JUMPING)
+	can_wall_jump = false
+
 func perform_wall_jump_away() -> void:
 	var wall_direction = get_wall_jump_direction()
 	velocity.y = 0
@@ -672,7 +655,6 @@ func perform_wall_jump_away() -> void:
 	reset_air_time()
 	change_state(State.WALL_JUMPING)
 	can_wall_jump = false
-	print("Wall jump away executed!")
 
 func handle_charge_jump() -> void:
 	if not Input.is_action_pressed("J_dash"):
@@ -691,7 +673,6 @@ func handle_charge_jump() -> void:
 	
 	if velocity.x != 0 and not big_jump_charged:
 		cancel_big_jump_charge()
-		print("Big jump cancelled - movement detected!")
 
 func handle_gravity(delta: float) -> void:
 	if current_state == State.BIG_JUMPING or current_state == State.KNOCKBACK:
@@ -731,7 +712,6 @@ func perform_jump() -> void:
 	velocity.y = character_data.jump_velocity
 	is_jump_held = true
 	change_state(State.JUMPING)
-	print("Jump!")
 
 func perform_double_jump() -> void:
 	velocity.y = character_data.jump_velocity * character_data.double_jump_multiplier
@@ -741,7 +721,6 @@ func perform_double_jump() -> void:
 	change_state(State.DOUBLE_JUMPING)
 	animation_player.play("Double_jump")
 	animation_player.queue("Jump")
-	print("Double jump!")
 
 func perform_triple_jump() -> void:
 	velocity.y = character_data.jump_velocity * character_data.triple_jump_multiplier
@@ -751,20 +730,12 @@ func perform_triple_jump() -> void:
 	change_state(State.TRIPLE_JUMPING)
 	animation_player.play("Triple_jump")
 	animation_player.queue("Jump")
-	print("Triple jump!")
-
-func perform_wall_jump() -> void:
-	velocity.x = get_wall_jump_direction() * character_data.wall_jump_force
-	reset_air_time()
-	change_state(State.WALL_JUMPING)
 
 func attempt_dash() -> void:
 	if not can_dash:
-		print("Dash on cooldown!")
 		return
 	
 	if character_data.stamina_current < character_data.stamina_cost:
-		print("Not enough stamina for dash! Current: ", character_data.stamina_current, "/", character_data.stamina_cost)
 		return
 	
 	var dash_direction = Input.get_axis("A_left", "D_right")
@@ -780,7 +751,6 @@ func attempt_dash() -> void:
 	if big_jump_charged:
 		dash_timer.wait_time = character_data.dash_duration * character_data.big_jump_dash_multiplier
 		big_jump_charged = false
-		print("BIG JUMP!")
 	else:
 		dash_timer.wait_time = character_data.dash_duration
 	
@@ -793,7 +763,6 @@ func perform_attack() -> void:
 		return
 	
 	if current_state == State.ATTACKING:
-		print("Already attacking - ignoring additional attack input")
 		return
 	
 	var max_count_of_attack = 3
@@ -813,13 +782,11 @@ func start_big_jump_charge() -> void:
 	if big_jump_charged or big_jump_timer.time_left > 0:
 		return
 	big_jump_timer.start()
-	print("BIG JUMP CHARGING STARTED - Timer: ", character_data.big_jump_charge_time, "s")
 
 func cancel_big_jump_charge() -> void:
 	if big_jump_timer.time_left > 0:
 		big_jump_timer.stop()
 		big_jump_charged = false
-		print("BIG JUMP CANCELLED - Time left: ", big_jump_timer.time_left, "s")
 
 func handle_air_time(delta: float) -> void:
 	if not is_on_floor():
@@ -834,9 +801,6 @@ func handle_air_time(delta: float) -> void:
 		reset_air_time()
 
 func check_stun_on_landing() -> void:
-	print("Total air time: ", air_time, "s")
-	print("Effective air time: ", effective_air_time, "s")
-	
 	hide_weapon_timer.stop()
 	hide_weapon_timer.start()
 	
@@ -919,6 +883,8 @@ func handle_stamina_regeneration(delta: float) -> void:
 func update_ui() -> void:
 	stamina_bar.value = character_data.stamina_current
 	stamina_bar.max_value = character_data.stamina_max
+	health_bar.value = character_data.health_current
+	health_bar.max_value = character_data.health_max
 
 func update_weapon_visibility(state: String) -> void:
 	match state:
@@ -949,26 +915,22 @@ func _on_hide_weapon_timer_timeout() -> void:
 
 func _on_big_jump_timer_timeout() -> void:
 	big_jump_charged = true
-	print("BIG JUMP FULLY CHARGED!")
 
 func _on_stun_timer_timeout() -> void:
 	change_state(State.IDLE)
-	print("Stun ended!")
 
 func _on_dash_cooldown_timer_timeout() -> void:
 	can_dash = true
-	print("Dash ready!")
-
-func _on_wall_jump_control_timer_timeout() -> void:
-	pass
-
-func _on_before_attack_timer_timeout() -> void:
-	pass
 
 func _on_damage_timer_timeout() -> void:
 	if current_state == State.ATTACKING and not damage_applied_this_attack:
 		damage_applied_this_attack = true
 		apply_damage_to_entities()
+
+func _on_damage_area_body_entered(body: Node2D) -> void:
+	if body.has_method("get_damage") and body != self:
+		var damage = body.get_damage()
+		take_damage(damage)
 
 func _on_animation_finished(anim_name: String) -> void:
 	if current_state == State.ATTACKING:

@@ -46,7 +46,6 @@ func handle_normal_movement() -> void:
 func take_damage(amount: int) -> void:
 	current_health -= amount
 	current_health = max(0, current_health)
-	print(name, " took ", amount, " damage! Health: ", current_health, "/", max_health)
 	
 	if current_health <= 0:
 		die()
@@ -54,8 +53,9 @@ func take_damage(amount: int) -> void:
 func apply_knockback(force: Vector2) -> void:
 	knockback_velocity = force
 	knockback_timer = knockback_duration
-	print(name, " knocked back with force: ", force)
 
 func die() -> void:
-	print(name, " died!")
 	queue_free()
+
+func get_damage() -> float:
+	return dmg
