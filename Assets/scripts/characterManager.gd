@@ -85,14 +85,20 @@ var damage_applied_this_attack: bool = false
 var knockback_velocity: Vector2 = Vector2.ZERO
 var knockback_timer: float = 0.0
 
+var health_current: int
+var stamina_current: float
+
 func _ready() -> void:
 	if not character_data:
 		character_data = CharacterData.new()
+	health_current = character_data.health_max
+	stamina_current = character_data.stamina_max
+	print("health_current: ", health_current)
 	init_timers()
 	setup_raycasts()
 	animation_player.animation_finished.connect(_on_animation_finished)
-	
 	update_weapon_visibility("hide")
+	
 
 func _process(delta: float) -> void:
 	check_death()
@@ -123,7 +129,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func check_death() -> void:
-	if character_data.health_current <= 0 and current_state != State.DEATH:
+	if health_current <= 0 and current_state != State.DEATH:
 		change_state(State.DEATH)
 
 func handle_flipping() -> void:
@@ -261,11 +267,11 @@ func take_damage(amount: int) -> void:
 	if current_state == State.DEATH:
 		return
 		
-	character_data.health_current -= amount
-	character_data.health_current = max(0, character_data.health_current)
+	health_current -= amount
+	health_current = max(0, health_current)
 	
-	character_data.stamina_current -= character_data.damage_stamina_cost
-	character_data.stamina_current = max(0, character_data.stamina_current)
+	stamina_current -= character_data.damage_stamina_cost
+	stamina_current = max(0, stamina_current)
 	stamina_regen_timer = character_data.stamina_regen_delay
 	
 	var damage_knockback = Vector2(
@@ -378,7 +384,8 @@ func change_state(new_state: State) -> void:
 		State.KNOCKBACK:
 			pass
 		State.DEATH:
-			velocity = Vector2.ZERO
+			damage_area.monitorable = false
+			print("YOU ARE DEAD!")
 
 func handle_state_transitions() -> void:
 	if current_state == State.STUNNED or current_state == State.ATTACKING or current_state == State.KNOCKBACK or current_state == State.DEATH:
@@ -529,9 +536,9 @@ func handle_big_jump_movement() -> void:
 
 func handle_big_jump_stamina(delta: float) -> void:
 	if current_state == State.BIG_JUMPING:
-		character_data.stamina_current -= character_data.big_jump_stamina_drain_rate * delta
-		if character_data.stamina_current <= 0:
-			character_data.stamina_current = 0
+		stamina_current -= character_data.big_jump_stamina_drain_rate * delta
+		if stamina_current <= 0:
+			stamina_current = 0
 			end_big_jump()
 
 func handle_ground_movement(input_direction: float) -> void:
@@ -578,8 +585,8 @@ func handle_ground_actions() -> void:
 		attempt_dash()
 	
 	if Input.is_action_just_pressed("L_attack"):
-		if character_data.stamina_current >= character_data.attack_stamina_cost:
-			character_data.stamina_current -= character_data.attack_stamina_cost
+		if stamina_current >= character_data.attack_stamina_cost:
+			stamina_current -= character_data.attack_stamina_cost
 			stamina_regen_timer = character_data.stamina_regen_delay
 			perform_attack()
 	
@@ -621,15 +628,15 @@ func handle_air_actions() -> void:
 		attempt_dash()
 	
 	if Input.is_action_just_pressed("L_attack"):
-		if character_data.stamina_current >= character_data.attack_stamina_cost:
-			character_data.stamina_current -= character_data.attack_stamina_cost
+		if stamina_current >= character_data.attack_stamina_cost:
+			stamina_current -= character_data.attack_stamina_cost
 			stamina_regen_timer = character_data.stamina_regen_delay
 			perform_attack()
 	
 	if Input.is_action_just_pressed("S_charge_jump"):
 		var ground = ground_check_ray.is_colliding() or ground_check_ray_2.is_colliding() or ground_check_ray_3.is_colliding()
-		if character_data.stamina_current >= character_data.big_attack_stamina_cost:
-			character_data.stamina_current -= character_data.big_attack_stamina_cost
+		if stamina_current >= character_data.big_attack_stamina_cost:
+			stamina_current -= character_data.big_attack_stamina_cost
 			stamina_regen_timer = character_data.stamina_regen_delay
 			is_high_big_attack = not ground
 			change_state(State.BIG_ATTACK)
@@ -672,7 +679,7 @@ func handle_wall_actions(delta) -> void:
 func perform_wall_jump() -> void:
 	var wall_direction = get_wall_jump_direction()
 	velocity.y = character_data.jump_velocity * 0.3
-	velocity.x = wall_direction * character_data.wall_jump_force
+	velocity.x = wall_direction * character_data.wall_jump_force * character_data.wall_jump_away_multiplier
 	reset_air_time()
 	change_state(State.WALL_JUMPING)
 	can_wall_jump = false
@@ -743,8 +750,8 @@ func perform_jump() -> void:
 	change_state(State.JUMPING)
 
 func perform_double_jump() -> void:
-	#if character_data.stamina_current >= character_data.double_jump_stamina_cost:
-		#character_data.stamina_current -= character_data.double_jump_stamina_cost
+	#if stamina_current >= character_data.double_jump_stamina_cost:
+		#stamina_current -= character_data.double_jump_stamina_cost
 		#stamina_regen_timer = character_data.stamina_regen_delay
 		
 		velocity.y = character_data.jump_velocity * character_data.double_jump_multiplier
@@ -756,8 +763,8 @@ func perform_double_jump() -> void:
 		animation_player.queue("Jump")
 
 func perform_triple_jump() -> void:
-	if character_data.stamina_current >= character_data.triple_jump_stamina_cost:
-		character_data.stamina_current -= character_data.triple_jump_stamina_cost
+	if stamina_current >= character_data.triple_jump_stamina_cost:
+		stamina_current -= character_data.triple_jump_stamina_cost
 		stamina_regen_timer = character_data.stamina_regen_delay
 		
 		velocity.y = character_data.jump_velocity * character_data.triple_jump_multiplier
@@ -772,7 +779,7 @@ func attempt_dash() -> void:
 	if not can_dash:
 		return
 	
-	if character_data.stamina_current < character_data.stamina_cost:
+	if stamina_current < character_data.stamina_cost:
 		return
 	
 	var dash_direction = Input.get_axis("A_left", "D_right")
@@ -782,7 +789,7 @@ func attempt_dash() -> void:
 	velocity.x = dash_direction * character_data.dash_speed
 	velocity.y = 0
 	can_dash = false
-	character_data.stamina_current -= character_data.stamina_cost
+	stamina_current -= character_data.stamina_cost
 	stamina_regen_timer = character_data.stamina_regen_delay
 	
 	if big_jump_charged:
@@ -905,24 +912,24 @@ func handle_animations() -> void:
 					3:  
 						animation_player.play("Attack_air_3")
 						update_weapon_visibility("both")
-		#State.DEATH:
-			#animation_player.play("Death")
+		State.DEATH:
+			animation_player.play("Death")
 
 func handle_stamina_regeneration(delta: float) -> void:
-	if character_data.stamina_current >= character_data.stamina_max:
+	if stamina_current >= character_data.stamina_max:
 		return
 	
 	if stamina_regen_timer > 0:
 		stamina_regen_timer -= delta
 		return
 	
-	character_data.stamina_current += character_data.stamina_cost * delta * character_data.stamina_regen_rate
-	character_data.stamina_current = min(character_data.stamina_current, character_data.stamina_max)
+	stamina_current += character_data.stamina_cost * delta * character_data.stamina_regen_rate
+	stamina_current = min(stamina_current, character_data.stamina_max)
 
 func update_ui() -> void:
-	stamina_bar.value = character_data.stamina_current
+	stamina_bar.value = stamina_current
 	stamina_bar.max_value = character_data.stamina_max
-	health_bar.value = character_data.health_current
+	health_bar.value = health_current
 	health_bar.max_value = character_data.health_max
 
 func update_weapon_visibility(state: String) -> void:
@@ -997,5 +1004,5 @@ func _on_animation_finished(anim_name: String) -> void:
 			stun_timer.start()
 		else:
 			change_state(State.IDLE)
-	#elif anim_name == "Death":
-		#pass
+	elif anim_name == "Death":
+		pass
