@@ -23,7 +23,7 @@ class_name CharacterData
 @export var stamina_regen_delay: float = 1.0
 
 @export_subgroup("Stamina Costs")
-@export var stamina_cost: float = 300.0
+@export var dash_stamina_cost: float = 300.0
 @export var big_jump_stamina_cost: float = 200.0
 @export var big_attack_stamina_cost: float = 500.0
 @export var attack_stamina_cost: float = 150.0

@@ -87,6 +87,7 @@ var knockback_timer: float = 0.0
 
 var health_current: int
 var stamina_current: float
+var death_animation_played: bool = false
 
 func _ready() -> void:
 	if not character_data:
@@ -102,18 +103,21 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	check_death()
-	handle_stamina_regeneration(delta)
-	handle_big_jump_stamina(delta)
+	if current_state != State.DEATH:
+		handle_stamina_regeneration(delta)
+		handle_big_jump_stamina(delta)
 	update_ui()
 
 func _physics_process(delta: float) -> void:
 	
-	if current_state == State.DEATH:
-		handle_animations()
-		return
-	
 	if current_state == State.KNOCKBACK:
 		handle_knockback(delta)
+		handle_animations()
+		move_and_slide()
+		return
+	
+	if current_state == State.DEATH:
+		handle_gravity(delta)
 		handle_animations()
 		move_and_slide()
 		return
@@ -133,6 +137,9 @@ func check_death() -> void:
 		change_state(State.DEATH)
 
 func handle_flipping() -> void:
+	if current_state == State.DEATH:
+		return
+		
 	var input_direction = Input.get_axis("A_left", "D_right")
 	
 	if current_state == State.WALL_SLIDING:
@@ -385,6 +392,8 @@ func change_state(new_state: State) -> void:
 			pass
 		State.DEATH:
 			damage_area.monitorable = false
+			velocity.x = 0
+			death_animation_played = false
 			print("YOU ARE DEAD!")
 
 func handle_state_transitions() -> void:
@@ -711,7 +720,7 @@ func handle_charge_jump() -> void:
 		cancel_big_jump_charge()
 
 func handle_gravity(delta: float) -> void:
-	if current_state == State.BIG_JUMPING or current_state == State.KNOCKBACK or current_state == State.DEATH:
+	if current_state == State.BIG_JUMPING or current_state == State.KNOCKBACK:
 		return
 		
 	if not is_on_floor():
@@ -750,17 +759,13 @@ func perform_jump() -> void:
 	change_state(State.JUMPING)
 
 func perform_double_jump() -> void:
-	#if stamina_current >= character_data.double_jump_stamina_cost:
-		#stamina_current -= character_data.double_jump_stamina_cost
-		#stamina_regen_timer = character_data.stamina_regen_delay
-		
-		velocity.y = character_data.jump_velocity * character_data.double_jump_multiplier
-		can_double_jump = false
-		is_double_jump_held = true
-		reset_air_time()
-		change_state(State.DOUBLE_JUMPING)
-		animation_player.play("Double_jump")
-		animation_player.queue("Jump")
+	velocity.y = character_data.jump_velocity * character_data.double_jump_multiplier
+	can_double_jump = false
+	is_double_jump_held = true
+	reset_air_time()
+	change_state(State.DOUBLE_JUMPING)
+	animation_player.play("Double_jump")
+	animation_player.queue("Jump")
 
 func perform_triple_jump() -> void:
 	if stamina_current >= character_data.triple_jump_stamina_cost:
@@ -779,7 +784,7 @@ func attempt_dash() -> void:
 	if not can_dash:
 		return
 	
-	if stamina_current < character_data.stamina_cost:
+	if stamina_current < character_data.dash_stamina_cost:
 		return
 	
 	var dash_direction = Input.get_axis("A_left", "D_right")
@@ -789,7 +794,7 @@ func attempt_dash() -> void:
 	velocity.x = dash_direction * character_data.dash_speed
 	velocity.y = 0
 	can_dash = false
-	stamina_current -= character_data.stamina_cost
+	stamina_current -= character_data.dash_stamina_cost
 	stamina_regen_timer = character_data.stamina_regen_delay
 	
 	if big_jump_charged:
@@ -913,7 +918,8 @@ func handle_animations() -> void:
 						animation_player.play("Attack_air_3")
 						update_weapon_visibility("both")
 		State.DEATH:
-			animation_player.play("Death")
+			if not death_animation_played:
+				animation_player.play("Death")
 
 func handle_stamina_regeneration(delta: float) -> void:
 	if stamina_current >= character_data.stamina_max:
@@ -923,7 +929,7 @@ func handle_stamina_regeneration(delta: float) -> void:
 		stamina_regen_timer -= delta
 		return
 	
-	stamina_current += character_data.stamina_cost * delta * character_data.stamina_regen_rate
+	stamina_current += character_data.dash_stamina_cost * delta * character_data.stamina_regen_rate
 	stamina_current = min(stamina_current, character_data.stamina_max)
 
 func update_ui() -> void:
@@ -1005,4 +1011,4 @@ func _on_animation_finished(anim_name: String) -> void:
 		else:
 			change_state(State.IDLE)
 	elif anim_name == "Death":
-		pass
+		death_animation_played = true
