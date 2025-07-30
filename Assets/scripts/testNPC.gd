@@ -4,7 +4,7 @@ extends CharacterBody2D
 @export var move_speed: float = 200.0
 @export var dmg: float = 30.0
 
-var current_health: int
+var current_health: float
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 var knockback_velocity: Vector2 = Vector2.ZERO
 var knockback_timer: float = 0.0

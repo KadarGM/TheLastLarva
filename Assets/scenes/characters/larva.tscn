@@ -1,8 +1,10 @@
-[gd_scene load_steps=46 format=3 uid="uid://cpa2s3ipluc7n"]
+[gd_scene load_steps=48 format=3 uid="uid://cpa2s3ipluc7n"]
 
 [ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://Assets/graphics/characters/larva/torso.svg" id="1_hsqkj"]
 [ext_resource type="Script" uid="uid://r1k2g7nohnd7" path="res://Assets/scripts/characterManager.gd" id="1_rtki4"]
 [ext_resource type="Texture2D" uid="uid://bmae8nmkwyayq" path="res://Assets/graphics/characters/larva/leg.svg" id="2_cqbux"]
+[ext_resource type="Resource" uid="uid://dp02l272xjb0c" path="res://Assets/resources/Character.tres" id="2_mhwdb"]
+[ext_resource type="Script" uid="uid://dewcwxkkpml1a" path="res://Assets/scripts/characterVisuals.gd" id="3_mol8u"]
 [ext_resource type="Texture2D" uid="uid://d3eaaehk4puky" path="res://Assets/graphics/characters/larva/leg_1.svg" id="3_mx68n"]
 [ext_resource type="Texture2D" uid="uid://epvqp0q6ebxg" path="res://Assets/graphics/characters/larva/arm.svg" id="4_5w3sp"]
 [ext_resource type="Texture2D" uid="uid://d34v4pbbsrmmi" path="res://Assets/graphics/characters/larva/arm_1.svg" id="5_b03rs"]
@@ -6007,8 +6009,12 @@ height = 484.182
 collision_layer = 2
 collision_mask = 7
 script = ExtResource("1_rtki4")
+character_data = ExtResource("2_mhwdb")
 metadata/_edit_horizontal_guides_ = [69.6705]
 metadata/_edit_vertical_guides_ = [-28.4933, 35.2966]
+
+[node name="Visuals" type="Node2D" parent="."]
+script = ExtResource("3_mol8u")
 
 [node name="DamageArea" type="Area2D" parent="."]
 collision_layer = 4

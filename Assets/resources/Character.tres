@@ -1,42 +1,66 @@
-[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3 uid="uid://dp02l272xjb0c"]
+[gd_resource type="Resource" script_class="CharacterData" load_steps=15 format=3 uid="uid://dp02l272xjb0c"]
 
+[ext_resource type="Texture2D" uid="uid://epvqp0q6ebxg" path="res://Assets/graphics/characters/larva/arm.svg" id="1_72c6n"]
 [ext_resource type="Script" uid="uid://dd13ispm08l6a" path="res://Assets/scripts/characterData.gd" id="1_72438"]
+[ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://Assets/graphics/characters/larva/torso.svg" id="2_xckht"]
+[ext_resource type="Texture2D" uid="uid://c86kchkmsvmjy" path="res://Assets/graphics/characters/larva/eye_b.svg" id="3_6jvht"]
+[ext_resource type="Texture2D" uid="uid://bcohmtdweh0ao" path="res://Assets/graphics/characters/larva/eye_f.svg" id="4_rna60"]
+[ext_resource type="Texture2D" uid="uid://d3eaaehk4puky" path="res://Assets/graphics/characters/larva/leg_1.svg" id="5_78tjt"]
+[ext_resource type="Texture2D" uid="uid://cx6w80sv5d8qa" path="res://Assets/graphics/characters/larva/feller_1.svg" id="6_vqgj7"]
+[ext_resource type="Texture2D" uid="uid://bq7i44lxwmqty" path="res://Assets/graphics/characters/larva/feller_2.svg" id="7_wtqqb"]
+[ext_resource type="Texture2D" uid="uid://d34v4pbbsrmmi" path="res://Assets/graphics/characters/larva/arm_1.svg" id="8_ukkac"]
+[ext_resource type="Texture2D" uid="uid://dno0jklef2fv4" path="res://Assets/graphics/characters/larva/head.svg" id="9_35pb0"]
+[ext_resource type="Texture2D" uid="uid://bmae8nmkwyayq" path="res://Assets/graphics/characters/larva/leg.svg" id="10_8sn2s"]
+[ext_resource type="Texture2D" uid="uid://b5rk0f08kkqjn" path="res://Assets/graphics/characters/larva/mandible_b.svg" id="11_h6y81"]
+[ext_resource type="Texture2D" uid="uid://bygtb821ge70j" path="res://Assets/graphics/characters/larva/mandible_f.svg" id="12_8i06o"]
+[ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://Assets/graphics/characters/larva/sword.svg" id="14_qd8ql"]
 
 [resource]
 script = ExtResource("1_72438")
+body = ExtResource("2_xckht")
+sword = ExtResource("14_qd8ql")
+leg = ExtResource("10_8sn2s")
+feet = ExtResource("5_78tjt")
+arm = ExtResource("1_72c6n")
+hand = ExtResource("8_ukkac")
+head = ExtResource("9_35pb0")
+eye_b = ExtResource("3_6jvht")
+eye_f = ExtResource("4_rna60")
+feller_1 = ExtResource("6_vqgj7")
+feller_2 = ExtResource("7_wtqqb")
+mandible_f = ExtResource("12_8i06o")
+mandible_b = ExtResource("11_h6y81")
 speed = 600.0
-jump_velocity = -400.0
+jump_velocity = -450.0
 jump_release_multiplier = 0.5
 dash_speed = 1200.0
 dash_duration = 0.2
-dash_cooldown_time = 0.5
-wall_jump_force = 800.0
-wall_slide_gravity_multiplier = 0.8
-wall_jump_control_delay = 0.2
-wall_ray_cast_length = 130.0
-wall_jump_away_multiplier = 2.0
+dash_cooldown_time = 0.7
+wall_jump_force = 250.0
+wall_slide_gravity_multiplier = 0.5
+wall_jump_control_delay = 0.15
+wall_ray_cast_length = 100.0
+wall_jump_away_multiplier = 0.5
 wall_slide_initial_velocity_divisor = 1000.0
 big_jump_charge_time = 3.0
-big_jump_multiplier = 1.5
-big_jump_stamina_cost = 200.0
+big_jump_multiplier = 2.0
 big_jump_dash_multiplier = 3.0
-big_jump_horizontal_speed = 1200.0
-big_jump_vertical_speed = 1200.0
+big_jump_horizontal_speed = 1500.0
+big_jump_vertical_speed = 1500.0
 big_jump_duration = 1.0
 big_jump_stamina_drain_rate = 1000.0
-stun_after_land_treshold = 2.0
+stun_after_land_treshold = 0.8
 stun_time = 0.5
-landing_multiplier = 10.0
+landing_multiplier = 2.0
 air_time_initial = 0.01
-hide_weapon_time = 2.0
-big_attack_stamina_cost = 500.0
+hide_weapon_time = 1.4
 big_attack_distance_treshold = 200.0
-attack_cooldown = 0.28
-attack_movement_force = 10.0
+attack_cooldown = 0.35
+attack_movement_force = 1800.0
 attack_movement_friction = 180.0
-attack_movement_multiplier = 1.2
+attack_movement_multiplier = 1.3
 attack_area_radius = 150.0
-damage_delay = 0.1
+damage_delay = 0.2
 ground_attack_force_multiplier = 0.25
 air_attack_force_multiplier = 0.08
 ground_friction_multiplier = 0.8
@@ -46,23 +70,30 @@ attack_1_dmg = 30
 attack_2_dmg = 30
 attack_3_dmg = 40
 big_attack_dmg = 80
-knockback_force = 300.0
+damage_knockback_force = 300.0
+knockback_force = 150.0
 knockback_force_multiplier = 1.1
-knockback_reaction_multiplier = 0.5
-knockback_duration = 0.2
+knockback_reaction_multiplier = 0.3
+knockback_duration = 0.1
 knockback_friction = 30.0
 knockback_vertical_multiplier = 0.3
 knockback_reaction_force_multiplier = 2.0
 knockback_reaction_jump_multiplier = 0.5
 knockback_force_horizontal_multiplier = 3.0
-double_jump_multiplier = 0.8
-triple_jump_multiplier = 0.6
+double_jump_multiplier = 0.9
+triple_jump_multiplier = 0.8
 health_max = 100
-stamina_max = 100
-stamina_cost = 20
-stamina_regen_rate = 1.25
-stamina_regen_delay = 2.0
-ground_check_ray_length = 200.0
+stamina_max = 1000.0
+stamina_regen_rate = 1.0
+stamina_regen_delay = 1.0
+stamina_cost = 300.0
+big_jump_stamina_cost = 200.0
+big_attack_stamina_cost = 500.0
+attack_stamina_cost = 150.0
+double_jump_stamina_cost = 0.0
+triple_jump_stamina_cost = 300.0
+damage_stamina_cost = 200.0
+ground_check_ray_length = 100.0
 near_ground_ray_length = 100.0
 ceiling_ray_length = 200.0
 air_movement_friction = 0.1
