@@ -1,4 +1,8 @@
+@tool
 extends Node2D
+
+@export var larva: CharacterBody2D
+
 @onready var body: Sprite2D = $"../Body/body"
 @onready var sword_body: Sprite2D = $"../Body/body/swordBody"
 @onready var sword_body_2: Sprite2D = $"../Body/body/swordBody2"
@@ -26,13 +30,12 @@ extends Node2D
 @onready var mandible_b: Sprite2D = $"../Body/body/head/mandibleB"
 @onready var mandible_f: Sprite2D = $"../Body/body/head/mandibleF"
 
-@onready var larva: CharacterBody2D = $".."
-
-func _ready() -> void:
-	if larva.character_data.body:
-		_set_sprites()
-	else:
-		print("resource is not fonded")
+func _process(_delta: float) -> void:
+	if Engine.is_editor_hint():
+		if larva.character_data.body:
+			_set_sprites()
+		else:
+			print("resource is not fonded")
 
 func _set_sprites() -> void:
 	body.texture = larva.character_data.body

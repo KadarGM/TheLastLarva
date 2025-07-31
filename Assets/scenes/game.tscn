@@ -90,26 +90,29 @@ shape = SubResource("RectangleShape2D_ihnug")
 collision_layer = 2
 collision_mask = 5
 script = ExtResource("3_ykwck")
+max_health = 500.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TestNPC"]
 position = Vector2(1719, 2526)
 shape = SubResource("CircleShape2D_xhv1s")
 
 [node name="TestNPC2" type="CharacterBody2D" parent="."]
-disable_mode = 2
 collision_layer = 2
 collision_mask = 5
 script = ExtResource("3_ykwck")
+max_health = 500.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TestNPC2"]
-position = Vector2(1968, 2536)
+position = Vector2(2293.75, 2521.16)
 shape = SubResource("CircleShape2D_xhv1s")
 
 [node name="TestNPC3" type="CharacterBody2D" parent="."]
+position = Vector2(513.04, 10.8901)
 collision_layer = 2
 collision_mask = 5
 script = ExtResource("3_ykwck")
+max_health = 500.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TestNPC3"]
-position = Vector2(2272, 2529)
+position = Vector2(2293.75, 2521.16)
 shape = SubResource("CircleShape2D_xhv1s")
