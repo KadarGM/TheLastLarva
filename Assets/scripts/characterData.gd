@@ -77,6 +77,7 @@ class_name CharacterData
 @export var attack_movement_multiplier: float = 1.3
 @export var attack_area_radius: float = 150.0
 @export var damage_delay: float = 0.2
+@export var invulnerability_after_damage: float = 1.2
 
 @export_group("Combat Movement Multipliers")
 @export var ground_attack_force_multiplier: float = 0.25

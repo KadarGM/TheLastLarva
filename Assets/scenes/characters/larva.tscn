@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://cpa2s3ipluc7n"]
+[gd_scene load_steps=43 format=3 uid="uid://cpa2s3ipluc7n"]
 
 [ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://Assets/graphics/characters/larva/torso.svg" id="1_hsqkj"]
 [ext_resource type="Script" uid="uid://r1k2g7nohnd7" path="res://Assets/scripts/characterManager.gd" id="1_rtki4"]
@@ -16,6 +16,9 @@
 [ext_resource type="Texture2D" uid="uid://bygtb821ge70j" path="res://Assets/graphics/characters/larva/mandible_f.svg" id="10_kkvls"]
 [ext_resource type="Texture2D" uid="uid://cx6w80sv5d8qa" path="res://Assets/graphics/characters/larva/feller_1.svg" id="11_wry3e"]
 [ext_resource type="Texture2D" uid="uid://bq7i44lxwmqty" path="res://Assets/graphics/characters/larva/feller_2.svg" id="12_gmhvq"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mol8u"]
+size = Vector2(822.4, 141)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_mhwdb"]
 radius = 92.091
@@ -5808,6 +5811,15 @@ metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
 [node name="Visuals" type="Node2D" parent="."]
 script = ExtResource("3_mol8u")
 
+[node name="BigAttackArea" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 6
+metadata/_edit_lock_ = true
+
+[node name="CollisionPolygon2D" type="CollisionShape2D" parent="BigAttackArea"]
+shape = SubResource("RectangleShape2D_mol8u")
+metadata/_edit_lock_ = true
+
 [node name="DamageArea" type="Area2D" parent="."]
 collision_layer = 4
 collision_mask = 6
@@ -5927,6 +5939,8 @@ target_position = Vector2(0, 200)
 [node name="WallJumpControlTimer" type="Timer" parent="Timers"]
 
 [node name="DamageTimer" type="Timer" parent="Timers"]
+
+[node name="InvulnerabilityTimer" type="Timer" parent="Timers"]
 
 [node name="Body" type="Node2D" parent="."]
 

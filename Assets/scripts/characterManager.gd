@@ -21,6 +21,7 @@ enum State {
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var body: Node2D = $Body
+@onready var big_attack_area: Area2D = $BigAttackArea
 @onready var attack_area: Area2D = $Body/AttackArea
 @onready var damage_area: Area2D = $DamageArea
 @onready var camera_2d: Camera2D = $Camera2D
@@ -33,6 +34,7 @@ enum State {
 @onready var wall_jump_control_timer: Timer = $Timers/WallJumpControlTimer
 @onready var before_attack_timer: Timer = $Timers/BeforeAttackTimer
 @onready var damage_timer: Timer = $Timers/DamageTimer
+@onready var invulnerability_timer: Timer = $Timers/InvulnerabilityTimer
 
 @onready var ground_check_ray: RayCast2D = $RayCasts/GroundCheckRay
 @onready var ground_check_ray_2: RayCast2D = $RayCasts/GroundCheckRay2
@@ -81,6 +83,7 @@ var was_on_wall: bool = false
 var velocity_before_attack: float = 0.0
 var pending_knockback_force: Vector2 = Vector2.ZERO
 var damage_applied_this_attack: bool = false
+@export var invulnerability: bool = false
 
 var knockback_velocity: Vector2 = Vector2.ZERO
 var knockback_timer: float = 0.0
@@ -94,7 +97,6 @@ func _ready() -> void:
 		character_data = CharacterData.new()
 	health_current = character_data.health_max
 	stamina_current = character_data.stamina_max
-	print("health_current: ", health_current)
 	init_timers()
 	setup_raycasts()
 	animation_player.animation_finished.connect(_on_animation_finished)
@@ -210,7 +212,11 @@ func has_nearby_enemy() -> bool:
 	return false
 
 func apply_damage_to_entities() -> void:
-	var overlapping_bodies = attack_area.get_overlapping_bodies()
+	var area_to_use = attack_area
+	if current_state == State.BIG_ATTACK_LANDING:
+		area_to_use = big_attack_area
+	
+	var overlapping_bodies = area_to_use.get_overlapping_bodies()
 	
 	if overlapping_bodies.is_empty():
 		return
@@ -273,6 +279,10 @@ func apply_knockback(force: Vector2) -> void:
 func take_damage(amount: int) -> void:
 	if current_state == State.DEATH:
 		return
+	
+	if invulnerability:
+		print("Damage blocked - Character is invulnerable")
+		return
 		
 	health_current -= amount
 	health_current = max(0, health_current)
@@ -280,6 +290,10 @@ func take_damage(amount: int) -> void:
 	stamina_current -= character_data.damage_stamina_cost
 	stamina_current = max(0, stamina_current)
 	stamina_regen_timer = character_data.stamina_regen_delay
+	
+	invulnerability = true
+	invulnerability_timer.start()
+	print("Invulnerability activated for ", character_data.invulnerability_after_damage, " seconds")
 	
 	var damage_knockback = Vector2(
 		randf_range(-1, 1) * character_data.damage_knockback_force,
@@ -338,6 +352,10 @@ func init_timers() -> void:
 	damage_timer.wait_time = character_data.damage_delay
 	damage_timer.one_shot = true
 	damage_timer.timeout.connect(_on_damage_timer_timeout)
+	
+	invulnerability_timer.wait_time = character_data.invulnerability_after_damage
+	invulnerability_timer.one_shot = true
+	invulnerability_timer.timeout.connect(_on_invulnerability_timer_timeout)
 
 func change_state(new_state: State) -> void:
 	if current_state == new_state:
@@ -346,8 +364,14 @@ func change_state(new_state: State) -> void:
 	if current_state == State.ATTACKING and new_state != State.KNOCKBACK:
 		pending_knockback_force = Vector2.ZERO
 	
+	if current_state == State.DASHING or current_state == State.BIG_ATTACK:
+		invulnerability = false
+		print("State invulnerability deactivated - Leaving state: ", State.keys()[current_state])
+	
 	previous_state = current_state
 	current_state = new_state
+	
+	print("State changed: ", State.keys()[previous_state], " -> ", State.keys()[new_state])
 	
 	match new_state:
 		State.IDLE, State.WALKING:
@@ -373,8 +397,11 @@ func change_state(new_state: State) -> void:
 		State.TRIPLE_JUMPING:
 			jump_count = 3
 		State.DASHING:
-			pass
+			invulnerability = true
+			print("State invulnerability activated - DASHING")
 		State.BIG_ATTACK:
+			invulnerability = true
+			print("State invulnerability activated - BIG_ATTACK")
 			big_attack_pending = true
 			hide_weapon_timer.stop()
 			if air_time == 0:
@@ -394,7 +421,7 @@ func change_state(new_state: State) -> void:
 			damage_area.monitorable = false
 			velocity.x = 0
 			death_animation_played = false
-			print("YOU ARE DEAD!")
+			print("Character DEATH - Final health: ", health_current)
 
 func handle_state_transitions() -> void:
 	if current_state == State.STUNNED or current_state == State.ATTACKING or current_state == State.KNOCKBACK or current_state == State.DEATH:
@@ -771,7 +798,6 @@ func perform_triple_jump() -> void:
 	if stamina_current >= character_data.triple_jump_stamina_cost:
 		stamina_current -= character_data.triple_jump_stamina_cost
 		stamina_regen_timer = character_data.stamina_regen_delay
-		
 		velocity.y = character_data.jump_velocity * character_data.triple_jump_multiplier
 		can_triple_jump = false
 		is_triple_jump_held = true
@@ -979,7 +1005,15 @@ func _on_damage_timer_timeout() -> void:
 		damage_applied_this_attack = true
 		apply_damage_to_entities()
 
+func _on_invulnerability_timer_timeout() -> void:
+	invulnerability = false
+	print("Invulnerability deactivated - Timer expired")
+
 func _on_damage_area_body_entered(_body: Node2D) -> void:
+	if invulnerability:
+		print("Damage area entered but character is invulnerable")
+		return
+		
 	if _body.has_method("get_damage") and _body != self:
 		var damage = _body.get_damage()
 		take_damage(damage)

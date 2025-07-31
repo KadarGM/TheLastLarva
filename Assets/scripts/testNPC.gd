@@ -10,6 +10,7 @@ var knockback_velocity: Vector2 = Vector2.ZERO
 var knockback_timer: float = 0.0
 var knockback_duration: float = 0.3
 var knockback_friction: float = 800.0
+@export var invulnerability: bool = false
 
 func _ready() -> void:
 	current_health = max_health
@@ -44,6 +45,9 @@ func handle_normal_movement() -> void:
 	velocity.x = 0
 
 func take_damage(amount: int) -> void:
+	if invulnerability:
+		return
+		
 	current_health -= amount
 	current_health = max(0, current_health)
 	
