@@ -34,6 +34,7 @@ func _process(_delta: float) -> void:
 	if Engine.is_editor_hint():
 		if larva.character_data.body:
 			_set_sprites()
+			_set_colors()
 		else:
 			print("resource is not fonded")
 
@@ -64,3 +65,13 @@ func _set_sprites() -> void:
 	feller_f_2.texture = larva.character_data.feller_2
 	mandible_b.texture = larva.character_data.mandible_b
 	mandible_f.texture = larva.character_data.mandible_f
+
+func _set_colors() -> void:
+	body.self_modulate = larva.character_data.body_color
+	head.self_modulate = larva.character_data.head_color
+	mandible_f.self_modulate = larva.character_data.mandibles_color
+	mandible_b.self_modulate = larva.character_data.mandibles_color
+	sword_body.self_modulate = larva.character_data.weapon_color
+	sword_body_2.self_modulate = larva.character_data.weapon_color
+	sword_f.self_modulate = larva.character_data.weapon_color
+	sword_b.self_modulate = larva.character_data.weapon_color

@@ -17,19 +17,8 @@
 [ext_resource type="Texture2D" uid="uid://cx6w80sv5d8qa" path="res://Assets/graphics/characters/larva/feller_1.svg" id="11_wry3e"]
 [ext_resource type="Texture2D" uid="uid://bq7i44lxwmqty" path="res://Assets/graphics/characters/larva/feller_2.svg" id="12_gmhvq"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_c6apq"]
-radius = 69.6963
-height = 297.164
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_mol8u"]
-size = Vector2(400, 141)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_sa4r2"]
-size = Vector2(400, 141)
-
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_mhwdb"]
-radius = 65.7999
-height = 180.182
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wpu1s"]
+size = Vector2(121.704, 219.043)
 
 [sub_resource type="Animation" id="Animation_o5lcw"]
 resource_name = "Attack_air_1"
@@ -6081,11 +6070,21 @@ _data = {
 &"Walk": SubResource("Animation_naawg")
 }
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mol8u"]
+size = Vector2(400, 141)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sa4r2"]
+size = Vector2(400, 141)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_mhwdb"]
+radius = 65.7999
+height = 180.182
+
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_mol8u"]
 radius = 209.211
 height = 484.182
 
-[node name="Larva" type="CharacterBody2D"]
+[node name="Larva" type="CharacterBody2D" groups=["Player"]]
 collision_layer = 2
 collision_mask = 7
 script = ExtResource("1_rtki4")
@@ -6094,47 +6093,9 @@ metadata/_edit_horizontal_guides_ = [69.6705]
 metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(1.6051, -79.1549)
+position = Vector2(-2.2816, -39.5507)
 rotation = 0.00136239
-scale = Vector2(1, 1)
-shape = SubResource("CapsuleShape2D_c6apq")
-
-[node name="Visuals" type="Node2D" parent="." node_paths=PackedStringArray("larva")]
-script = ExtResource("3_mol8u")
-larva = NodePath("..")
-
-[node name="Areas" type="Node2D" parent="."]
-
-[node name="BigAttackArea" type="Area2D" parent="Areas"]
-collision_layer = 4
-collision_mask = 6
-metadata/_edit_lock_ = true
-
-[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Areas/BigAttackArea"]
-position = Vector2(205, 0)
-shape = SubResource("RectangleShape2D_mol8u")
-metadata/_edit_lock_ = true
-
-[node name="BigAttackArea2" type="Area2D" parent="Areas"]
-collision_layer = 4
-collision_mask = 6
-metadata/_edit_lock_ = true
-
-[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Areas/BigAttackArea2"]
-position = Vector2(-205, 0)
-shape = SubResource("RectangleShape2D_sa4r2")
-metadata/_edit_lock_ = true
-
-[node name="DamageArea" type="Area2D" parent="Areas"]
-collision_layer = 4
-collision_mask = 6
-
-[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Areas/DamageArea"]
-position = Vector2(0, -69.091)
-shape = SubResource("CapsuleShape2D_mhwdb")
-
-[node name="Camera2D" type="Camera2D" parent="."]
-scale = Vector2(3.33333, 3.33333)
+shape = SubResource("RectangleShape2D_wpu1s")
 
 [node name="GameUI" type="CanvasLayer" parent="."]
 
@@ -6178,28 +6139,63 @@ autoplay = "Idle"
 playback_auto_capture = false
 playback_default_blend_time = 0.2
 
+[node name="Visualizer" type="Node2D" parent="." node_paths=PackedStringArray("larva")]
+script = ExtResource("3_mol8u")
+larva = NodePath("..")
+
+[node name="Areas" type="Node2D" parent="."]
+z_index = -100
+
+[node name="BigAttackArea" type="Area2D" parent="Areas"]
+collision_layer = 4
+collision_mask = 6
+metadata/_edit_lock_ = true
+
+[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Areas/BigAttackArea"]
+position = Vector2(205, 0)
+shape = SubResource("RectangleShape2D_mol8u")
+metadata/_edit_lock_ = true
+
+[node name="BigAttackArea2" type="Area2D" parent="Areas"]
+collision_layer = 4
+collision_mask = 6
+metadata/_edit_lock_ = true
+
+[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Areas/BigAttackArea2"]
+position = Vector2(-205, 0)
+shape = SubResource("RectangleShape2D_sa4r2")
+metadata/_edit_lock_ = true
+
+[node name="DamageArea" type="Area2D" parent="Areas"]
+collision_layer = 4
+collision_mask = 6
+
+[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Areas/DamageArea"]
+position = Vector2(0, -69.091)
+shape = SubResource("CapsuleShape2D_mhwdb")
+
 [node name="RayCasts" type="Node2D" parent="."]
 
 [node name="GroundCheckRay" type="RayCast2D" parent="RayCasts"]
 target_position = Vector2(0, 800)
 
 [node name="GroundCheckRay2" type="RayCast2D" parent="RayCasts"]
-position = Vector2(66.8277, 0)
+position = Vector2(52.1514, 0)
 target_position = Vector2(0, 800)
 
 [node name="GroundCheckRay3" type="RayCast2D" parent="RayCasts"]
-position = Vector2(-68.1908, 0)
+position = Vector2(-54.2842, 0)
 target_position = Vector2(0, 800)
 
 [node name="NearGroundRay" type="RayCast2D" parent="RayCasts"]
 target_position = Vector2(0, 800)
 
 [node name="NearGroundRay2" type="RayCast2D" parent="RayCasts"]
-position = Vector2(75.0803, 0)
+position = Vector2(60.404, 0)
 target_position = Vector2(0, 800)
 
 [node name="NearGroundRay3" type="RayCast2D" parent="RayCasts"]
-position = Vector2(-74.8403, 0)
+position = Vector2(-60.9337, 0)
 target_position = Vector2(0, 800)
 
 [node name="LeftWallRay" type="RayCast2D" parent="RayCasts"]
@@ -6215,11 +6211,11 @@ position = Vector2(0.513153, -77.5973)
 target_position = Vector2(0, 200)
 
 [node name="CeilingRay2" type="RayCast2D" parent="RayCasts"]
-position = Vector2(66.8276, -77.5973)
+position = Vector2(52.1513, -77.5973)
 target_position = Vector2(0, 200)
 
 [node name="CeilingRay3" type="RayCast2D" parent="RayCasts"]
-position = Vector2(-68.1907, -77.5973)
+position = Vector2(-54.0788, -77.5973)
 target_position = Vector2(0, 200)
 
 [node name="Timers" type="Node2D" parent="."]
@@ -6246,10 +6242,13 @@ target_position = Vector2(0, 200)
 
 [node name="DashAttackTimer" type="Timer" parent="Timers"]
 
+[node name="Camera2D" type="Camera2D" parent="."]
+scale = Vector2(3.33333, 3.33333)
+
 [node name="Body" type="Node2D" parent="."]
 
 [node name="body" type="Sprite2D" parent="Body"]
-self_modulate = Color(0.83, 0.712417, 0.6225, 1)
+self_modulate = Color(0.831373, 0.713726, 0.623529, 1)
 z_index = 10
 position = Vector2(0, -0.157724)
 rotation = -0.378014
@@ -6257,7 +6256,7 @@ texture = ExtResource("1_hsqkj")
 offset = Vector2(-0.0502249, -51.7729)
 
 [node name="swordBody" type="Sprite2D" parent="Body/body"]
-self_modulate = Color(0.763867, 0.85, 0.578, 1)
+self_modulate = Color(0.74327, 0.87, 0.4698, 1)
 z_index = -10
 position = Vector2(84.6987, -111.074)
 rotation = -2.44936
@@ -6265,7 +6264,7 @@ texture = ExtResource("6_kgmty")
 offset = Vector2(-0.177225, -62.5795)
 
 [node name="swordBody2" type="Sprite2D" parent="Body/body"]
-self_modulate = Color(0.763867, 0.85, 0.578, 1)
+self_modulate = Color(0.74327, 0.87, 0.4698, 1)
 z_index = -10
 position = Vector2(28.5125, -109.532)
 rotation = -3.51706
@@ -6310,7 +6309,7 @@ texture = ExtResource("4_5w3sp")
 offset = Vector2(5.70042, 17.0137)
 
 [node name="handF_1" type="Sprite2D" parent="Body/body/armF_1"]
-z_index = 25
+z_index = 1
 position = Vector2(11.1804, 36.7297)
 rotation = 0.00185794
 scale = Vector2(1.00842, 1)
@@ -6318,7 +6317,7 @@ texture = ExtResource("5_b03rs")
 offset = Vector2(2.01591, 21.0446)
 
 [node name="swordF" type="Sprite2D" parent="Body/body/armF_1/handF_1"]
-self_modulate = Color(0.764706, 0.85098, 0.576471, 1)
+self_modulate = Color(0.74327, 0.87, 0.4698, 1)
 z_index = -1
 position = Vector2(4.95043, 35.3479)
 rotation = -3.73732
@@ -6334,13 +6333,15 @@ texture = ExtResource("4_5w3sp")
 offset = Vector2(5.57173, 17.0747)
 
 [node name="handB_1" type="Sprite2D" parent="Body/body/armB_1"]
+z_index = -1
 position = Vector2(10.9968, 35.926)
 rotation = 0.625494
 texture = ExtResource("5_b03rs")
 offset = Vector2(2.73983, 22.1135)
 
 [node name="swordB" type="Sprite2D" parent="Body/body/armB_1/handB_1"]
-self_modulate = Color(0.763867, 0.85, 0.578, 1)
+self_modulate = Color(0.74327, 0.87, 0.4698, 1)
+z_index = 1
 position = Vector2(6.01828, 34.3446)
 rotation = -1.76371
 scale = Vector2(1, -1)
@@ -6355,7 +6356,7 @@ texture = ExtResource("4_5w3sp")
 offset = Vector2(5.60191, 17.4601)
 
 [node name="handF_2" type="Sprite2D" parent="Body/body/armF_2"]
-z_index = 20
+z_index = -1
 position = Vector2(11.9248, 36.3137)
 rotation = -0.0780196
 scale = Vector2(0.999999, 0.999999)
@@ -6371,14 +6372,14 @@ texture = ExtResource("4_5w3sp")
 offset = Vector2(6.0298, 17.8384)
 
 [node name="handB_2" type="Sprite2D" parent="Body/body/armB_2"]
-z_index = -5
+z_index = -1
 position = Vector2(11.3604, 36.5102)
 rotation = 0.528218
 texture = ExtResource("5_b03rs")
 offset = Vector2(2.50182, 21.0555)
 
 [node name="head" type="Sprite2D" parent="Body/body"]
-self_modulate = Color(0.65, 0.557917, 0.4875, 1)
+self_modulate = Color(0.65098, 0.556863, 0.486275, 1)
 z_index = 15
 position = Vector2(8.93434, -122.07)
 rotation = 0.410382
@@ -6386,17 +6387,17 @@ texture = ExtResource("6_8d63f")
 offset = Vector2(-3, -15)
 
 [node name="EyeB" type="Sprite2D" parent="Body/body/head"]
-z_index = 16
+z_index = 1
 position = Vector2(-53.2945, -23.1954)
 texture = ExtResource("7_0sc0i")
 
 [node name="EyeF" type="Sprite2D" parent="Body/body/head"]
-z_index = 16
+z_index = 1
 position = Vector2(9.70552, -14.1954)
 texture = ExtResource("8_jxecb")
 
 [node name="fellerB_1" type="Sprite2D" parent="Body/body/head"]
-z_index = 17
+z_index = 3
 position = Vector2(-19.2143, -57.1281)
 rotation = -0.025634
 scale = Vector2(0.999865, 0.999865)
@@ -6411,7 +6412,7 @@ texture = ExtResource("12_gmhvq")
 offset = Vector2(-20.6367, -23.2733)
 
 [node name="fellerF_1" type="Sprite2D" parent="Body/body/head"]
-z_index = 18
+z_index = 2
 position = Vector2(9.24352, -55.2045)
 rotation = 0.408715
 scale = Vector2(0.999792, 0.999792)
@@ -6419,14 +6420,14 @@ texture = ExtResource("11_wry3e")
 offset = Vector2(1.26703, -25.8268)
 
 [node name="fellerF_2" type="Sprite2D" parent="Body/body/head/fellerF_1"]
-z_index = 18
+z_index = 3
 position = Vector2(3.69121, -54.6411)
 rotation = 0.610762
 texture = ExtResource("12_gmhvq")
 offset = Vector2(-19.4864, -22.3888)
 
 [node name="mandibleB" type="Sprite2D" parent="Body/body/head"]
-self_modulate = Color(0.73, 0.669897, 0.5913, 1)
+self_modulate = Color(0.83, 0.75945, 0.7055, 1)
 z_index = -1
 position = Vector2(-42.1161, 21.1635)
 rotation = -0.0853177
@@ -6435,8 +6436,8 @@ texture = ExtResource("9_ewfm0")
 offset = Vector2(-1.02925, 16.043)
 
 [node name="mandibleF" type="Sprite2D" parent="Body/body/head"]
-self_modulate = Color(0.729412, 0.670588, 0.592157, 1)
-z_index = 16
+self_modulate = Color(0.83, 0.75945, 0.7055, 1)
+z_index = 1
 position = Vector2(-14.1227, 28.4495)
 rotation = -0.0973327
 scale = Vector2(0.999815, 0.999815)
@@ -6444,6 +6445,7 @@ texture = ExtResource("10_kkvls")
 offset = Vector2(-3.25712, 15.8394)
 
 [node name="AttackArea" type="Area2D" parent="Body"]
+z_index = -100
 collision_layer = 4
 collision_mask = 6
 metadata/_edit_lock_ = true

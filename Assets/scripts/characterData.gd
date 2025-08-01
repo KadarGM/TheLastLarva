@@ -16,6 +16,12 @@ class_name CharacterData
 @export var mandible_f: Texture2D
 @export var mandible_b: Texture2D
 
+@export_group("Colors")
+@export var body_color: Color
+@export var head_color: Color
+@export var mandibles_color: Color
+@export var weapon_color: Color
+
 @export_group("Health & Stamina")
 @export var health_max: int = 1000
 @export var stamina_max: float = 1000.0

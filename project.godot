@@ -27,6 +27,12 @@ window/stretch/mode="viewport"
 
 enabled=PackedStringArray()
 
+[global_group]
+
+Player=""
+Obstacles=""
+Enemy=""
+
 [input]
 
 ui_left={
