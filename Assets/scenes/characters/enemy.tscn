@@ -6468,3 +6468,7 @@ texture = ExtResource("16_d5fve")
 offset = Vector2(-3.25712, 15.8394)
 
 [connection signal="body_entered" from="Areas/DamageArea" to="." method="_on_damage_area_body_entered"]
+[connection signal="body_entered" from="Areas/DetectionArea" to="." method="_on_detection_area_body_entered"]
+[connection signal="body_exited" from="Areas/DetectionArea" to="." method="_on_detection_area_body_exited"]
+[connection signal="body_entered" from="Body/AttackArea" to="." method="_on_attack_area_body_entered"]
+[connection signal="body_exited" from="Body/AttackArea" to="." method="_on_attack_area_body_exited"]

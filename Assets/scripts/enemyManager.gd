@@ -65,14 +65,6 @@ func _ready() -> void:
 func connect_signals() -> void:
 	if animation_player:
 		animation_player.animation_finished.connect(_on_animation_finished)
-	if detection_area:
-		detection_area.body_entered.connect(_on_detection_area_body_entered)
-		detection_area.body_exited.connect(_on_detection_area_body_exited)
-	if attack_area:
-		attack_area.body_entered.connect(_on_attack_area_body_entered)
-		attack_area.body_exited.connect(_on_attack_area_body_exited)
-	if damage_area:
-		damage_area.body_entered.connect(_on_damage_area_body_entered)
 
 func _process(_delta: float) -> void:
 	check_death()
