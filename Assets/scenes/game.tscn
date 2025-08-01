@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://ey8sm6xs8cp3"]
 
 [ext_resource type="Script" uid="uid://q76rbpfs2ftj" path="res://Assets/scripts/gameManager.gd" id="1_48yxf"]
-[ext_resource type="PackedScene" uid="uid://cpa2s3ipluc7n" path="res://Assets/scenes/characters/larva.tscn" id="1_hjtmn"]
+[ext_resource type="PackedScene" uid="uid://cpa2s3ipluc7n" path="res://Assets/scenes/characters/player.tscn" id="1_hjtmn"]
 [ext_resource type="Script" uid="uid://c5a5opmn42e1c" path="res://Assets/scripts/testNPC.gd" id="3_ykwck"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ihnug"]
@@ -17,7 +17,7 @@ radius = 29.4279
 script = ExtResource("1_48yxf")
 
 [node name="Larva" parent="." instance=ExtResource("1_hjtmn")]
-position = Vector2(1940, 1780)
+position = Vector2(2000.41, 2555.16)
 scale = Vector2(0.3, 0.3)
 collision_mask = 1
 metadata/_edit_horizontal_guides_ = [70.0]
