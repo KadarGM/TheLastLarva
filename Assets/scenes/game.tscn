@@ -1,17 +1,14 @@
-[gd_scene load_steps=7 format=3 uid="uid://ey8sm6xs8cp3"]
+[gd_scene load_steps=6 format=3 uid="uid://ey8sm6xs8cp3"]
 
 [ext_resource type="Script" uid="uid://q76rbpfs2ftj" path="res://Assets/scripts/gameManager.gd" id="1_48yxf"]
 [ext_resource type="PackedScene" uid="uid://cpa2s3ipluc7n" path="res://Assets/scenes/characters/player.tscn" id="1_hjtmn"]
-[ext_resource type="Script" uid="uid://c5a5opmn42e1c" path="res://Assets/scripts/testNPC.gd" id="3_ykwck"]
+[ext_resource type="PackedScene" uid="uid://ctqediaidg7t1" path="res://Assets/scenes/characters/enemy.tscn" id="3_ykwck"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ihnug"]
 size = Vector2(1153.5, 134)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xhv1s"]
 size = Vector2(2030.75, 134)
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_xhv1s"]
-radius = 29.4279
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_48yxf")
@@ -20,6 +17,7 @@ script = ExtResource("1_48yxf")
 position = Vector2(2000.41, 2555.16)
 scale = Vector2(0.3, 0.3)
 collision_mask = 1
+invulnerability = true
 metadata/_edit_horizontal_guides_ = [70.0]
 metadata/_edit_vertical_guides_ = [-61.0304, 60.4157]
 
@@ -86,33 +84,11 @@ position = Vector2(1064, 2138)
 rotation = 1.5708
 shape = SubResource("RectangleShape2D_ihnug")
 
-[node name="TestNPC" type="CharacterBody2D" parent="."]
-collision_layer = 2
-collision_mask = 5
-script = ExtResource("3_ykwck")
-max_health = 500.0
+[node name="CollisionShape2D15" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(3094.19, 2178.08)
+rotation = 1.5708
+shape = SubResource("RectangleShape2D_ihnug")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TestNPC"]
-position = Vector2(1719, 2526)
-shape = SubResource("CircleShape2D_xhv1s")
-
-[node name="TestNPC2" type="CharacterBody2D" parent="."]
-collision_layer = 2
-collision_mask = 5
-script = ExtResource("3_ykwck")
-max_health = 500.0
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TestNPC2"]
-position = Vector2(2293.75, 2521.16)
-shape = SubResource("CircleShape2D_xhv1s")
-
-[node name="TestNPC3" type="CharacterBody2D" parent="."]
-position = Vector2(513.04, 10.8901)
-collision_layer = 2
-collision_mask = 5
-script = ExtResource("3_ykwck")
-max_health = 500.0
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TestNPC3"]
-position = Vector2(2293.75, 2521.16)
-shape = SubResource("CircleShape2D_xhv1s")
+[node name="Enemy" parent="." instance=ExtResource("3_ykwck")]
+position = Vector2(1477.23, 2536.73)
+scale = Vector2(0.3, 0.3)
