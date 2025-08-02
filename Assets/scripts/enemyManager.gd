@@ -14,7 +14,7 @@ enum State {
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var body: Node2D = $Body
 
-@onready var detection_area: Area2D = $Areas/DetectionArea
+@onready var detection_area: Area2D = $Body/DetectionArea
 @onready var attack_area: Area2D = $Body/AttackArea
 @onready var damage_area: Area2D = $Areas/DamageArea
 
@@ -22,6 +22,8 @@ enum State {
 @onready var attack_cooldown_timer: Timer = $Timers/AttackCooldownTimer
 @onready var damage_timer: Timer = $Timers/DamageTimer
 @onready var invulnerability_timer: Timer = $Timers/InvulnerabilityTimer
+@onready var between_states_timer: Timer = $Timers/BetweenStatesTimer
+@onready var emergency_timer: Timer = $Timers/EmergencyTimer
 
 @onready var ground_check_ray: RayCast2D = $RayCasts/GroundCheckRay
 @onready var ground_check_ray_2: RayCast2D = $RayCasts/GroundCheckRay2
@@ -53,6 +55,9 @@ var count_of_attack: int = 0
 @export var invulnerability: bool = false
 var death_animation_played: bool = false
 
+var player_in_detection_zone: bool = false
+var chase_direction: int = 0
+
 func _ready() -> void:
 	if not enemy_data:
 		enemy_data = EnemyData.new()
@@ -61,14 +66,27 @@ func _ready() -> void:
 	call_deferred("setup_raycasts")
 	call_deferred("connect_signals")
 	call_deferred("update_weapon_visibility", "hide")
+	call_deferred("start_patrol_behavior")
 
 func connect_signals() -> void:
 	if animation_player:
 		animation_player.animation_finished.connect(_on_animation_finished)
+	
+	if detection_area:
+		detection_area.body_entered.connect(_on_detection_area_body_entered)
+		detection_area.body_exited.connect(_on_detection_area_body_exited)
+	
+	if attack_area:
+		attack_area.body_entered.connect(_on_attack_area_body_entered)
+		attack_area.body_exited.connect(_on_attack_area_body_exited)
+	
+	if damage_area:
+		damage_area.body_entered.connect(_on_damage_area_body_entered)
 
 func _process(_delta: float) -> void:
 	check_death()
 	update_direction()
+	update_chase_direction()
 
 func _physics_process(delta: float) -> void:
 	if current_state == State.KNOCKBACK:
@@ -95,10 +113,10 @@ func setup_raycasts() -> void:
 		ground_check_ray.target_position = Vector2(0, enemy_data.ground_check_ray_length)
 		ground_check_ray.enabled = true
 	if ground_check_ray_2:
-		ground_check_ray_2.target_position = Vector2(-30, enemy_data.ground_check_ray_length)
+		ground_check_ray_2.target_position = Vector2(0, enemy_data.ground_check_ray_length)
 		ground_check_ray_2.enabled = true
 	if ground_check_ray_3:
-		ground_check_ray_3.target_position = Vector2(30, enemy_data.ground_check_ray_length)
+		ground_check_ray_3.target_position = Vector2(0, enemy_data.ground_check_ray_length)
 		ground_check_ray_3.enabled = true
 	
 	if left_wall_ray:
@@ -128,6 +146,31 @@ func init_timers() -> void:
 		invulnerability_timer.wait_time = enemy_data.invulnerability_after_damage
 		invulnerability_timer.one_shot = true
 		invulnerability_timer.timeout.connect(_on_invulnerability_timer_timeout)
+	
+	if between_states_timer:
+		between_states_timer.one_shot = true
+		between_states_timer.timeout.connect(_on_between_states_timer_timeout)
+		
+	if emergency_timer:
+		emergency_timer.wait_time = 4.0
+		emergency_timer.one_shot = true
+		emergency_timer.timeout.connect(_on_invulnerability_timer_timeout)
+
+func start_patrol_behavior() -> void:
+	if not player_in_detection_zone and current_state != State.DEATH and current_state != State.ATTACKING:
+		var random_time = randf_range(enemy_data.patrol_state_min_time, enemy_data.patrol_state_max_time)
+		between_states_timer.wait_time = random_time
+		between_states_timer.start()
+
+func update_chase_direction() -> void:
+	if player_in_detection_zone and target_player and is_instance_valid(target_player):
+		var x_difference = target_player.global_position.x - global_position.x
+		if abs(x_difference) < enemy_data.position_tolerance:
+			chase_direction = 0
+		else:
+			chase_direction = sign(x_difference)
+	else:
+		chase_direction = 0
 
 func check_death() -> void:
 	if health_current <= 0 and current_state != State.DEATH:
@@ -143,21 +186,26 @@ func change_state(new_state: State) -> void:
 	match new_state:
 		State.IDLE:
 			velocity.x = 0
+			if not player_in_detection_zone:
+				start_patrol_behavior()
 		State.WALKING:
-			pass
+			if not player_in_detection_zone:
+				start_patrol_behavior()
 		State.CHASING:
-			pass
+			between_states_timer.stop()
 		State.ATTACKING:
 			velocity.x = 0
 			damage_applied_this_attack = false
+			between_states_timer.stop()
 			perform_attack()
 		State.KNOCKBACK:
-			pass
+			between_states_timer.stop()
 		State.DEATH:
 			if damage_area:
 				damage_area.monitorable = false
 			velocity.x = 0
 			death_animation_played = false
+			between_states_timer.stop()
 
 func handle_state_transitions() -> void:
 	if current_state == State.ATTACKING or current_state == State.KNOCKBACK or current_state == State.DEATH:
@@ -168,10 +216,17 @@ func handle_state_transitions() -> void:
 			change_state(State.ATTACKING)
 		return
 	
-	if target_player != null and is_instance_valid(target_player):
-		change_state(State.CHASING)
-	else:
-		change_state(State.WALKING)
+	if player_in_detection_zone and target_player and is_instance_valid(target_player):
+		if chase_direction == 0:
+			change_state(State.IDLE)
+		else:
+			change_state(State.CHASING)
+	elif current_state == State.CHASING or current_state == State.IDLE:
+		if not player_in_detection_zone:
+			if randf() < enemy_data.patrol_idle_chance:
+				change_state(State.IDLE)
+			else:
+				change_state(State.WALKING)
 
 func handle_current_state() -> void:
 	match current_state:
@@ -182,14 +237,14 @@ func handle_current_state() -> void:
 				movement_direction *= -1
 			velocity.x = movement_direction * enemy_data.speed
 		State.CHASING:
-			if target_player and is_instance_valid(target_player):
-				var direction_to_player = sign(target_player.global_position.x - global_position.x)
-				if direction_to_player != 0:
-					if is_on_floor() and check_edge_or_wall_for_chase(direction_to_player):
-						velocity.x = 0
-					else:
-						velocity.x = direction_to_player * enemy_data.speed
-						movement_direction = direction_to_player
+			if chase_direction != 0:
+				if check_edge_or_wall_for_chase(chase_direction):
+					velocity.x = 0
+				else:
+					velocity.x = chase_direction * enemy_data.speed
+					movement_direction = chase_direction
+			else:
+				velocity.x = 0
 		State.ATTACKING:
 			velocity.x = 0
 		State.KNOCKBACK:
@@ -199,33 +254,37 @@ func handle_current_state() -> void:
 
 func check_edge_or_wall() -> bool:
 	if movement_direction > 0:
-		if right_wall_ray and right_wall_ray.is_colliding():
+		if right_wall_ray.is_colliding():
 			return true
-		if ground_check_ray and ground_check_ray.is_colliding() and ground_check_ray_3 and not ground_check_ray_3.is_colliding():
+		if ground_check_ray.is_colliding() and not ground_check_ray_2.is_colliding():
 			return true
 	else:
-		if left_wall_ray and left_wall_ray.is_colliding():
+		if left_wall_ray.is_colliding():
 			return true
-		if ground_check_ray and ground_check_ray.is_colliding() and ground_check_ray_2 and not ground_check_ray_2.is_colliding():
+		if ground_check_ray.is_colliding() and not ground_check_ray_3.is_colliding():
 			return true
 	return false
 
 func check_edge_or_wall_for_chase(direction: float) -> bool:
 	if direction > 0:
-		if right_wall_ray and right_wall_ray.is_colliding():
+		if right_wall_ray.is_colliding():
 			return true
-		if ground_check_ray and ground_check_ray.is_colliding() and ground_check_ray_3 and not ground_check_ray_3.is_colliding():
+		if ground_check_ray.is_colliding() and not ground_check_ray_2.is_colliding():
 			return true
 	else:
-		if left_wall_ray and left_wall_ray.is_colliding():
+		if left_wall_ray.is_colliding():
 			return true
-		if ground_check_ray and ground_check_ray.is_colliding() and ground_check_ray_2 and not ground_check_ray_2.is_colliding():
+		if ground_check_ray.is_colliding() and not ground_check_ray_3.is_colliding():
 			return true
 	return false
 
 func update_direction() -> void:
 	if current_state == State.DEATH:
 		return
+	
+	if current_state == State.CHASING or current_state == State.ATTACKING:
+		if chase_direction != 0:
+			movement_direction = chase_direction
 	
 	body.scale.x = -movement_direction
 
@@ -241,7 +300,10 @@ func handle_knockback(delta: float) -> void:
 		
 		if knockback_timer <= 0 or knockback_velocity.length() < 10:
 			knockback_velocity = Vector2.ZERO
-			change_state(State.WALKING)
+			if player_in_detection_zone:
+				change_state(State.CHASING)
+			else:
+				change_state(State.WALKING)
 
 func perform_attack() -> void:
 	if hide_weapon_timer:
@@ -383,26 +445,37 @@ func update_weapon_visibility(state: String) -> void:
 			sword_body.visible = false
 
 func _on_detection_area_body_entered(entered_body: Node2D) -> void:
-	if entered_body.has_method("get_damage"):
+	print("player_in_detection_zone: ", player_in_detection_zone)
+	if entered_body:
 		target_player = entered_body
+		player_in_detection_zone = true
+		between_states_timer.stop()
+		emergency_timer.start()
+		
 
 func _on_detection_area_body_exited(exited_body: Node2D) -> void:
+	print("player_in_detection_zone: ", player_in_detection_zone)
 	if exited_body == target_player:
 		target_player = null
+		player_in_detection_zone = false
+		player_in_attack_range = false
+		if current_state != State.DEATH and current_state != State.ATTACKING:
+			start_patrol_behavior()
+		
 
 func _on_attack_area_body_entered(entered_body: Node2D) -> void:
-	if entered_body.has_method("take_damage") and entered_body != self:
+	if entered_body != self and entered_body.has_method("take_damage"):
 		player_in_attack_range = true
 
 func _on_attack_area_body_exited(exited_body: Node2D) -> void:
-	if exited_body.has_method("take_damage") and exited_body != self:
+	if exited_body != self and exited_body.has_method("take_damage"):
 		player_in_attack_range = false
 
 func _on_damage_area_body_entered(entered_body: Node2D) -> void:
 	if invulnerability:
 		return
 		
-	if entered_body.has_method("get_damage") and entered_body != self:
+	if entered_body != self and entered_body.has_method("get_damage"):
 		var damage = entered_body.get_damage()
 		var knockback_direction = (global_position - entered_body.global_position).normalized()
 		if knockback_direction.x == 0:
@@ -431,6 +504,20 @@ func _on_invulnerability_timer_timeout() -> void:
 func _on_attack_cooldown_timer_timeout() -> void:
 	pass
 
+func _on_emergency_timer_timeout() -> void:
+	pass
+
+func _on_between_states_timer_timeout() -> void:
+	if not player_in_detection_zone and current_state != State.DEATH and current_state != State.ATTACKING:
+		if current_state == State.IDLE:
+			change_state(State.WALKING)
+		elif current_state == State.WALKING:
+			if randf() < enemy_data.patrol_idle_chance:
+				change_state(State.IDLE)
+			else:
+				movement_direction *= -1
+		start_patrol_behavior()
+
 func _on_animation_finished(anim_name: String) -> void:
 	if current_state == State.ATTACKING:
 		if anim_name.begins_with("Attack_ground"):
@@ -439,7 +526,7 @@ func _on_animation_finished(anim_name: String) -> void:
 					change_state(State.ATTACKING)
 				else:
 					change_state(State.CHASING)
-			elif target_player and is_instance_valid(target_player):
+			elif player_in_detection_zone and target_player and is_instance_valid(target_player):
 				change_state(State.CHASING)
 			else:
 				change_state(State.WALKING)

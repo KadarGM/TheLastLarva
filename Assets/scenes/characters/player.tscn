@@ -6086,7 +6086,6 @@ height = 483.582
 
 [node name="Player" type="CharacterBody2D" groups=["Player"]]
 collision_layer = 2
-collision_mask = 7
 script = ExtResource("1_25l4c")
 character_data = ExtResource("2_x3ddt")
 metadata/_edit_horizontal_guides_ = [69.6705]
@@ -6150,8 +6149,8 @@ playback_default_blend_time = 0.2
 z_index = -100
 
 [node name="BigAttackArea" type="Area2D" parent="Areas"]
-collision_layer = 4
-collision_mask = 6
+collision_layer = 2
+collision_mask = 4
 metadata/_edit_lock_ = true
 
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="Areas/BigAttackArea"]
@@ -6160,8 +6159,8 @@ shape = SubResource("RectangleShape2D_mol8u")
 metadata/_edit_lock_ = true
 
 [node name="BigAttackArea2" type="Area2D" parent="Areas"]
-collision_layer = 4
-collision_mask = 6
+collision_layer = 2
+collision_mask = 4
 metadata/_edit_lock_ = true
 
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="Areas/BigAttackArea2"]
@@ -6170,8 +6169,8 @@ shape = SubResource("RectangleShape2D_sa4r2")
 metadata/_edit_lock_ = true
 
 [node name="DamageArea" type="Area2D" parent="Areas"]
-collision_layer = 4
-collision_mask = 6
+collision_layer = 2
+collision_mask = 4
 
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="Areas/DamageArea"]
 position = Vector2(0, -69.091)
@@ -6249,8 +6248,8 @@ target_position = Vector2(0, 200)
 
 [node name="AttackArea" type="Area2D" parent="Body"]
 z_index = -100
-collision_layer = 4
-collision_mask = 6
+collision_layer = 2
+collision_mask = 4
 
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="Body/AttackArea"]
 position = Vector2(-152.033, -85.091)
