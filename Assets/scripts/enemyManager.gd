@@ -67,8 +67,6 @@ var can_see_player: bool = false
 var has_jumped: bool = false
 
 func _ready() -> void:
-	if not enemy_data:
-		enemy_data = EnemyData.new()
 	health_current = enemy_data.health_max
 	shape_detection.disabled = true
 	call_deferred("init_timers")
@@ -205,7 +203,7 @@ func change_state(new_state: State) -> void:
 				start_patrol_behavior()
 		State.JUMPING:
 			if is_on_floor() and not has_jumped:
-				velocity.y = enemy_data.jump_velocity * 0.5
+				velocity.y = enemy_data.jump_velocity * 0.8
 				has_jumped = true
 		State.CHASING:
 			between_states_timer.stop()

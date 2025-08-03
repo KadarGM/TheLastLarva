@@ -37,21 +37,12 @@ scale = Vector2(0.3, 0.3)
 position = Vector2(1773.56, 2542.04)
 scale = Vector2(0.3, 0.3)
 
-[node name="Enemy3" parent="Enemies" instance=ExtResource("3_ykwck")]
-position = Vector2(1967.57, 2544.89)
-scale = Vector2(0.3, 0.3)
-
 [node name="Enemy5" parent="Enemies" instance=ExtResource("3_ykwck")]
 position = Vector2(2250.29, 2542.04)
 scale = Vector2(0.3, 0.3)
 
 [node name="Enemy6" parent="Enemies" instance=ExtResource("3_ykwck")]
 position = Vector2(2613.42, 1556.42)
-scale = Vector2(0.3, 0.3)
-metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
-
-[node name="Enemy7" parent="Enemies" instance=ExtResource("3_ykwck")]
-position = Vector2(2704.2, 690.112)
 scale = Vector2(0.3, 0.3)
 metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
 
