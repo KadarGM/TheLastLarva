@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://ey8sm6xs8cp3"]
+[gd_scene load_steps=8 format=3 uid="uid://ey8sm6xs8cp3"]
 
 [ext_resource type="Script" uid="uid://q76rbpfs2ftj" path="res://Assets/scripts/gameManager.gd" id="1_48yxf"]
 [ext_resource type="PackedScene" uid="uid://cpa2s3ipluc7n" path="res://Assets/scenes/characters/player.tscn" id="1_hjtmn"]
+[ext_resource type="Script" uid="uid://e35h32y3laer" path="res://Assets/scripts/Enemies.gd" id="3_t7i2e"]
 [ext_resource type="PackedScene" uid="uid://ctqediaidg7t1" path="res://Assets/scenes/characters/enemy.tscn" id="3_ykwck"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ihnug"]
@@ -10,93 +11,116 @@ size = Vector2(1153.5, 134)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xhv1s"]
 size = Vector2(2030.75, 134)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ykwck"]
+size = Vector2(116.657, 134)
+
 [node name="Game" type="Node2D"]
 script = ExtResource("1_48yxf")
 
-[node name="Larva" parent="." instance=ExtResource("1_hjtmn")]
+[node name="Players" type="Node2D" parent="."]
+
+[node name="Larva" parent="Players" instance=ExtResource("1_hjtmn")]
 position = Vector2(994.038, 410.135)
 scale = Vector2(0.3, 0.3)
 invulnerability = true
 metadata/_edit_horizontal_guides_ = [70.0]
 metadata/_edit_vertical_guides_ = [-61.0304, 60.4157]
 
-[node name="Enemy" parent="." instance=ExtResource("3_ykwck")]
+[node name="Enemies" type="Node2D" parent="."]
+script = ExtResource("3_t7i2e")
+
+[node name="Enemy" parent="Enemies" instance=ExtResource("3_ykwck")]
 position = Vector2(1482.54, 2542.04)
 scale = Vector2(0.3, 0.3)
 
-[node name="Enemy5" parent="." instance=ExtResource("3_ykwck")]
+[node name="Enemy2" parent="Enemies" instance=ExtResource("3_ykwck")]
+position = Vector2(1773.56, 2542.04)
+scale = Vector2(0.3, 0.3)
+
+[node name="Enemy3" parent="Enemies" instance=ExtResource("3_ykwck")]
+position = Vector2(1967.57, 2544.89)
+scale = Vector2(0.3, 0.3)
+
+[node name="Enemy5" parent="Enemies" instance=ExtResource("3_ykwck")]
 position = Vector2(2250.29, 2542.04)
 scale = Vector2(0.3, 0.3)
 
-[node name="Enemy6" parent="." instance=ExtResource("3_ykwck")]
+[node name="Enemy6" parent="Enemies" instance=ExtResource("3_ykwck")]
 position = Vector2(2613.42, 1556.42)
 scale = Vector2(0.3, 0.3)
 metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
 
-[node name="Enemy7" parent="." instance=ExtResource("3_ykwck")]
+[node name="Enemy7" parent="Enemies" instance=ExtResource("3_ykwck")]
 position = Vector2(2704.2, 690.112)
 scale = Vector2(0.3, 0.3)
 metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
 
-[node name="StaticBody2D" type="StaticBody2D" parent="." groups=["Obstacles"]]
+[node name="Obstacles" type="Node2D" parent="."]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="StaticBody2D" type="StaticBody2D" parent="Obstacles" groups=["Obstacles"]]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
 position = Vector2(830, 547)
 shape = SubResource("RectangleShape2D_ihnug")
 
-[node name="CollisionShape2D6" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="CollisionShape2D6" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
 position = Vector2(759, 2014)
 shape = SubResource("RectangleShape2D_ihnug")
 
-[node name="CollisionShape2D7" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="CollisionShape2D7" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
 position = Vector2(643, 1706)
 shape = SubResource("RectangleShape2D_ihnug")
 
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
 position = Vector2(930, 2353)
 shape = SubResource("RectangleShape2D_ihnug")
 
-[node name="CollisionShape2D8" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="CollisionShape2D8" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
 position = Vector2(2622, 1665)
 shape = SubResource("RectangleShape2D_ihnug")
 
-[node name="CollisionShape2D9" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="CollisionShape2D9" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
 position = Vector2(2737, 1374)
 shape = SubResource("RectangleShape2D_ihnug")
 
-[node name="CollisionShape2D11" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="CollisionShape2D11" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
 position = Vector2(2872, 1065)
 shape = SubResource("RectangleShape2D_ihnug")
 
-[node name="CollisionShape2D12" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="CollisionShape2D12" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
 position = Vector2(2675, 797)
 shape = SubResource("RectangleShape2D_ihnug")
 
-[node name="CollisionShape2D10" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="CollisionShape2D10" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
 position = Vector2(2113.63, 2645)
 shape = SubResource("RectangleShape2D_xhv1s")
 
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
 position = Vector2(818, 723)
 rotation = 1.5708
 shape = SubResource("RectangleShape2D_ihnug")
 
-[node name="CollisionShape2D4" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
 position = Vector2(1064, 1058)
 rotation = 1.5708
 shape = SubResource("RectangleShape2D_ihnug")
 
-[node name="CollisionShape2D13" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="CollisionShape2D13" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
 position = Vector2(1796, 1030)
 rotation = 1.5708
 shape = SubResource("RectangleShape2D_ihnug")
 
-[node name="CollisionShape2D14" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="CollisionShape2D15" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
+position = Vector2(2306.18, 689.946)
+rotation = 1.5708
+shape = SubResource("RectangleShape2D_ykwck")
+
+[node name="CollisionShape2D14" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
 position = Vector2(1796, 1776)
 rotation = 1.5708
 shape = SubResource("RectangleShape2D_ihnug")
 
-[node name="CollisionShape2D5" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="CollisionShape2D5" type="CollisionShape2D" parent="Obstacles/StaticBody2D"]
 position = Vector2(1064, 2138)
 rotation = 1.5708
 shape = SubResource("RectangleShape2D_ihnug")
