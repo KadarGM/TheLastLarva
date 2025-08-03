@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="CharacterData" load_steps=15 format=3 uid="uid://dp02l272xjb0c"]
+[gd_resource type="Resource" script_class="CharacterData" load_steps=15 format=3 uid="uid://d125kkggxi83n"]
 
 [ext_resource type="Texture2D" uid="uid://epvqp0q6ebxg" path="res://Assets/graphics/characters/larva/arm.svg" id="1_72c6n"]
-[ext_resource type="Script" uid="uid://dd13ispm08l6a" path="res://Assets/scripts/characterData.gd" id="1_72438"]
+[ext_resource type="Script" uid="uid://blttbfe55ei7" path="res://Assets/scripts/characterData.gd" id="1_72438"]
 [ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://Assets/graphics/characters/larva/torso.svg" id="2_xckht"]
 [ext_resource type="Texture2D" uid="uid://c86kchkmsvmjy" path="res://Assets/graphics/characters/larva/eye_b.svg" id="3_6jvht"]
 [ext_resource type="Texture2D" uid="uid://bcohmtdweh0ao" path="res://Assets/graphics/characters/larva/eye_f.svg" id="4_rna60"]
@@ -36,7 +36,7 @@ mandibles_color = Color(0.843151, 0.730404, 0.644235, 1)
 weapon_color = Color(0.74327, 0.87, 0.4698, 1)
 health_max = 1000
 stamina_max = 1000.0
-stamina_regen_rate = 1.0
+stamina_regen_rate = 100.0
 stamina_regen_delay = 1.0
 speed = 600.0
 jump_velocity = -450.0
@@ -106,4 +106,7 @@ damage_stamina_cost = 10.0
 ground_check_ray_length = 100.0
 near_ground_ray_length = 100.0
 ceiling_ray_length = 200.0
-metadata/_custom_type_script = "uid://dd13ispm08l6a"
+patrol_state_min_time = 1.0
+patrol_state_max_time = 4.0
+detection_range = 600.0
+position_tolerance = 50.0

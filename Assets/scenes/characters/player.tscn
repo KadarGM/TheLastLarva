@@ -1,8 +1,9 @@
-[gd_scene load_steps=45 format=3 uid="uid://cpa2s3ipluc7n"]
+[gd_scene load_steps=46 format=3 uid="uid://cpa2s3ipluc7n"]
 
-[ext_resource type="Script" uid="uid://r1k2g7nohnd7" path="res://Assets/scripts/characterManager.gd" id="1_25l4c"]
-[ext_resource type="Resource" uid="uid://dp02l272xjb0c" path="res://Assets/resources/Player.tres" id="2_x3ddt"]
-[ext_resource type="Script" uid="uid://dewcwxkkpml1a" path="res://Assets/scripts/characterVisualiser.gd" id="3_q5ib6"]
+[ext_resource type="Script" uid="uid://bpo0fw0end0ct" path="res://Assets/scripts/playerCharacter.gd" id="1_t8iac"]
+[ext_resource type="Script" uid="uid://dcts54drik3ds" path="res://Assets/scripts/characterVisualizer.gd" id="2_25l4c"]
+[ext_resource type="Resource" uid="uid://d125kkggxi83n" path="res://Assets/resources/Player.tres" id="2_x3ddt"]
+[ext_resource type="Resource" uid="uid://cypp5ufvhucw8" path="res://Assets/resources/PlayerCap.tres" id="3_q5ib6"]
 [ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://Assets/graphics/characters/larva/torso.svg" id="4_m4tvu"]
 [ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://Assets/graphics/characters/larva/sword.svg" id="5_fveyi"]
 [ext_resource type="Texture2D" uid="uid://bmae8nmkwyayq" path="res://Assets/graphics/characters/larva/leg.svg" id="6_ylwl8"]
@@ -6086,14 +6087,15 @@ height = 483.582
 
 [node name="Player" type="CharacterBody2D" groups=["Player"]]
 collision_layer = 2
-script = ExtResource("1_25l4c")
+script = ExtResource("1_t8iac")
 character_data = ExtResource("2_x3ddt")
+capabilities = ExtResource("3_q5ib6")
 metadata/_edit_horizontal_guides_ = [69.6705]
 metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
 
-[node name="Visualizer" type="Node2D" parent="." node_paths=PackedStringArray("larva")]
-script = ExtResource("3_q5ib6")
-larva = NodePath("..")
+[node name="Visualizer" type="Node2D" parent="." node_paths=PackedStringArray("character")]
+script = ExtResource("2_25l4c")
+character = NodePath("..")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(-2.2816, -39.5507)
@@ -6144,6 +6146,32 @@ libraries = {
 autoplay = "Idle"
 playback_auto_capture = false
 playback_default_blend_time = 0.2
+
+[node name="Timers" type="Node2D" parent="."]
+
+[node name="BetweenStatesTimer" type="Timer" parent="Timers"]
+
+[node name="EmergencyTimer" type="Timer" parent="Timers"]
+
+[node name="BigJumpTimer" type="Timer" parent="Timers"]
+
+[node name="BigJumpCooldownTimer" type="Timer" parent="Timers"]
+
+[node name="HideWeaponTimer" type="Timer" parent="Timers"]
+
+[node name="DashTimer" type="Timer" parent="Timers"]
+
+[node name="StunTimer" type="Timer" parent="Timers"]
+
+[node name="DashCooldownTimer" type="Timer" parent="Timers"]
+
+[node name="WallJumpControlTimer" type="Timer" parent="Timers"]
+
+[node name="AttackCooldownTimer" type="Timer" parent="Timers"]
+
+[node name="DamageTimer" type="Timer" parent="Timers"]
+
+[node name="InvulnerabilityTimer" type="Timer" parent="Timers"]
 
 [node name="Areas" type="Node2D" parent="."]
 z_index = -100
@@ -6219,30 +6247,6 @@ target_position = Vector2(0, 200)
 [node name="CeilingRay3" type="RayCast2D" parent="RayCasts"]
 position = Vector2(-54.0788, -77.5973)
 target_position = Vector2(0, 200)
-
-[node name="Timers" type="Node2D" parent="."]
-
-[node name="BigJumpTimer" type="Timer" parent="Timers"]
-
-[node name="BigJumpCooldownTimer" type="Timer" parent="Timers"]
-
-[node name="BeforeAttackTimer" type="Timer" parent="Timers"]
-
-[node name="HideWeaponTimer" type="Timer" parent="Timers"]
-
-[node name="DashTimer" type="Timer" parent="Timers"]
-
-[node name="DashCooldownTimer" type="Timer" parent="Timers"]
-
-[node name="StunTimer" type="Timer" parent="Timers"]
-
-[node name="WallJumpControlTimer" type="Timer" parent="Timers"]
-
-[node name="DamageTimer" type="Timer" parent="Timers"]
-
-[node name="InvulnerabilityTimer" type="Timer" parent="Timers"]
-
-[node name="DashAttackTimer" type="Timer" parent="Timers"]
 
 [node name="Body" type="Node2D" parent="."]
 
@@ -6453,5 +6457,3 @@ rotation = -0.0973327
 scale = Vector2(0.999815, 0.999815)
 texture = ExtResource("16_wyi6u")
 offset = Vector2(-3.25712, 15.8394)
-
-[connection signal="body_entered" from="Areas/DamageArea" to="." method="_on_damage_area_body_entered"]

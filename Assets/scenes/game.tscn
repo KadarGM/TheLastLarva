@@ -1,6 +1,5 @@
-[gd_scene load_steps=8 format=3 uid="uid://ey8sm6xs8cp3"]
+[gd_scene load_steps=7 format=3 uid="uid://ey8sm6xs8cp3"]
 
-[ext_resource type="Script" uid="uid://q76rbpfs2ftj" path="res://Assets/scripts/gameManager.gd" id="1_48yxf"]
 [ext_resource type="PackedScene" uid="uid://cpa2s3ipluc7n" path="res://Assets/scenes/characters/player.tscn" id="1_hjtmn"]
 [ext_resource type="Script" uid="uid://e35h32y3laer" path="res://Assets/scripts/Enemies.gd" id="3_t7i2e"]
 [ext_resource type="PackedScene" uid="uid://ctqediaidg7t1" path="res://Assets/scenes/characters/enemy.tscn" id="3_ykwck"]
@@ -15,36 +14,35 @@ size = Vector2(2030.75, 134)
 size = Vector2(116.657, 134)
 
 [node name="Game" type="Node2D"]
-script = ExtResource("1_48yxf")
 
 [node name="Players" type="Node2D" parent="."]
 
-[node name="Larva" parent="Players" instance=ExtResource("1_hjtmn")]
-position = Vector2(994.038, 410.135)
-scale = Vector2(0.3, 0.3)
-invulnerability = true
-metadata/_edit_horizontal_guides_ = [70.0]
-metadata/_edit_vertical_guides_ = [-61.0304, 60.4157]
+[node name="Player" parent="Players" instance=ExtResource("1_hjtmn")]
+position = Vector2(1794.9, 406.855)
+scale = Vector2(0.4, 0.4)
 
 [node name="Enemies" type="Node2D" parent="."]
 script = ExtResource("3_t7i2e")
 
 [node name="Enemy" parent="Enemies" instance=ExtResource("3_ykwck")]
-position = Vector2(1482.54, 2542.04)
-scale = Vector2(0.3, 0.3)
+position = Vector2(2941.56, 641.951)
+scale = Vector2(0.4, 0.4)
 
 [node name="Enemy2" parent="Enemies" instance=ExtResource("3_ykwck")]
-position = Vector2(1773.56, 2542.04)
-scale = Vector2(0.3, 0.3)
+position = Vector2(1691.9, 2507.89)
+scale = Vector2(0.4, 0.4)
+
+[node name="Enemy3" parent="Enemies" instance=ExtResource("3_ykwck")]
+position = Vector2(2830.29, 2510.74)
+scale = Vector2(0.4, 0.4)
+
+[node name="Enemy4" parent="Enemies" instance=ExtResource("3_ykwck")]
+position = Vector2(2630.57, 1557.8)
+scale = Vector2(0.4, 0.4)
 
 [node name="Enemy5" parent="Enemies" instance=ExtResource("3_ykwck")]
-position = Vector2(2250.29, 2542.04)
-scale = Vector2(0.3, 0.3)
-
-[node name="Enemy6" parent="Enemies" instance=ExtResource("3_ykwck")]
-position = Vector2(2613.42, 1556.42)
-scale = Vector2(0.3, 0.3)
-metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
+position = Vector2(1092.74, 430.821)
+scale = Vector2(0.4, 0.4)
 
 [node name="Obstacles" type="Node2D" parent="."]
 

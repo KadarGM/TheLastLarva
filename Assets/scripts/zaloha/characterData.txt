@@ -17,15 +17,15 @@ class_name CharacterData
 @export var mandible_b: Texture2D
 
 @export_group("Colors")
-@export var body_color: Color = Color.WHITE
-@export var head_color: Color = Color.WHITE
-@export var mandibles_color: Color = Color.WHITE
-@export var weapon_color: Color = Color.WHITE
+@export var body_color: Color
+@export var head_color: Color
+@export var mandibles_color: Color
+@export var weapon_color: Color
 
 @export_group("Health & Stamina")
 @export var health_max: int = 1000
 @export var stamina_max: float = 1000.0
-@export var stamina_regen_rate: float = 100.0
+@export var stamina_regen_rate: float = 1.0
 @export var stamina_regen_delay: float = 1.0
 
 @export_group("Basic Movement")
@@ -121,9 +121,3 @@ class_name CharacterData
 @export var ground_check_ray_length: float = 100.0
 @export var near_ground_ray_length: float = 100.0
 @export var ceiling_ray_length: float = 200.0
-
-@export_group("Patrol Behavior")
-@export var patrol_state_min_time: float = 1.0
-@export var patrol_state_max_time: float = 4.0
-@export var detection_range: float = 600.0
-@export var position_tolerance: float = 50.0
