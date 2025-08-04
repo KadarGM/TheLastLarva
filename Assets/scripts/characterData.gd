@@ -125,5 +125,6 @@ class_name CharacterData
 @export_group("Patrol Behavior")
 @export var patrol_state_min_time: float = 1.0
 @export var patrol_state_max_time: float = 4.0
+@export var patrol_idle_chance: float = 0.3
 @export var detection_range: float = 600.0
 @export var position_tolerance: float = 50.0

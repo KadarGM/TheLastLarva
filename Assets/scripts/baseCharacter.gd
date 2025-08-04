@@ -86,8 +86,7 @@ func _ready() -> void:
 		push_error("Character needs CharacterData resource!")
 		return
 	if not capabilities:
-		push_error("Character needs CharacterCapabilities resource!")
-		return
+		capabilities = CharacterCapabilities.new()
 		
 	health_current = character_data.health_max
 	stamina_current = character_data.stamina_max
@@ -162,38 +161,43 @@ func setup_raycasts() -> void:
 		right_wall_ray.enabled = true
 
 func init_timers() -> void:
-	hide_weapon_timer.wait_time = character_data.hide_weapon_time
-	hide_weapon_timer.one_shot = true
-	hide_weapon_timer.timeout.connect(_on_hide_weapon_timer_timeout)
+	if hide_weapon_timer:
+		hide_weapon_timer.wait_time = character_data.hide_weapon_time
+		hide_weapon_timer.one_shot = true
+		hide_weapon_timer.timeout.connect(_on_hide_weapon_timer_timeout)
 	
-	if capabilities.can_dash:
+	if dash_timer and capabilities.can_dash:
 		dash_timer.wait_time = character_data.dash_duration
 		dash_timer.one_shot = true
 	
-	if capabilities.can_dash:
+	if dash_cooldown_timer and capabilities.can_dash:
 		dash_cooldown_timer.wait_time = character_data.dash_cooldown_time
 		dash_cooldown_timer.one_shot = true
 		dash_cooldown_timer.timeout.connect(_on_dash_cooldown_timer_timeout)
 	
-	stun_timer.wait_time = character_data.stun_time
-	stun_timer.one_shot = true
-	stun_timer.timeout.connect(_on_stun_timer_timeout)
+	if stun_timer:
+		stun_timer.wait_time = character_data.stun_time
+		stun_timer.one_shot = true
+		stun_timer.timeout.connect(_on_stun_timer_timeout)
 	
-	if capabilities.can_wall_jump:
+	if wall_jump_control_timer and capabilities.can_wall_jump:
 		wall_jump_control_timer.wait_time = character_data.wall_jump_control_delay
 		wall_jump_control_timer.one_shot = true
-
-	attack_cooldown_timer.wait_time = character_data.attack_cooldown
-	attack_cooldown_timer.one_shot = true
-	attack_cooldown_timer.timeout.connect(_on_attack_cooldown_timer_timeout)
 	
-	damage_timer.wait_time = character_data.damage_delay
-	damage_timer.one_shot = true
-	damage_timer.timeout.connect(_on_damage_timer_timeout)
+	if attack_cooldown_timer:
+		attack_cooldown_timer.wait_time = character_data.attack_cooldown
+		attack_cooldown_timer.one_shot = true
+		attack_cooldown_timer.timeout.connect(_on_attack_cooldown_timer_timeout)
 	
-	invulnerability_timer.wait_time = character_data.invulnerability_after_damage
-	invulnerability_timer.one_shot = true
-	invulnerability_timer.timeout.connect(_on_invulnerability_timer_timeout)
+	if damage_timer:
+		damage_timer.wait_time = character_data.damage_delay
+		damage_timer.one_shot = true
+		damage_timer.timeout.connect(_on_damage_timer_timeout)
+	
+	if invulnerability_timer:
+		invulnerability_timer.wait_time = character_data.invulnerability_after_damage
+		invulnerability_timer.one_shot = true
+		invulnerability_timer.timeout.connect(_on_invulnerability_timer_timeout)
 
 func check_death() -> void:
 	if health_current <= 0 and current_state != State.DEATH:
@@ -248,8 +252,8 @@ func enter_state(state: State) -> void:
 		State.KNOCKBACK:
 			pass
 		State.DEATH:
-			#if damage_area:
-				#damage_area.monitorable = false
+			if damage_area:
+				damage_area.set_deferred("monitorable", false)
 			velocity.x = 0
 			death_animation_played = false
 
@@ -274,7 +278,13 @@ func handle_knockback(delta: float) -> void:
 		
 		if knockback_timer <= 0 or knockback_velocity.length() < 10:
 			knockback_velocity = Vector2.ZERO
-			change_state(State.IDLE)
+			if self is EnemyCharacter:
+				if get("player_in_detection_zone"):
+					change_state(State.CHASING)
+				else:
+					change_state(State.WALKING)
+			else:
+				change_state(State.IDLE)
 
 func handle_stamina_regeneration(delta: float) -> void:
 	if stamina_current >= character_data.stamina_max:
