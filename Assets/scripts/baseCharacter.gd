@@ -538,13 +538,22 @@ func _on_attack_area_body_entered(_body: Node2D) -> void:
 func _on_attack_area_body_exited(_body: Node2D) -> void:
 	pass
 
-func _on_damage_area_body_entered(_body: Node2D) -> void:
+func _on_damage_area_body_entered(entered_body: Node2D) -> void:
 	if invulnerability:
 		return
 	
-	if _body != self and _body.has_method("get_damage"):
-		var damage = _body.get_damage()
-		var knockback_direction = (global_position - _body.global_position).normalized()
+	if entered_body == self:
+		return
+	
+	if self.is_in_group("Enemy") and entered_body.is_in_group("Player"):
+		return
+	
+	if self.is_in_group("Player") and entered_body.is_in_group("Enemy"):
+		return
+	
+	if entered_body.has_method("get_damage"):
+		var damage = entered_body.get_damage()
+		var knockback_direction = (global_position - entered_body.global_position).normalized()
 		if knockback_direction.x == 0:
 			knockback_direction.x = randf_range(-0.1, 0.1)
 		

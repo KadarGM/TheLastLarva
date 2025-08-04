@@ -18,6 +18,14 @@ var chase_direction: int = 0
 var can_see_player: bool = false
 var has_jumped: bool = false
 
+var air_time_for_double_jump: float = 0.2
+var air_time: float = 0.0
+var has_used_double_jump: bool = false
+var has_used_triple_jump: bool = false
+
+var dash_decision_cooldown: float = 0.0
+var big_attack_decision_cooldown: float = 0.0
+
 func initialize_character() -> void:
 	if not capabilities:
 		capabilities = CharacterCapabilities.new()
@@ -63,14 +71,80 @@ func connect_additional_signals() -> void:
 		detection_area.body_entered.connect(_on_detection_area_body_entered)
 		detection_area.body_exited.connect(_on_detection_area_body_exited)
 
-func process_character(_delta: float) -> void:
+func process_character(delta: float) -> void:
 	update_direction()
 	update_chase_direction()
 	if not player == null:
 		update_view_ray(player)
+	
+	if dash_decision_cooldown > 0:
+		dash_decision_cooldown -= delta
+	if big_attack_decision_cooldown > 0:
+		big_attack_decision_cooldown -= delta
+	
+	if not is_on_floor():
+		air_time += delta
+	else:
+		air_time = 0.0
+		has_used_double_jump = false
+		has_used_triple_jump = false
 
 func physics_process_character(_delta: float) -> void:
 	handle_soft_collisions()
+	handle_ai_decisions()
+
+func handle_ai_decisions() -> void:
+	if current_state == State.DEATH or current_state == State.ATTACKING or current_state == State.KNOCKBACK:
+		return
+	
+	if not target_player or not is_instance_valid(target_player) or not can_see_player:
+		return
+	
+	var player_pos = target_player.global_position
+	var my_pos = global_position
+	var x_distance = abs(player_pos.x - my_pos.x)
+	var y_distance = player_pos.y - my_pos.y
+	
+	if not is_on_floor() and air_time > air_time_for_double_jump:
+		if capabilities.can_double_jump and not has_used_double_jump and can_double_jump:
+			if y_distance < -50 and x_distance < 200:
+				perform_double_jump()
+				has_used_double_jump = true
+				return
+		
+		if capabilities.can_triple_jump and has_used_double_jump and not has_used_triple_jump and can_triple_jump:
+			if y_distance < -100 and x_distance < 150 and stamina_current >= character_data.triple_jump_stamina_cost:
+				perform_triple_jump()
+				has_used_triple_jump = true
+				return
+	
+	if capabilities.can_dash and can_dash and dash_decision_cooldown <= 0:
+		if is_on_floor() and x_distance > 300 and x_distance < 600:
+			if stamina_current >= character_data.dash_stamina_cost:
+				attempt_enemy_dash()
+				dash_decision_cooldown = 2.0
+				return
+	
+	if capabilities.can_big_attack and big_attack_decision_cooldown <= 0:
+		if not is_on_floor() and y_distance > 100 and x_distance < 150:
+			if stamina_current >= character_data.big_attack_stamina_cost:
+				perform_big_attack()
+				big_attack_decision_cooldown = 3.0
+				return
+	
+	if capabilities.can_wall_jump and current_state == State.WALL_SLIDING:
+		if y_distance < -50:
+			var wall_direction = 1.0
+			if left_wall_ray.is_colliding():
+				wall_direction = 1.0
+			elif right_wall_ray.is_colliding():
+				wall_direction = -1.0
+			
+			velocity.y = character_data.jump_velocity * 0.3
+			velocity.x = wall_direction * character_data.wall_jump_force * character_data.wall_jump_away_multiplier
+			change_state(State.WALL_JUMPING)
+			can_wall_jump = false
+			return
 
 func start_patrol_behavior() -> void:
 	if not player_in_detection_zone and current_state != State.DEATH and current_state != State.ATTACKING and current_state != State.JUMPING:
@@ -90,7 +164,7 @@ func update_chase_direction() -> void:
 		chase_direction = 0
 
 func handle_state_transitions() -> void:
-	if current_state == State.ATTACKING or current_state == State.KNOCKBACK or current_state == State.DEATH:
+	if current_state == State.STUNNED or current_state == State.ATTACKING or current_state == State.KNOCKBACK or current_state == State.DEATH:
 		return
 
 	if current_state == State.JUMPING:
@@ -156,6 +230,21 @@ func handle_current_state(_delta: float) -> void:
 			pass
 		State.DEATH:
 			pass
+		State.DASHING:
+			pass
+		State.BIG_ATTACK, State.BIG_ATTACK_LANDING:
+			velocity.x = move_toward(velocity.x, 0, character_data.speed * character_data.big_attack_air_friction)
+		State.DOUBLE_JUMPING, State.TRIPLE_JUMPING:
+			if chase_direction != 0 and can_see_player:
+				velocity.x = chase_direction * character_data.speed
+			else:
+				velocity.x = move_toward(velocity.x, 0, character_data.speed * 0.1)
+		State.WALL_SLIDING:
+			velocity.y += gravity * _delta * character_data.wall_slide_gravity_multiplier
+		State.WALL_JUMPING:
+			if wall_jump_control_timer and wall_jump_control_timer.is_stopped():
+				if chase_direction != 0:
+					velocity.x = chase_direction * character_data.speed * 0.7
 
 func check_edge_or_wall() -> bool:
 	if movement_direction > 0:
@@ -233,6 +322,33 @@ func update_view_ray(b: Node2D) -> void:
 		else:
 			can_see_player = false
 
+func attempt_enemy_dash() -> void:
+	if not can_dash or not capabilities.can_dash:
+		return
+	
+	if stamina_current < character_data.dash_stamina_cost:
+		return
+	
+	var dash_direction = chase_direction
+	if dash_direction == 0:
+		return
+	
+	velocity.x = dash_direction * character_data.dash_speed
+	velocity.y = 0
+	can_dash = false
+	stamina_current -= character_data.dash_stamina_cost
+	stamina_regen_timer = character_data.stamina_regen_delay
+	
+	dash_timer.wait_time = character_data.dash_duration
+	dash_timer.start()
+	dash_cooldown_timer.start()
+	change_state(State.DASHING)
+
+func perform_big_attack() -> void:
+	stamina_current -= character_data.big_attack_stamina_cost
+	stamina_regen_timer = character_data.stamina_regen_delay
+	change_state(State.BIG_ATTACK)
+
 func enter_state(state: State) -> void:
 	super.enter_state(state)
 	
@@ -248,6 +364,13 @@ func enter_state(state: State) -> void:
 			if is_on_floor() and not has_jumped:
 				velocity.y = character_data.jump_velocity * 0.8
 				has_jumped = true
+				jump_count = 1
+				can_double_jump = true
+		State.DOUBLE_JUMPING:
+			jump_count = 2
+			can_triple_jump = true
+		State.TRIPLE_JUMPING:
+			jump_count = 3
 		State.CHASING:
 			if between_states_timer:
 				between_states_timer.stop()
@@ -267,6 +390,11 @@ func enter_state(state: State) -> void:
 				damage_timer.start()
 			if attack_cooldown_timer:
 				attack_cooldown_timer.start()
+		State.BIG_ATTACK:
+			invulnerability = true
+			hide_weapon_timer.stop()
+		State.BIG_ATTACK_LANDING:
+			pass
 		State.KNOCKBACK:
 			if between_states_timer:
 				between_states_timer.stop()
@@ -308,6 +436,28 @@ func _on_attack_area_body_exited(exited_body: Node2D) -> void:
 	if exited_body != self and exited_body.has_method("take_damage"):
 		player_in_attack_range = false
 
+func _on_damage_area_body_entered(entered_body: Node2D) -> void:
+	if invulnerability:
+		return
+	
+	if entered_body == self:
+		return
+	
+	if entered_body.is_in_group("Player"):
+		return
+	
+	if entered_body.has_method("get_damage"):
+		var damage = entered_body.get_damage()
+		var knockback_direction = (global_position - entered_body.global_position).normalized()
+		if knockback_direction.x == 0:
+			knockback_direction.x = randf_range(-0.1, 0.1)
+		
+		take_damage(damage)
+		
+		var damage_knockback = knockback_direction * character_data.damage_knockback_force
+		damage_knockback.y = -abs(damage_knockback.y * 0.5)
+		apply_knockback(damage_knockback)
+
 func _on_between_states_timer_timeout() -> void:
 	if not player_in_detection_zone and current_state != State.DEATH and current_state != State.ATTACKING and current_state != State.JUMPING:
 		if current_state == State.IDLE:
@@ -329,7 +479,7 @@ func set_shape_detection_enabled(enabled: bool) -> void:
 
 func _on_animation_finished(anim_name: String) -> void:
 	if current_state == State.ATTACKING:
-		if anim_name.begins_with("Attack_ground"):
+		if anim_name.begins_with("Attack_ground") or anim_name.begins_with("Attack_air"):
 			if player_in_attack_range and target_player and is_instance_valid(target_player):
 				if attack_cooldown_timer and attack_cooldown_timer.is_stopped():
 					change_state(State.ATTACKING)
@@ -339,6 +489,11 @@ func _on_animation_finished(anim_name: String) -> void:
 				change_state(State.CHASING)
 			else:
 				change_state(State.WALKING)
+	elif current_state == State.BIG_ATTACK and anim_name == "Big_attack":
+		if is_on_floor():
+			change_state(State.BIG_ATTACK_LANDING)
+	elif anim_name == "Big_attack_landing":
+		change_state(State.IDLE)
 	elif anim_name == "Death":
 		death_animation_played = true
 		queue_free()

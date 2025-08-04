@@ -18,7 +18,7 @@ size = Vector2(116.657, 134)
 [node name="Players" type="Node2D" parent="."]
 
 [node name="Player" parent="Players" instance=ExtResource("1_hjtmn")]
-position = Vector2(1794.9, 406.855)
+position = Vector2(2158, 690.89)
 scale = Vector2(0.4, 0.4)
 
 [node name="Enemies" type="Node2D" parent="."]
@@ -42,6 +42,10 @@ scale = Vector2(0.4, 0.4)
 
 [node name="Enemy5" parent="Enemies" instance=ExtResource("3_ykwck")]
 position = Vector2(1092.74, 430.821)
+scale = Vector2(0.4, 0.4)
+
+[node name="Enemy6" parent="Enemies" instance=ExtResource("3_ykwck")]
+position = Vector2(1807.22, 416.18)
 scale = Vector2(0.4, 0.4)
 
 [node name="Obstacles" type="Node2D" parent="."]
