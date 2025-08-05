@@ -1,6 +1,27 @@
 extends Resource
 class_name CharacterData
 
+enum State {
+	IDLE,
+	WALKING,
+	JUMPING,
+	DOUBLE_JUMPING,
+	TRIPLE_JUMPING,
+	WALL_SLIDING,
+	WALL_JUMPING,
+	DASHING,
+	CHARGING_JUMP,
+	BIG_JUMPING,
+	STUNNED,
+	ATTACKING,
+	BIG_ATTACK,
+	BIG_ATTACK_LANDING,
+	DASH_ATTACK,
+	KNOCKBACK,
+	DEATH,
+	CHASING
+}
+
 @export_group("Sprites")
 @export var body: Texture2D
 @export var sword: Texture2D

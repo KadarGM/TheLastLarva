@@ -1,17 +1,9 @@
 extends CharacterBody2D
 
-enum State {
-	IDLE,
-	WALKING,
-	JUMPING,
-	CHASING,
-	ATTACKING,
-	KNOCKBACK,
-	DEATH
-}
-
 @export var character_data: CharacterData
-var player = null
+@export var invulnerability: bool = false
+
+@onready var char_global = CharacterGlobalManager
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var BODY: Node2D = $Body
@@ -42,10 +34,12 @@ var player = null
 @onready var sword_body: Sprite2D = $Body/body/swordBody
 @onready var sword_body_2: Sprite2D = $Body/body/swordBody2
 
+
+var player = null
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
-var current_state: State = State.IDLE
-var previous_state: State = State.IDLE
+var current_state = character_data.State.IDLE
+var previous_state = character_data.State.IDLE
 
 var health_current: int
 var movement_direction: int = 1
@@ -58,9 +52,7 @@ var player_in_attack_range: bool = false
 var damage_applied_this_attack: bool = false
 var count_of_attack: int = 0
 
-@export var invulnerability: bool = false
 var death_animation_played: bool = false
-
 var player_in_detection_zone: bool = false
 var chase_direction: int = 0
 var can_see_player: bool = false
@@ -98,14 +90,14 @@ func _process(_delta: float) -> void:
 		update_view_ray(player)
 
 func _physics_process(delta: float) -> void:
-	if current_state == State.KNOCKBACK:
+	if current_state == character_data.State.KNOCKBACK:
 		handle_knockback(delta)
 		handle_gravity(delta)
 		handle_animations()
 		move_and_slide()
 		return
 
-	if current_state == State.DEATH:
+	if current_state == character_data.State.DEATH:
 		handle_gravity(delta)
 		handle_animations()
 		move_and_slide()
@@ -167,7 +159,7 @@ func init_timers() -> void:
 		emergency_timer.timeout.connect(_on_emergency_timer_timeout)
 
 func start_patrol_behavior() -> void:
-	if not player_in_detection_zone and current_state != State.DEATH and current_state != State.ATTACKING and current_state != State.JUMPING:
+	if not player_in_detection_zone and current_state != character_data.State.DEATH and current_state != character_data.State.ATTACKING and current_state != character_data.State.JUMPING:
 		var random_time = randf_range(character_data.patrol_state_min_time, character_data.patrol_state_max_time)
 		between_states_timer.wait_time = random_time
 		between_states_timer.start()
@@ -183,10 +175,10 @@ func update_chase_direction() -> void:
 		chase_direction = 0
 
 func check_death() -> void:
-	if health_current <= 0 and current_state != State.DEATH:
-		change_state(State.DEATH)
+	if health_current <= 0 and current_state != character_data.State.DEATH:
+		change_state(character_data.State.DEATH)
 
-func change_state(new_state: State) -> void:
+func change_state(new_state) -> void:
 	if current_state == new_state:
 		return
 
@@ -194,27 +186,27 @@ func change_state(new_state: State) -> void:
 	current_state = new_state
 
 	match new_state:
-		State.IDLE:
+		character_data.State.IDLE:
 			velocity.x = 0
 			if not player_in_detection_zone:
 				start_patrol_behavior()
-		State.WALKING:
+		character_data.State.WALKING:
 			if not player_in_detection_zone:
 				start_patrol_behavior()
-		State.JUMPING:
+		character_data.State.JUMPING:
 			if is_on_floor() and not has_jumped:
 				velocity.y = character_data.jump_velocity * 0.8
 				has_jumped = true
-		State.CHASING:
+		character_data.State.CHASING:
 			between_states_timer.stop()
-		State.ATTACKING:
+		character_data.State.ATTACKING:
 			velocity.x = 0
 			damage_applied_this_attack = false
 			between_states_timer.stop()
 			perform_attack()
-		State.KNOCKBACK:
+		character_data.State.KNOCKBACK:
 			between_states_timer.stop()
-		State.DEATH:
+		character_data.State.DEATH:
 			if damage_area:
 				damage_area.monitorable = false
 			velocity.x = 0
@@ -222,54 +214,54 @@ func change_state(new_state: State) -> void:
 			between_states_timer.stop()
 
 func handle_state_transitions() -> void:
-	if current_state == State.ATTACKING or current_state == State.KNOCKBACK or current_state == State.DEATH:
+	if current_state == character_data.State.ATTACKING or current_state == character_data.State.KNOCKBACK or current_state == character_data.State.DEATH:
 		return
 
-	if current_state == State.JUMPING:
+	if current_state == character_data.State.JUMPING:
 		if is_on_floor() and has_jumped:
 			has_jumped = false
 			if player_in_detection_zone and can_see_player:
-				change_state(State.CHASING)
+				change_state(character_data.State.CHASING)
 			else:
-				change_state(State.WALKING)
+				change_state(character_data.State.WALKING)
 		return
 
 	if player_in_attack_range and target_player and is_instance_valid(target_player):
 		if attack_cooldown_timer and attack_cooldown_timer.is_stopped():
-			change_state(State.ATTACKING)
+			change_state(character_data.State.ATTACKING)
 		return
 
 	if player_in_detection_zone and target_player and is_instance_valid(target_player) and can_see_player:
 		var y_difference = global_position.y - target_player.global_position.y
 		
 		if y_difference > 0 and y_difference < abs(character_data.jump_velocity) * 0.8 and is_on_floor() and chase_direction != 0:
-			change_state(State.JUMPING)
+			change_state(character_data.State.JUMPING)
 		elif y_difference > abs(character_data.jump_velocity) * 0.8 or chase_direction == 0:
-			change_state(State.IDLE)
+			change_state(character_data.State.IDLE)
 		else:
-			change_state(State.CHASING)
+			change_state(character_data.State.CHASING)
 	elif player_in_detection_zone and not can_see_player:
-		if current_state != State.IDLE and current_state != State.WALKING:
-			change_state(State.WALKING)
+		if current_state != character_data.State.IDLE and current_state != character_data.State.WALKING:
+			change_state(character_data.State.WALKING)
 	else:
-		if current_state == State.CHASING or current_state == State.IDLE:
+		if current_state == character_data.State.CHASING or current_state == character_data.State.IDLE:
 			if not between_states_timer.time_left > 0:
 				start_patrol_behavior()
 
 func handle_current_state() -> void:
 	match current_state:
-		State.IDLE:
+		character_data.State.IDLE:
 			velocity.x = 0
-		State.WALKING:
+		character_data.State.WALKING:
 			if is_on_floor() and check_edge_or_wall():
 				movement_direction *= -1
 			velocity.x = movement_direction * character_data.speed
-		State.JUMPING:
+		character_data.State.JUMPING:
 			if chase_direction != 0 and can_see_player:
 				velocity.x = chase_direction * character_data.speed
 			else:
 				velocity.x = move_toward(velocity.x, 0, character_data.speed * 0.1)
-		State.CHASING:
+		character_data.State.CHASING:
 			if chase_direction != 0:
 				if check_edge_or_wall_for_chase(chase_direction):
 					velocity.x = 0
@@ -278,11 +270,11 @@ func handle_current_state() -> void:
 					movement_direction = chase_direction
 			else:
 				velocity.x = 0
-		State.ATTACKING:
+		character_data.State.ATTACKING:
 			velocity.x = 0
-		State.KNOCKBACK:
+		character_data.State.KNOCKBACK:
 			pass
-		State.DEATH:
+		character_data.State.DEATH:
 			pass
 
 func check_edge_or_wall() -> bool:
@@ -315,10 +307,10 @@ func check_edge_or_wall_for_chase(direction: float) -> bool:
 	return false
 
 func update_direction() -> void:
-	if current_state == State.DEATH:
+	if current_state == character_data.State.DEATH:
 		return
 
-	if current_state == State.CHASING or current_state == State.ATTACKING or current_state == State.JUMPING:
+	if current_state == character_data.State.CHASING or current_state == character_data.State.ATTACKING or current_state == character_data.State.JUMPING:
 		if chase_direction != 0:
 			movement_direction = chase_direction
 
@@ -328,7 +320,7 @@ func handle_soft_collisions() -> void:
 	if not soft_collision_area:
 		return
 		
-	if current_state == State.DEATH or current_state == State.ATTACKING:
+	if current_state == character_data.State.DEATH or current_state == character_data.State.ATTACKING:
 		return
 	
 	var push_vector = Vector2.ZERO
@@ -365,9 +357,9 @@ func handle_knockback(delta: float) -> void:
 		if knockback_timer <= 0 or knockback_velocity.length() < 10:
 			knockback_velocity = Vector2.ZERO
 			if player_in_detection_zone:
-				change_state(State.CHASING)
+				change_state(character_data.State.CHASING)
 			else:
-				change_state(State.WALKING)
+				change_state(character_data.State.WALKING)
 
 func perform_attack() -> void:
 	if hide_weapon_timer:
@@ -425,7 +417,7 @@ func apply_damage_to_entities() -> void:
 			entity.apply_knockback(knockback_force)
 
 func take_damage(amount: int) -> void:
-	if current_state == State.DEATH:
+	if current_state == character_data.State.DEATH:
 		return
 
 	if invulnerability:
@@ -442,16 +434,16 @@ func take_damage(amount: int) -> void:
 		die()
 
 func apply_knockback(force: Vector2) -> void:
-	if current_state == State.DEATH or current_state == State.KNOCKBACK:
+	if current_state == character_data.State.DEATH or current_state == character_data.State.KNOCKBACK:
 		return
 
 	knockback_velocity = Vector2(force.x * character_data.knockback_force_horizontal_multiplier, force.y)
 	knockback_timer = character_data.knockback_duration
 
-	change_state(State.KNOCKBACK)
+	change_state(character_data.State.KNOCKBACK)
 
 func die() -> void:
-	change_state(State.DEATH)
+	change_state(character_data.State.DEATH)
 
 func get_damage() -> float:
 	return character_data.attack_1_dmg
@@ -461,13 +453,13 @@ func handle_animations() -> void:
 		return
 
 	match current_state:
-		State.IDLE:
+		character_data.State.IDLE:
 			animation_player.play("Idle")
-		State.WALKING, State.CHASING:
+		character_data.State.WALKING, character_data.State.CHASING:
 			animation_player.play("Walk")
-		State.JUMPING:
+		character_data.State.JUMPING:
 			animation_player.play("Jump")
-		State.ATTACKING:
+		character_data.State.ATTACKING:
 			match count_of_attack:
 				1:
 					animation_player.play("Attack_ground_1")
@@ -478,17 +470,17 @@ func handle_animations() -> void:
 				3:
 					animation_player.play("Attack_ground_3")
 					update_weapon_visibility("both")
-		State.KNOCKBACK:
+		character_data.State.KNOCKBACK:
 			animation_player.play("Jump")
-		State.DEATH:
+		character_data.State.DEATH:
 			if not death_animation_played:
 				animation_player.play("Death")
 
-func update_weapon_visibility(state: String) -> void:
+func update_weapon_visibility(State: String) -> void:
 	if not sword_f or not sword_b or not sword_body or not sword_body_2:
 		return
 
-	match state:
+	match State:
 		"hide":
 			sword_f.visible = false
 			sword_b.visible = false
@@ -535,7 +527,7 @@ func _on_detection_area_body_exited(exited_body: Node2D) -> void:
 		player_in_attack_range = false
 		can_see_player = false
 		emergency_timer.start()
-		if current_state != State.DEATH and current_state != State.ATTACKING:
+		if current_state != character_data.State.DEATH and current_state != character_data.State.ATTACKING:
 			start_patrol_behavior()
 
 func _on_attack_area_body_entered(entered_body: Node2D) -> void:
@@ -562,14 +554,14 @@ func _on_damage_area_body_entered(entered_body: Node2D) -> void:
 		knockback_velocity.y = -abs(knockback_velocity.y * 0.5)
 		knockback_timer = character_data.knockback_duration
 
-		change_state(State.KNOCKBACK)
+		change_state(character_data.State.KNOCKBACK)
 
 func _on_hide_weapon_timer_timeout() -> void:
 	update_weapon_visibility("hide")
 	count_of_attack = 1
 
 func _on_damage_timer_timeout() -> void:
-	if current_state == State.ATTACKING and not damage_applied_this_attack:
+	if current_state == character_data.State.ATTACKING and not damage_applied_this_attack:
 		damage_applied_this_attack = true
 		apply_damage_to_entities()
 
@@ -587,29 +579,29 @@ func set_shape_detection_enabled(enabled: bool) -> void:
 		shape_detection.disabled = not enabled
 
 func _on_between_states_timer_timeout() -> void:
-	if not player_in_detection_zone and current_state != State.DEATH and current_state != State.ATTACKING and current_state != State.JUMPING:
-		if current_state == State.IDLE:
-			change_state(State.WALKING)
-		elif current_state == State.WALKING:
+	if not player_in_detection_zone and current_state != character_data.State.DEATH and current_state != character_data.State.ATTACKING and current_state != character_data.State.JUMPING:
+		if current_state == character_data.State.IDLE:
+			change_state(character_data.State.WALKING)
+		elif current_state == character_data.State.WALKING:
 			if randf() < character_data.patrol_idle_chance:
-				change_state(State.IDLE)
+				change_state(character_data.State.IDLE)
 			else:
 				if randf() < 0.5:
 					movement_direction *= -1
 		start_patrol_behavior()
 
 func _on_animation_finished(anim_name: String) -> void:
-	if current_state == State.ATTACKING:
+	if current_state == character_data.State.ATTACKING:
 		if anim_name.begins_with("Attack_ground"):
 			if player_in_attack_range and target_player and is_instance_valid(target_player):
 				if attack_cooldown_timer and attack_cooldown_timer.is_stopped():
-					change_state(State.ATTACKING)
+					change_state(character_data.State.ATTACKING)
 				else:
-					change_state(State.CHASING)
+					change_state(character_data.State.CHASING)
 			elif player_in_detection_zone and target_player and is_instance_valid(target_player):
-				change_state(State.CHASING)
+				change_state(character_data.State.CHASING)
 			else:
-				change_state(State.WALKING)
+				change_state(character_data.State.WALKING)
 	elif anim_name == "Death":
 		death_animation_played = true
 		queue_free()

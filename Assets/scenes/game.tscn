@@ -20,6 +20,7 @@ size = Vector2(116.657, 134)
 [node name="Player" parent="Players" instance=ExtResource("1_hjtmn")]
 position = Vector2(1809, 359)
 scale = Vector2(0.4, 0.4)
+character_data = null
 
 [node name="Enemies" type="Node2D" parent="."]
 script = ExtResource("3_t7i2e")

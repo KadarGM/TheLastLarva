@@ -1,6 +1,6 @@
 [gd_scene load_steps=45 format=3 uid="uid://ctqediaidg7t1"]
 
-[ext_resource type="Script" uid="uid://crvart3k0rhxm" path="res://Assets/scripts/zaloha/enemyManager2.gd" id="1_xan8r"]
+[ext_resource type="Script" uid="uid://crvart3k0rhxm" path="res://Assets/scripts/enemyManager.gd" id="1_xan8r"]
 [ext_resource type="Resource" uid="uid://cxlupfbjhfrqm" path="res://Assets/resources/Enemy.tres" id="2_a6hic"]
 [ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://Assets/graphics/characters/larva/torso.svg" id="4_3wrfr"]
 [ext_resource type="Script" uid="uid://dcts54drik3ds" path="res://Assets/scripts/characterVisualizer.gd" id="4_a03dg"]

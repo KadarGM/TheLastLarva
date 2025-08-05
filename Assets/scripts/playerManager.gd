@@ -1,26 +1,9 @@
 extends CharacterBody2D
 
-enum State {
-	IDLE,
-	WALKING,
-	JUMPING,
-	DOUBLE_JUMPING,
-	TRIPLE_JUMPING,
-	WALL_SLIDING,
-	WALL_JUMPING,
-	DASHING,
-	CHARGING_JUMP,
-	BIG_JUMPING,
-	STUNNED,
-	ATTACKING,
-	BIG_ATTACK,
-	BIG_ATTACK_LANDING,
-	DASH_ATTACK,
-	KNOCKBACK,
-	DEATH
-}
-
 @export var character_data: CharacterData
+@export var invulnerability: bool = false
+
+@onready var char_global = CharacterGlobalManager
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var BODY: Node2D = $Body
@@ -64,8 +47,8 @@ enum State {
 
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
-var current_state: State = State.IDLE
-var previous_state: State = State.IDLE
+var current_state = character_data.State.IDLE
+var previous_state = character_data.State.IDLE
 
 var health_current: int
 var stamina_current: float
@@ -104,7 +87,6 @@ var is_high_big_attack: bool = false
 var knockback_velocity: Vector2 = Vector2.ZERO
 var knockback_timer: float = 0.0
 
-@export var invulnerability: bool = false
 var death_animation_played: bool = false
 
 func _ready() -> void:
@@ -122,20 +104,20 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	check_death()
-	if current_state != State.DEATH:
+	if current_state != character_data.State.DEATH:
 		handle_stamina_regeneration(delta)
 		handle_big_jump_stamina(delta)
 		handle_dash_attack_stamina(delta)
 	update_ui()
 
 func _physics_process(delta: float) -> void:
-	if current_state == State.KNOCKBACK:
+	if current_state == character_data.State.KNOCKBACK:
 		handle_knockback(delta)
 		handle_animations()
 		move_and_slide()
 		return
 	
-	if current_state == State.DEATH:
+	if current_state == character_data.State.DEATH:
 		handle_gravity(delta)
 		handle_animations()
 		move_and_slide()
@@ -152,21 +134,21 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func check_death() -> void:
-	if health_current <= 0 and current_state != State.DEATH:
-		change_state(State.DEATH)
+	if health_current <= 0 and current_state != character_data.State.DEATH:
+		change_state(character_data.State.DEATH)
 
 func handle_flipping() -> void:
-	if current_state == State.DEATH:
+	if current_state == character_data.State.DEATH:
 		return
 		
 	var input_direction = Input.get_axis("A_left", "D_right")
 	
-	if current_state == State.WALL_SLIDING:
+	if current_state == character_data.State.WALL_SLIDING:
 		if left_wall_ray.is_colliding():
 			BODY.scale.x = 1
 		elif right_wall_ray.is_colliding():
 			BODY.scale.x = -1
-	elif input_direction != 0 and current_state != State.DASH_ATTACK:
+	elif input_direction != 0 and current_state != character_data.State.DASH_ATTACK:
 		BODY.scale.x = -sign(input_direction)
 
 func setup_raycasts() -> void:
@@ -234,93 +216,93 @@ func init_timers() -> void:
 	invulnerability_timer.one_shot = true
 	invulnerability_timer.timeout.connect(_on_invulnerability_timer_timeout)
 
-func change_state(new_state: State) -> void:
+func change_state(new_state) -> void:
 	if current_state == new_state:
 		return
 	
-	if current_state == State.ATTACKING and new_state != State.KNOCKBACK and new_state != State.DASH_ATTACK:
+	if current_state == character_data.State.ATTACKING and new_state != character_data.State.KNOCKBACK and new_state != character_data.State.DASH_ATTACK:
 		pending_knockback_force = Vector2.ZERO
 	
-	if current_state == State.DASHING or current_state == State.BIG_ATTACK or current_state == State.DASH_ATTACK:
+	if current_state == character_data.State.DASHING or current_state == character_data.State.BIG_ATTACK or current_state == character_data.State.DASH_ATTACK:
 		invulnerability = false
-		print("State invulnerability deactivated - Leaving state: ", State.keys()[current_state])
+		print("State invulnerability deactivated - Leaving state: ", character_data.State.keys()[current_state])
 	
 	previous_state = current_state
 	current_state = new_state
 	
-	print("State changed: ", State.keys()[previous_state], " -> ", State.keys()[new_state])
+	print("State changed: ", character_data.State.keys()[previous_state], " -> ", character_data.State.keys()[new_state])
 	
 	match new_state:
-		State.IDLE, State.WALKING:
+		character_data.State.IDLE, character_data.State.WALKING:
 			jump_count = 0
-		State.STUNNED:
+		character_data.State.STUNNED:
 			velocity.x = 0
 			cancel_big_jump_charge()
-		State.WALL_JUMPING:
+		character_data.State.WALL_JUMPING:
 			wall_jump_control_timer.start()
 			has_wall_jumped = true
 			jump_count = 0
-		State.WALL_SLIDING:
+		character_data.State.WALL_SLIDING:
 			jump_count = 0
 			can_wall_jump = true
-		State.JUMPING:
-			if previous_state == State.IDLE or previous_state == State.WALKING:
+		character_data.State.JUMPING:
+			if previous_state == character_data.State.IDLE or previous_state == character_data.State.WALKING:
 				can_double_jump = true
 				can_triple_jump = false
 				jump_count = 1
-		State.DOUBLE_JUMPING:
+		character_data.State.DOUBLE_JUMPING:
 			jump_count = 2
 			can_triple_jump = true
-		State.TRIPLE_JUMPING:
+		character_data.State.TRIPLE_JUMPING:
 			jump_count = 3
-		State.DASHING:
+		character_data.State.DASHING:
 			invulnerability = true
-			print("State invulnerability activated - DASHING")
-		State.DASH_ATTACK:
+			print("character_data.State invulnerability activated - DASHING")
+		character_data.State.DASH_ATTACK:
 			invulnerability = true
-			print("State invulnerability activated - DASH_ATTACK")
+			print("character_data.State invulnerability activated - DASH_ATTACK")
 			dash_attack_damaged_entities.clear()
 			big_jump_charged = false
-		State.BIG_ATTACK:
+		character_data.State.BIG_ATTACK:
 			invulnerability = true
-			print("State invulnerability activated - BIG_ATTACK")
+			print("character_data.State invulnerability activated - BIG_ATTACK")
 			big_attack_pending = true
 			hide_weapon_timer.stop()
 			if air_time == 0:
 				air_time = character_data.air_time_initial
 				effective_air_time = character_data.air_time_initial
-		State.BIG_ATTACK_LANDING:
+		character_data.State.BIG_ATTACK_LANDING:
 			apply_damage_to_entities()
-		State.BIG_JUMPING:
+		character_data.State.BIG_JUMPING:
 			big_jump_charged = false
-		State.ATTACKING:
+		character_data.State.ATTACKING:
 			velocity_before_attack = velocity.x
 			damage_applied_this_attack = false
 			damage_timer.start()
-		State.KNOCKBACK:
+		character_data.State.KNOCKBACK:
 			pass
-		State.DEATH:
+		character_data.State.DEATH:
 			damage_area.monitorable = false
 			velocity.x = 0
 			death_animation_played = false
 			print("Character DEATH - Final health: ", health_current)
 
 func handle_state_transitions() -> void:
-	if current_state == State.STUNNED or current_state == State.ATTACKING or current_state == State.KNOCKBACK or current_state == State.DEATH:
+	if current_state == character_data.State.STUNNED or current_state == character_data.State.ATTACKING or current_state == character_data.State.KNOCKBACK or current_state == character_data.State.DEATH:
 		return
 	
-	if current_state == State.BIG_JUMPING:
+	if current_state == character_data.State.BIG_JUMPING:
 		check_big_jump_collision()
 		check_big_jump_input_release()
 		return
 	
-	if current_state == State.DASH_ATTACK:
+	if current_state == character_data.State.DASH_ATTACK:
 		check_dash_attack_collision()
 		check_dash_attack_input_release()
 		return
 	
 	if not dash_timer.is_stopped():
-		change_state(State.DASHING)
+		change_state(character_data.State.DASHING)
 		return
 	
 	if is_on_floor():
@@ -328,15 +310,15 @@ func handle_state_transitions() -> void:
 		can_wall_jump = true
 		was_on_wall = false
 		
-		if current_state == State.BIG_ATTACK_LANDING:
+		if current_state == character_data.State.BIG_ATTACK_LANDING:
 			return
 		
 		if abs(velocity.x) > 10:
-			change_state(State.WALKING)
+			change_state(character_data.State.WALKING)
 		elif big_jump_timer.time_left > 0:
-			change_state(State.CHARGING_JUMP)
+			change_state(character_data.State.CHARGING_JUMP)
 		else:
-			change_state(State.IDLE)
+			change_state(character_data.State.IDLE)
 	else:
 		var left = left_wall_ray.is_colliding()
 		var right = right_wall_ray.is_colliding()
@@ -351,53 +333,53 @@ func handle_state_transitions() -> void:
 			was_on_wall = false
 
 		if is_touching_wall and velocity.y > 0:
-			if current_state == State.BIG_ATTACK or current_state == State.BIG_ATTACK_LANDING:
+			if current_state == character_data.State.BIG_ATTACK or current_state == character_data.State.BIG_ATTACK_LANDING:
 				can_wall_slide = false
 			else:
 				can_wall_slide = true
 		
 		if can_wall_slide:
-			change_state(State.WALL_SLIDING)
-		elif current_state != State.WALL_JUMPING and current_state != State.BIG_ATTACK and current_state != State.BIG_ATTACK_LANDING:
-			if current_state != State.DOUBLE_JUMPING and current_state != State.JUMPING and current_state != State.TRIPLE_JUMPING:
-				change_state(State.JUMPING)
+			change_state(character_data.State.WALL_SLIDING)
+		elif current_state != character_data.State.WALL_JUMPING and current_state != character_data.State.BIG_ATTACK and current_state != character_data.State.BIG_ATTACK_LANDING:
+			if current_state != character_data.State.DOUBLE_JUMPING and current_state != character_data.State.JUMPING and current_state != character_data.State.TRIPLE_JUMPING:
+				change_state(character_data.State.JUMPING)
 
 func handle_current_state(delta) -> void:
-	if current_state == State.KNOCKBACK or current_state == State.DEATH:
+	if current_state == character_data.State.KNOCKBACK or current_state == character_data.State.DEATH:
 		return
 		
 	var input_direction = Input.get_axis("A_left", "D_right")
 	
 	match current_state:
-		State.IDLE, State.WALKING:
+		character_data.State.IDLE, character_data.State.WALKING:
 			handle_ground_movement(input_direction)
 			handle_ground_actions()
-		State.JUMPING, State.DOUBLE_JUMPING, State.TRIPLE_JUMPING:
+		character_data.State.JUMPING, character_data.State.DOUBLE_JUMPING, character_data.State.TRIPLE_JUMPING:
 			handle_air_movement(input_direction)
 			handle_air_actions()
-		State.WALL_SLIDING:
+		character_data.State.WALL_SLIDING:
 			handle_wall_actions(delta)
-		State.WALL_JUMPING:
+		character_data.State.WALL_JUMPING:
 			if wall_jump_control_timer.is_stopped():
 				can_double_jump = true
 				can_triple_jump = true
 				handle_air_movement(input_direction)
 			handle_air_actions()
-		State.DASHING:
+		character_data.State.DASHING:
 			pass
-		State.DASH_ATTACK:
+		character_data.State.DASH_ATTACK:
 			handle_dash_attack_movement()
-		State.CHARGING_JUMP:
+		character_data.State.CHARGING_JUMP:
 			handle_charge_jump()
-		State.BIG_JUMPING:
+		character_data.State.BIG_JUMPING:
 			handle_big_jump_movement()
-		State.STUNNED:
+		character_data.State.STUNNED:
 			pass
-		State.BIG_ATTACK:
+		character_data.State.BIG_ATTACK:
 			handle_air_movement(input_direction)
-		State.BIG_ATTACK_LANDING:
+		character_data.State.BIG_ATTACK_LANDING:
 			velocity.x = 0
-		State.ATTACKING:
+		character_data.State.ATTACKING:
 			handle_attack_movement()
 			if before_attack_timer.is_stopped():
 				if Input.is_action_just_pressed("L_attack"):
@@ -406,13 +388,13 @@ func handle_current_state(delta) -> void:
 func handle_ground_movement(input_direction: float) -> void:
 	if input_direction:
 		velocity.x = input_direction * character_data.speed
-		if current_state == State.CHARGING_JUMP:
+		if current_state == character_data.State.CHARGING_JUMP:
 			cancel_big_jump_charge()
 	else:
 		velocity.x = move_toward(velocity.x, 0, character_data.speed)
 
 func handle_air_movement(input_direction: float) -> void:
-	if current_state == State.BIG_ATTACK or current_state == State.BIG_ATTACK_LANDING:
+	if current_state == character_data.State.BIG_ATTACK or current_state == character_data.State.BIG_ATTACK_LANDING:
 		velocity.x = move_toward(velocity.x, 0, character_data.speed * character_data.big_attack_air_friction)
 		return
 		
@@ -422,7 +404,7 @@ func handle_air_movement(input_direction: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, character_data.speed * character_data.air_movement_friction)
 
 func handle_ground_actions() -> void:
-	if current_state == State.STUNNED:
+	if current_state == character_data.State.STUNNED:
 		return
 	
 	if big_jump_charged and Input.is_action_pressed("J_dash"):
@@ -462,12 +444,12 @@ func handle_ground_actions() -> void:
 
 func handle_air_actions() -> void:
 	if Input.is_action_just_pressed("W_jump"):
-		if current_state != State.WALL_JUMPING and current_state != State.ATTACKING:
+		if current_state != character_data.State.WALL_JUMPING and current_state != character_data.State.ATTACKING:
 			if can_double_jump and jump_count == 1:
 				perform_double_jump()
 			elif can_triple_jump and jump_count == 2:
 				perform_triple_jump()
-		elif current_state == State.WALL_JUMPING:
+		elif current_state == character_data.State.WALL_JUMPING:
 			if can_double_jump:
 				perform_double_jump()
 			elif can_triple_jump:
@@ -488,7 +470,7 @@ func handle_air_actions() -> void:
 		cancel_big_jump_charge()
 		big_jump_charged = false
 	
-	if Input.is_action_just_pressed("J_dash") and current_state != State.ATTACKING:
+	if Input.is_action_just_pressed("J_dash") and current_state != character_data.State.ATTACKING:
 		attempt_dash()
 	
 	if Input.is_action_just_pressed("L_attack"):
@@ -507,7 +489,7 @@ func handle_air_actions() -> void:
 			stamina_regen_timer = character_data.stamina_regen_delay
 			print("Big attack stamina cost - Stamina: ", old_stamina, " -> ", stamina_current)
 			is_high_big_attack = not ground
-			change_state(State.BIG_ATTACK)
+			change_state(character_data.State.BIG_ATTACK)
 
 func handle_wall_actions(delta) -> void:
 	var input_direction = Input.get_axis("A_left", "D_right")
@@ -596,13 +578,13 @@ func handle_big_jump_movement() -> void:
 		velocity.y = 0
 
 func handle_gravity(delta: float) -> void:
-	if current_state == State.BIG_JUMPING or current_state == State.KNOCKBACK or current_state == State.DASH_ATTACK:
+	if current_state == character_data.State.BIG_JUMPING or current_state == character_data.State.KNOCKBACK or current_state == character_data.State.DASH_ATTACK:
 		return
 		
 	if not is_on_floor():
-		if current_state == State.WALL_SLIDING and (is_wall_hanging_left() or is_wall_hanging_right()):
+		if current_state == character_data.State.WALL_SLIDING and (is_wall_hanging_left() or is_wall_hanging_right()):
 			return
-		elif current_state == State.WALL_SLIDING:
+		elif current_state == character_data.State.WALL_SLIDING:
 			if Input.is_action_pressed("S_charge_jump"):
 				velocity.y += gravity * delta * character_data.wall_slide_gravity_multiplier
 			elif  Input.is_action_just_released("S_charge_jump"):
@@ -615,7 +597,7 @@ func handle_gravity(delta: float) -> void:
 			velocity.y += gravity * delta
 
 func handle_jump_release() -> void:
-	if current_state == State.KNOCKBACK or current_state == State.DEATH:
+	if current_state == character_data.State.KNOCKBACK or current_state == character_data.State.DEATH:
 		return
 		
 	if Input.is_action_just_released("W_jump") or is_on_ceiling():
@@ -632,17 +614,17 @@ func handle_jump_release() -> void:
 func handle_air_time(delta: float) -> void:
 	if not is_on_floor():
 		air_time += delta
-		if current_state == State.BIG_ATTACK or big_attack_pending:
+		if current_state == character_data.State.BIG_ATTACK or big_attack_pending:
 			effective_air_time += delta * character_data.landing_multiplier
 		else:
 			effective_air_time += delta
 	elif is_on_floor():
-		if current_state == State.BIG_ATTACK_LANDING or big_attack_pending:
+		if current_state == character_data.State.BIG_ATTACK_LANDING or big_attack_pending:
 			check_stun_on_landing()
 		reset_air_time()
 
 func handle_knockback(delta: float) -> void:
-	if current_state == State.KNOCKBACK:
+	if current_state == character_data.State.KNOCKBACK:
 		if knockback_timer > 0:
 			knockback_timer -= delta
 			velocity = knockback_velocity
@@ -650,12 +632,12 @@ func handle_knockback(delta: float) -> void:
 			
 			if knockback_timer <= 0 or knockback_velocity.length() < 10:
 				knockback_velocity = Vector2.ZERO
-				change_state(State.IDLE)
+				change_state(character_data.State.IDLE)
 		else:
-			change_state(State.IDLE)
+			change_state(character_data.State.IDLE)
 
 func handle_big_jump_stamina(delta: float) -> void:
-	if current_state == State.BIG_JUMPING:
+	if current_state == character_data.State.BIG_JUMPING:
 		stamina_current -= character_data.big_jump_stamina_drain_rate * delta
 		if stamina_current <= 0:
 			stamina_current = 0
@@ -663,7 +645,7 @@ func handle_big_jump_stamina(delta: float) -> void:
 			end_big_jump()
 
 func handle_dash_attack_stamina(delta: float) -> void:
-	if current_state == State.DASH_ATTACK:
+	if current_state == character_data.State.DASH_ATTACK:
 		stamina_current -= character_data.dash_attack_stamina_drain_rate * delta
 		if stamina_current <= 0:
 			stamina_current = 0
@@ -684,14 +666,14 @@ func handle_stamina_regeneration(delta: float) -> void:
 func perform_jump() -> void:
 	velocity.y = character_data.jump_velocity
 	is_jump_held = true
-	change_state(State.JUMPING)
+	change_state(character_data.State.JUMPING)
 
 func perform_double_jump() -> void:
 	velocity.y = character_data.jump_velocity * character_data.double_jump_multiplier
 	can_double_jump = false
 	is_double_jump_held = true
 	reset_air_time()
-	change_state(State.DOUBLE_JUMPING)
+	change_state(character_data.State.DOUBLE_JUMPING)
 	animation_player.play("Double_jump")
 	animation_player.queue("Jump")
 
@@ -706,7 +688,7 @@ func perform_triple_jump() -> void:
 		can_triple_jump = false
 		is_triple_jump_held = true
 		reset_air_time()
-		change_state(State.TRIPLE_JUMPING)
+		change_state(character_data.State.TRIPLE_JUMPING)
 		animation_player.play("Triple_jump")
 		animation_player.queue("Jump")
 
@@ -715,7 +697,7 @@ func perform_wall_jump() -> void:
 	velocity.y = character_data.jump_velocity * 0.3
 	velocity.x = wall_direction * character_data.wall_jump_force * character_data.wall_jump_away_multiplier
 	reset_air_time()
-	change_state(State.WALL_JUMPING)
+	change_state(character_data.State.WALL_JUMPING)
 	can_wall_jump = false
 
 func perform_wall_jump_away() -> void:
@@ -723,7 +705,7 @@ func perform_wall_jump_away() -> void:
 	velocity.y = 0
 	velocity.x = wall_direction * character_data.wall_jump_force * character_data.wall_jump_away_multiplier
 	reset_air_time()
-	change_state(State.WALL_JUMPING)
+	change_state(character_data.State.WALL_JUMPING)
 	can_wall_jump = false
 
 func attempt_dash() -> void:
@@ -753,7 +735,7 @@ func attempt_dash() -> void:
 	
 	dash_timer.start()
 	dash_cooldown_timer.start()
-	change_state(State.DASHING)
+	change_state(character_data.State.DASHING)
 
 func perform_dash_attack() -> void:
 	var attack_dir = get_attack_direction()
@@ -761,7 +743,7 @@ func perform_dash_attack() -> void:
 	
 	print("Starting dash attack in direction: ", attack_dir)
 	
-	change_state(State.DASH_ATTACK)
+	change_state(character_data.State.DASH_ATTACK)
 
 func handle_dash_attack_movement() -> void:
 	if dash_attack_direction.x != 0:
@@ -784,18 +766,18 @@ func end_dash_attack() -> void:
 	dash_attack_direction = Vector2.ZERO
 	dash_attack_damaged_entities.clear()
 	stamina_regen_timer = character_data.stamina_regen_delay
-	change_state(State.JUMPING)
+	change_state(character_data.State.JUMPING)
 
 func perform_attack() -> void:
 	if not before_attack_timer.is_stopped():
 		return
 	
-	if current_state == State.ATTACKING:
+	if current_state == character_data.State.ATTACKING:
 		return
 	
 	var max_count_of_attack = 3
 	
-	change_state(State.ATTACKING)
+	change_state(character_data.State.ATTACKING)
 	
 	if count_of_attack < max_count_of_attack:
 		count_of_attack += 1
@@ -823,7 +805,7 @@ func cancel_big_jump_charge() -> void:
 func perform_directional_big_jump(direction: Vector2) -> void:
 	big_jump_charged = false
 	big_jump_direction = direction
-	change_state(State.BIG_JUMPING)
+	change_state(character_data.State.BIG_JUMPING)
 
 func check_big_jump_collision() -> void:
 	var _ceil = ceiling_ray.is_colliding() or ceiling_ray_2.is_colliding() or ceiling_ray_3.is_colliding()
@@ -846,12 +828,12 @@ func check_big_jump_input_release() -> void:
 
 func end_big_jump() -> void:
 	big_jump_direction = Vector2.ZERO
-	change_state(State.JUMPING)
+	change_state(character_data.State.JUMPING)
 
 func check_big_attack_landing() -> void:
 	var near = near_ground_ray.is_colliding() or near_ground_ray_2.is_colliding() or near_ground_ray_3.is_colliding()
-	if current_state == State.BIG_ATTACK and big_attack_pending and near:
-		change_state(State.BIG_ATTACK_LANDING)
+	if current_state == character_data.State.BIG_ATTACK and big_attack_pending and near:
+		change_state(character_data.State.BIG_ATTACK_LANDING)
 
 func reset_air_time() -> void:
 	air_time = 0
@@ -894,7 +876,7 @@ func has_nearby_enemy() -> bool:
 func apply_damage_to_entities() -> void:
 	var overlapping_bodies = []
 	
-	if current_state == State.BIG_ATTACK_LANDING:
+	if current_state == character_data.State.BIG_ATTACK_LANDING:
 		var front_bodies = big_attack_area.get_overlapping_bodies()
 		var back_bodies = big_attack_area_2.get_overlapping_bodies()
 		
@@ -992,22 +974,22 @@ func apply_damage_to_entities() -> void:
 				character_data.jump_velocity * character_data.knockback_reaction_jump_multiplier
 			)
 			
-			if current_state == State.ATTACKING:
+			if current_state == character_data.State.ATTACKING:
 				pending_knockback_force = reaction_force
 			else:
 				apply_knockback(reaction_force)
 
 func apply_knockback(force: Vector2) -> void:
-	if current_state == State.BIG_ATTACK or current_state == State.BIG_ATTACK_LANDING or current_state == State.BIG_JUMPING or current_state == State.KNOCKBACK or current_state == State.DEATH or current_state == State.DASH_ATTACK:
+	if current_state == character_data.State.BIG_ATTACK or current_state == character_data.State.BIG_ATTACK_LANDING or current_state == character_data.State.BIG_JUMPING or current_state == character_data.State.KNOCKBACK or current_state == character_data.State.DEATH or current_state == character_data.State.DASH_ATTACK:
 		return
 	
 	knockback_velocity = Vector2(force.x * character_data.knockback_force_horizontal_multiplier, force.y)
 	knockback_timer = character_data.knockback_duration
 	
-	change_state(State.KNOCKBACK)
+	change_state(character_data.State.KNOCKBACK)
 
 func take_damage(amount: int) -> void:
-	if current_state == State.DEATH:
+	if current_state == character_data.State.DEATH:
 		return
 	
 	if invulnerability:
@@ -1037,43 +1019,43 @@ func take_damage(amount: int) -> void:
 
 func handle_animations() -> void:
 	match current_state:
-		State.IDLE:
+		character_data.State.IDLE:
 			if big_jump_charged and Input.is_action_pressed("J_dash"):
 				animation_player.play("Big_jump_charge")
 			else:
 				animation_player.play("Idle")
-		State.WALKING:
+		character_data.State.WALKING:
 			animation_player.play("Walk")
-		State.JUMPING, State.WALL_JUMPING:
+		character_data.State.JUMPING, character_data.State.WALL_JUMPING:
 			animation_player.play("Jump")
-		State.BIG_JUMPING:
+		character_data.State.BIG_JUMPING:
 			animation_player.play("Dash")
-		State.BIG_ATTACK:
+		character_data.State.BIG_ATTACK:
 			if is_high_big_attack and animation_player.current_animation != "Big_attack":
 				animation_player.play("Big_attack_prepare")
 				update_weapon_visibility("both")
-		State.BIG_ATTACK_LANDING:
+		character_data.State.BIG_ATTACK_LANDING:
 			if animation_player.current_animation != "Big_attack_landing":
 				animation_player.play("Big_attack_landing")
-		State.WALL_SLIDING:
+		character_data.State.WALL_SLIDING:
 			if (big_jump_timer.time_left > 0) or (big_jump_charged and Input.is_action_pressed("J_dash")):
 				animation_player.play("Big_jump_wall_charge")
 			else:
 				animation_player.play("Sliding_wall")
-		State.DASHING:
+		character_data.State.DASHING:
 			animation_player.play("Dash")
-		State.DASH_ATTACK:
+		character_data.State.DASH_ATTACK:
 			animation_player.play("Dash_attack")
 			update_weapon_visibility("both")
-		State.CHARGING_JUMP:
+		character_data.State.CHARGING_JUMP:
 			animation_player.play("Big_jump_charge")
-		State.STUNNED:
+		character_data.State.STUNNED:
 			pass
-		State.KNOCKBACK:
+		character_data.State.KNOCKBACK:
 			animation_player.play("Jump")
-		State.DOUBLE_JUMPING, State.TRIPLE_JUMPING:
+		character_data.State.DOUBLE_JUMPING, character_data.State.TRIPLE_JUMPING:
 			pass
-		State.ATTACKING:
+		character_data.State.ATTACKING:
 			if is_on_floor():
 				match count_of_attack:
 					1: 
@@ -1096,7 +1078,7 @@ func handle_animations() -> void:
 					3:  
 						animation_player.play("Attack_air_3")
 						update_weapon_visibility("both")
-		State.DEATH:
+		character_data.State.DEATH:
 			if not death_animation_played:
 				animation_player.play("Death")
 
@@ -1140,13 +1122,13 @@ func _on_big_jump_cooldown_timer_timeout() -> void:
 	can_big_jump = true
 
 func _on_stun_timer_timeout() -> void:
-	change_state(State.IDLE)
+	change_state(character_data.State.IDLE)
 
 func _on_dash_cooldown_timer_timeout() -> void:
 	can_dash = true
 
 func _on_damage_timer_timeout() -> void:
-	if current_state == State.ATTACKING and not damage_applied_this_attack:
+	if current_state == character_data.State.ATTACKING and not damage_applied_this_attack:
 		damage_applied_this_attack = true
 		apply_damage_to_entities()
 
@@ -1171,10 +1153,10 @@ func _on_damage_area_body_entered(_body: Node2D) -> void:
 		knockback_velocity.y = -abs(knockback_velocity.y * 0.5)
 		knockback_timer = character_data.knockback_duration
 		
-		change_state(State.KNOCKBACK)
+		change_state(character_data.State.KNOCKBACK)
 
 func _on_attack_area_body_entered(_body: Node2D) -> void:
-	if current_state != State.DASH_ATTACK or _body == self:
+	if current_state != character_data.State.DASH_ATTACK or _body == self:
 		return
 		
 	if _body in dash_attack_damaged_entities:
@@ -1208,32 +1190,32 @@ func _on_attack_area_body_exited(_body: Node2D) -> void:
 	pass
 
 func _on_animation_finished(anim_name: String) -> void:
-	if current_state == State.ATTACKING:
+	if current_state == character_data.State.ATTACKING:
 		if anim_name.begins_with("Attack_ground"):
 			if pending_knockback_force.length() > 0:
 				apply_knockback(pending_knockback_force)
 				pending_knockback_force = Vector2.ZERO
 			else:
 				velocity.x = velocity_before_attack
-				change_state(State.IDLE)
+				change_state(character_data.State.IDLE)
 		elif anim_name.begins_with("Attack_air"):
 			if pending_knockback_force.length() > 0:
 				apply_knockback(pending_knockback_force)
 				pending_knockback_force = Vector2.ZERO
 			else:
-				change_state(State.JUMPING)
-	elif current_state == State.DASH_ATTACK and anim_name == "Dash_attack":
+				change_state(character_data.State.JUMPING)
+	elif current_state == character_data.State.DASH_ATTACK and anim_name == "Dash_attack":
 		end_dash_attack()
-	elif current_state == State.BIG_ATTACK and anim_name == "Big_attack_prepare":
+	elif current_state == character_data.State.BIG_ATTACK and anim_name == "Big_attack_prepare":
 		animation_player.play("Big_attack")
-	elif anim_name == "Big_attack" and (current_state == State.BIG_ATTACK_LANDING or is_on_floor()):
+	elif anim_name == "Big_attack" and (current_state == character_data.State.BIG_ATTACK_LANDING or is_on_floor()):
 		if not animation_player.is_playing() or animation_player.current_animation != "Big_attack_landing":
 			animation_player.play("Big_attack_landing")
 	elif anim_name == "Big_attack_landing":
 		if effective_air_time > character_data.stun_after_land_treshold:
-			change_state(State.STUNNED)
+			change_state(character_data.State.STUNNED)
 			stun_timer.start()
 		else:
-			change_state(State.IDLE)
+			change_state(character_data.State.IDLE)
 	elif anim_name == "Death":
 		death_animation_played = true
