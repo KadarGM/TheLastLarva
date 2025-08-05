@@ -1,8 +1,7 @@
-[gd_scene load_steps=46 format=3 uid="uid://ctqediaidg7t1"]
+[gd_scene load_steps=45 format=3 uid="uid://ctqediaidg7t1"]
 
-[ext_resource type="Script" uid="uid://ca8n31mn44olp" path="res://Assets/scripts/enemyCharacter.gd" id="1_a6hic"]
-[ext_resource type="Resource" uid="uid://cxlupfbjhfrqm" path="res://Assets/resources/Enemy1.tres" id="2_a6hic"]
-[ext_resource type="Resource" uid="uid://cybapvu50av5k" path="res://Assets/resources/EnemyCap.tres" id="3_3wrfr"]
+[ext_resource type="Script" uid="uid://crvart3k0rhxm" path="res://Assets/scripts/zaloha/enemyManager2.gd" id="1_xan8r"]
+[ext_resource type="Resource" uid="uid://cxlupfbjhfrqm" path="res://Assets/resources/Enemy.tres" id="2_a6hic"]
 [ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://Assets/graphics/characters/larva/torso.svg" id="4_3wrfr"]
 [ext_resource type="Script" uid="uid://dcts54drik3ds" path="res://Assets/scripts/characterVisualizer.gd" id="4_a03dg"]
 [ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://Assets/graphics/characters/larva/sword.svg" id="5_a03dg"]
@@ -6087,9 +6086,8 @@ height = 345.605
 
 [node name="Enemy" type="CharacterBody2D" groups=["Enemy"]]
 collision_layer = 4
-script = ExtResource("1_a6hic")
+script = ExtResource("1_xan8r")
 character_data = ExtResource("2_a6hic")
-capabilities = ExtResource("3_3wrfr")
 metadata/_edit_horizontal_guides_ = [69.6705, -1663.22]
 metadata/_edit_vertical_guides_ = [60.5697, -62.2498, -1328.39]
 
@@ -6138,6 +6136,8 @@ playback_default_blend_time = 0.2
 [node name="DamageTimer" type="Timer" parent="Timers"]
 
 [node name="InvulnerabilityTimer" type="Timer" parent="Timers"]
+
+[node name="BeforeAttackTimer" type="Timer" parent="Timers"]
 
 [node name="Areas" type="Node2D" parent="."]
 z_index = -100

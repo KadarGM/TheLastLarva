@@ -10,11 +10,11 @@ enum State {
 	DEATH
 }
 
-@export var enemy_data: EnemyData
+@export var character_data: CharacterData
 var player = null
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
-@onready var body: Node2D = $Body
+@onready var BODY: Node2D = $Body
 
 @onready var detection_area: Area2D = $Body/DetectionArea
 @onready var attack_area: Area2D = $Body/AttackArea
@@ -67,7 +67,7 @@ var can_see_player: bool = false
 var has_jumped: bool = false
 
 func _ready() -> void:
-	health_current = enemy_data.health_max
+	health_current = character_data.health_max
 	shape_detection.disabled = true
 	call_deferred("init_timers")
 	call_deferred("setup_raycasts")
@@ -120,40 +120,40 @@ func _physics_process(delta: float) -> void:
 
 func setup_raycasts() -> void:
 	if ground_check_ray:
-		ground_check_ray.target_position = Vector2(0, enemy_data.ground_check_ray_length)
+		ground_check_ray.target_position = Vector2(0, character_data.ground_check_ray_length)
 		ground_check_ray.enabled = true
 	if ground_check_ray_2:
-		ground_check_ray_2.target_position = Vector2(0, enemy_data.ground_check_ray_length)
+		ground_check_ray_2.target_position = Vector2(0, character_data.ground_check_ray_length)
 		ground_check_ray_2.enabled = true
 	if ground_check_ray_3:
-		ground_check_ray_3.target_position = Vector2(0, enemy_data.ground_check_ray_length)
+		ground_check_ray_3.target_position = Vector2(0, character_data.ground_check_ray_length)
 		ground_check_ray_3.enabled = true
 
 	if left_wall_ray:
-		left_wall_ray.target_position = Vector2(-enemy_data.wall_ray_cast_length, 0)
+		left_wall_ray.target_position = Vector2(-character_data.wall_ray_cast_length, 0)
 		left_wall_ray.enabled = true
 	if right_wall_ray:
-		right_wall_ray.target_position = Vector2(enemy_data.wall_ray_cast_length, 0)
+		right_wall_ray.target_position = Vector2(character_data.wall_ray_cast_length, 0)
 		right_wall_ray.enabled = true
 
 func init_timers() -> void:
 	if hide_weapon_timer:
-		hide_weapon_timer.wait_time = enemy_data.hide_weapon_time
+		hide_weapon_timer.wait_time = character_data.hide_weapon_time
 		hide_weapon_timer.one_shot = true
 		hide_weapon_timer.timeout.connect(_on_hide_weapon_timer_timeout)
 
 	if attack_cooldown_timer:
-		attack_cooldown_timer.wait_time = enemy_data.attack_cooldown
+		attack_cooldown_timer.wait_time = character_data.attack_cooldown
 		attack_cooldown_timer.one_shot = true
 		attack_cooldown_timer.timeout.connect(_on_attack_cooldown_timer_timeout)
 
 	if damage_timer:
-		damage_timer.wait_time = enemy_data.damage_delay
+		damage_timer.wait_time = character_data.damage_delay
 		damage_timer.one_shot = true
 		damage_timer.timeout.connect(_on_damage_timer_timeout)
 
 	if invulnerability_timer:
-		invulnerability_timer.wait_time = enemy_data.invulnerability_after_damage
+		invulnerability_timer.wait_time = character_data.invulnerability_after_damage
 		invulnerability_timer.one_shot = true
 		invulnerability_timer.timeout.connect(_on_invulnerability_timer_timeout)
 
@@ -168,14 +168,14 @@ func init_timers() -> void:
 
 func start_patrol_behavior() -> void:
 	if not player_in_detection_zone and current_state != State.DEATH and current_state != State.ATTACKING and current_state != State.JUMPING:
-		var random_time = randf_range(enemy_data.patrol_state_min_time, enemy_data.patrol_state_max_time)
+		var random_time = randf_range(character_data.patrol_state_min_time, character_data.patrol_state_max_time)
 		between_states_timer.wait_time = random_time
 		between_states_timer.start()
 
 func update_chase_direction() -> void:
 	if player_in_detection_zone and target_player and is_instance_valid(target_player):
 		var x_difference = target_player.global_position.x - global_position.x
-		if abs(x_difference) < enemy_data.position_tolerance:
+		if abs(x_difference) < character_data.position_tolerance:
 			chase_direction = 0
 		else:
 			chase_direction = sign(x_difference)
@@ -203,7 +203,7 @@ func change_state(new_state: State) -> void:
 				start_patrol_behavior()
 		State.JUMPING:
 			if is_on_floor() and not has_jumped:
-				velocity.y = enemy_data.jump_velocity * 0.8
+				velocity.y = character_data.jump_velocity * 0.8
 				has_jumped = true
 		State.CHASING:
 			between_states_timer.stop()
@@ -242,9 +242,9 @@ func handle_state_transitions() -> void:
 	if player_in_detection_zone and target_player and is_instance_valid(target_player) and can_see_player:
 		var y_difference = global_position.y - target_player.global_position.y
 		
-		if y_difference > 0 and y_difference < abs(enemy_data.jump_velocity) * 0.8 and is_on_floor() and chase_direction != 0:
+		if y_difference > 0 and y_difference < abs(character_data.jump_velocity) * 0.8 and is_on_floor() and chase_direction != 0:
 			change_state(State.JUMPING)
-		elif y_difference > abs(enemy_data.jump_velocity) * 0.8 or chase_direction == 0:
+		elif y_difference > abs(character_data.jump_velocity) * 0.8 or chase_direction == 0:
 			change_state(State.IDLE)
 		else:
 			change_state(State.CHASING)
@@ -263,18 +263,18 @@ func handle_current_state() -> void:
 		State.WALKING:
 			if is_on_floor() and check_edge_or_wall():
 				movement_direction *= -1
-			velocity.x = movement_direction * enemy_data.speed
+			velocity.x = movement_direction * character_data.speed
 		State.JUMPING:
 			if chase_direction != 0 and can_see_player:
-				velocity.x = chase_direction * enemy_data.speed
+				velocity.x = chase_direction * character_data.speed
 			else:
-				velocity.x = move_toward(velocity.x, 0, enemy_data.speed * 0.1)
+				velocity.x = move_toward(velocity.x, 0, character_data.speed * 0.1)
 		State.CHASING:
 			if chase_direction != 0:
 				if check_edge_or_wall_for_chase(chase_direction):
 					velocity.x = 0
 				else:
-					velocity.x = chase_direction * enemy_data.speed
+					velocity.x = chase_direction * character_data.speed
 					movement_direction = chase_direction
 			else:
 				velocity.x = 0
@@ -322,7 +322,7 @@ func update_direction() -> void:
 		if chase_direction != 0:
 			movement_direction = chase_direction
 
-	body.scale.x = -movement_direction
+	BODY.scale.x = -movement_direction
 
 func handle_soft_collisions() -> void:
 	if not soft_collision_area:
@@ -360,7 +360,7 @@ func handle_knockback(delta: float) -> void:
 	if knockback_timer > 0:
 		knockback_timer -= delta
 		velocity = knockback_velocity
-		knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, enemy_data.knockback_friction * delta)
+		knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, character_data.knockback_friction * delta)
 
 		if knockback_timer <= 0 or knockback_velocity.length() < 10:
 			knockback_velocity = Vector2.ZERO
@@ -398,17 +398,17 @@ func apply_damage_to_entities() -> void:
 	var damage = 0
 	match count_of_attack:
 		1:
-			damage = enemy_data.attack_1_dmg
+			damage = character_data.attack_1_dmg
 		2:
-			damage = enemy_data.attack_2_dmg
+			damage = character_data.attack_2_dmg
 		3:
-			damage = enemy_data.attack_3_dmg
+			damage = character_data.attack_3_dmg
 
-	var base_knockback_force = enemy_data.knockback_force
+	var base_knockback_force = character_data.knockback_force
 	if count_of_attack == 3:
-		base_knockback_force *= enemy_data.knockback_force_multiplier
+		base_knockback_force *= character_data.knockback_force_multiplier
 
-	var attack_dir = -body.scale.x
+	var attack_dir = -BODY.scale.x
 
 	for entity in overlapping_bodies:
 		if entity == self:
@@ -416,7 +416,7 @@ func apply_damage_to_entities() -> void:
 
 		var knockback_force = Vector2(
 			attack_dir * base_knockback_force,
-			enemy_data.jump_velocity * enemy_data.knockback_vertical_multiplier
+			character_data.jump_velocity * character_data.knockback_vertical_multiplier
 		)
 
 		if entity.has_method("take_damage"):
@@ -445,8 +445,8 @@ func apply_knockback(force: Vector2) -> void:
 	if current_state == State.DEATH or current_state == State.KNOCKBACK:
 		return
 
-	knockback_velocity = Vector2(force.x * enemy_data.knockback_force_horizontal_multiplier, force.y)
-	knockback_timer = enemy_data.knockback_duration
+	knockback_velocity = Vector2(force.x * character_data.knockback_force_horizontal_multiplier, force.y)
+	knockback_timer = character_data.knockback_duration
 
 	change_state(State.KNOCKBACK)
 
@@ -454,7 +454,7 @@ func die() -> void:
 	change_state(State.DEATH)
 
 func get_damage() -> float:
-	return enemy_data.attack_1_dmg
+	return character_data.attack_1_dmg
 
 func handle_animations() -> void:
 	if not animation_player:
@@ -558,9 +558,9 @@ func _on_damage_area_body_entered(entered_body: Node2D) -> void:
 
 		take_damage(damage)
 
-		knockback_velocity = knockback_direction * enemy_data.damage_knockback_force
+		knockback_velocity = knockback_direction * character_data.damage_knockback_force
 		knockback_velocity.y = -abs(knockback_velocity.y * 0.5)
-		knockback_timer = enemy_data.knockback_duration
+		knockback_timer = character_data.knockback_duration
 
 		change_state(State.KNOCKBACK)
 
@@ -591,7 +591,7 @@ func _on_between_states_timer_timeout() -> void:
 		if current_state == State.IDLE:
 			change_state(State.WALKING)
 		elif current_state == State.WALKING:
-			if randf() < enemy_data.patrol_idle_chance:
+			if randf() < character_data.patrol_idle_chance:
 				change_state(State.IDLE)
 			else:
 				if randf() < 0.5:

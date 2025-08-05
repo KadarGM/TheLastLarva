@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://ey8sm6xs8cp3"]
 
-[ext_resource type="PackedScene" uid="uid://cpa2s3ipluc7n" path="res://Assets/scenes/characters/player.tscn" id="1_hjtmn"]
+[ext_resource type="PackedScene" uid="uid://df1dloofeb6le" path="res://Assets/scenes/characters/player.tscn" id="1_hjtmn"]
 [ext_resource type="Script" uid="uid://e35h32y3laer" path="res://Assets/scripts/Enemies.gd" id="3_t7i2e"]
 [ext_resource type="PackedScene" uid="uid://ctqediaidg7t1" path="res://Assets/scenes/characters/enemy.tscn" id="3_ykwck"]
 
@@ -18,7 +18,7 @@ size = Vector2(116.657, 134)
 [node name="Players" type="Node2D" parent="."]
 
 [node name="Player" parent="Players" instance=ExtResource("1_hjtmn")]
-position = Vector2(2158, 690.89)
+position = Vector2(1809, 359)
 scale = Vector2(0.4, 0.4)
 
 [node name="Enemies" type="Node2D" parent="."]

@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_rg07r")
-can_walk = false
+can_walk = true
 can_jump = true
 can_double_jump = true
 can_triple_jump = true

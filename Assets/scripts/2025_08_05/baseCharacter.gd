@@ -133,13 +133,23 @@ func _physics_process(delta: float) -> void:
 		return
 	
 	handle_gravity(delta)
-	handle_state_transitions()
-	handle_current_state(delta)
+	handle_movement(delta)
+	handle_actions()
+	handle_state_physics()
 	handle_animations()
 	physics_process_character(delta)
 	move_and_slide()
 
 func physics_process_character(_delta: float) -> void:
+	pass
+
+func handle_movement(_delta: float) -> void:
+	pass
+
+func handle_actions() -> void:
+	pass
+
+func handle_state_physics() -> void:
 	pass
 
 func setup_raycasts() -> void:
@@ -257,12 +267,6 @@ func enter_state(state: State) -> void:
 			velocity.x = 0
 			death_animation_played = false
 
-func handle_state_transitions() -> void:
-	pass
-
-func handle_current_state(_delta: float) -> void:
-	pass
-
 func handle_gravity(delta: float) -> void:
 	if not is_on_floor():
 		if current_state == State.WALL_SLIDING and capabilities.can_wall_slide:
@@ -357,6 +361,38 @@ func perform_attack() -> void:
 		hide_weapon_timer.start()
 	if attack_cooldown_timer:
 		attack_cooldown_timer.start()
+
+func perform_dash(direction: float) -> void:
+	if not can_dash or not capabilities.can_dash:
+		return
+	
+	if stamina_current < character_data.dash_stamina_cost:
+		return
+	
+	velocity.x = direction * character_data.dash_speed
+	velocity.y = 0
+	can_dash = false
+	stamina_current -= character_data.dash_stamina_cost
+	stamina_regen_timer = character_data.stamina_regen_delay
+	
+	dash_timer.wait_time = character_data.dash_duration
+	dash_timer.start()
+	dash_cooldown_timer.start()
+	change_state(State.DASHING)
+
+func perform_wall_jump() -> void:
+	var wall_direction = get_wall_jump_direction()
+	velocity.y = character_data.jump_velocity * 0.3
+	velocity.x = wall_direction * character_data.wall_jump_force * character_data.wall_jump_away_multiplier
+	change_state(State.WALL_JUMPING)
+	can_wall_jump = false
+
+func get_wall_jump_direction() -> float:
+	if left_wall_ray.is_colliding():
+		return 1.0
+	elif right_wall_ray.is_colliding():
+		return -1.0
+	return 0.0
 
 func take_damage(amount: int) -> void:
 	if current_state == State.DEATH:
@@ -510,6 +546,37 @@ func apply_damage_to_entities() -> void:
 			entity.take_damage(damage)
 		if entity.has_method("apply_knockback"):
 			entity.apply_knockback(knockback_force)
+
+func check_floor_state() -> void:
+	if is_on_floor():
+		has_wall_jumped = false
+		can_wall_jump = true
+		was_on_wall = false
+		
+		if abs(velocity.x) > 10:
+			change_state(State.WALKING)
+		else:
+			change_state(State.IDLE)
+	else:
+		check_wall_state()
+
+func check_wall_state() -> void:
+	var left = left_wall_ray.is_colliding()
+	var right = right_wall_ray.is_colliding()
+	var is_touching_wall = left or right
+	
+	if is_touching_wall:
+		if not was_on_wall:
+			can_wall_jump = true
+			was_on_wall = true
+	else:
+		was_on_wall = false
+	
+	if is_touching_wall and velocity.y > 0 and capabilities.can_wall_slide:
+		change_state(State.WALL_SLIDING)
+	elif current_state != State.WALL_JUMPING:
+		if current_state != State.DOUBLE_JUMPING and current_state != State.JUMPING and current_state != State.TRIPLE_JUMPING:
+			change_state(State.JUMPING)
 
 func _on_hide_weapon_timer_timeout() -> void:
 	update_weapon_visibility("hide")

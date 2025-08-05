@@ -23,7 +23,7 @@ enum State {
 @export var character_data: CharacterData
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
-@onready var body: Node2D = $Body
+@onready var BODY: Node2D = $Body
 @onready var camera_2d: Camera2D = $Camera2D
 
 @onready var big_attack_area: Area2D = $Areas/BigAttackArea
@@ -163,11 +163,11 @@ func handle_flipping() -> void:
 	
 	if current_state == State.WALL_SLIDING:
 		if left_wall_ray.is_colliding():
-			body.scale.x = 1
+			BODY.scale.x = 1
 		elif right_wall_ray.is_colliding():
-			body.scale.x = -1
+			BODY.scale.x = -1
 	elif input_direction != 0 and current_state != State.DASH_ATTACK:
-		body.scale.x = -sign(input_direction)
+		BODY.scale.x = -sign(input_direction)
 
 func setup_raycasts() -> void:
 	ground_check_ray.target_position = Vector2(0, character_data.ground_check_ray_length)
@@ -863,7 +863,7 @@ func check_stun_on_landing() -> void:
 	big_attack_pending = false
 
 func get_attack_direction() -> float:
-	return -body.scale.x
+	return -BODY.scale.x
 
 func get_wall_jump_direction() -> float:
 	if left_wall_ray.is_colliding():

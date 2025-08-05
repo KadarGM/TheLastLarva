@@ -1,7 +1,7 @@
 @tool
 extends Node2D
 
-@export var character: BaseCharacter
+@export var character: CharacterBody2D
 
 @onready var body: Sprite2D = $"../Body/body"
 @onready var sword_body: Sprite2D = $"../Body/body/swordBody"
@@ -32,82 +32,49 @@ extends Node2D
 
 func _process(_delta: float) -> void:
 	if Engine.is_editor_hint():
-		if character and character.character_data and character.character_data.body:
-			_set_sprites()
-			_set_colors()
+		if character and character.character_data:
+			_set_sprites(character.character_data)
+			_set_colors(character.character_data)
+			pass
+		else:
+			return
 
-func _set_sprites() -> void:
-	var data = character.character_data
-	
-	if body:
+func _set_sprites(data) -> void:
+	if data.body:
 		body.texture = data.body
-	if sword_body:
 		sword_body.texture = data.sword
-	if sword_body_2:
 		sword_body_2.texture = data.sword
-	if leg_f:
 		leg_f.texture = data.leg
-	if feet_f:
 		feet_f.texture = data.feet
-	if leg_b:
 		leg_b.texture = data.leg
-	if feet_b:
 		feet_b.texture = data.feet
-	if arm_f_1:
 		arm_f_1.texture = data.arm
-	if hand_f_1:
 		hand_f_1.texture = data.hand
-	if sword_f:
 		sword_f.texture = data.sword
-	if arm_b_1:
 		arm_b_1.texture = data.arm
-	if hand_b_1:
 		hand_b_1.texture = data.hand
-	if sword_b:
 		sword_b.texture = data.sword
-	if arm_f_2:
 		arm_f_2.texture = data.arm
-	if hand_f_2:
 		hand_f_2.texture = data.hand
-	if arm_b_2:
 		arm_b_2.texture = data.arm
-	if hand_b_2:
 		hand_b_2.texture = data.hand
-	if head:
 		head.texture = data.head
-	if eye_b:
 		eye_b.texture = data.eye_b
-	if eye_f:
 		eye_f.texture = data.eye_f
-	if feller_b_1:
 		feller_b_1.texture = data.feller_1
-	if feller_b_2:
 		feller_b_2.texture = data.feller_2
-	if feller_f_1:
 		feller_f_1.texture = data.feller_1
-	if feller_f_2:
 		feller_f_2.texture = data.feller_2
-	if mandible_b:
 		mandible_b.texture = data.mandible_b
-	if mandible_f:
 		mandible_f.texture = data.mandible_f
 
-func _set_colors() -> void:
-	var data = character.character_data
-	
-	if body:
+func _set_colors(data) -> void:
+	if data.body:
 		body.self_modulate = data.body_color
-	if head:
 		head.self_modulate = data.head_color
-	if mandible_f:
 		mandible_f.self_modulate = data.mandibles_color
-	if mandible_b:
 		mandible_b.self_modulate = data.mandibles_color
-	if sword_body:
 		sword_body.self_modulate = data.weapon_color
-	if sword_body_2:
 		sword_body_2.self_modulate = data.weapon_color
-	if sword_f:
 		sword_f.self_modulate = data.weapon_color
-	if sword_b:
 		sword_b.self_modulate = data.weapon_color

@@ -1,45 +1,45 @@
 [gd_resource type="Resource" script_class="CharacterData" load_steps=15 format=3 uid="uid://cxlupfbjhfrqm"]
 
-[ext_resource type="Texture2D" uid="uid://epvqp0q6ebxg" path="res://Assets/graphics/characters/larva/arm.svg" id="1_b3vob"]
-[ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://Assets/graphics/characters/larva/torso.svg" id="2_qdjgy"]
-[ext_resource type="Texture2D" uid="uid://c86kchkmsvmjy" path="res://Assets/graphics/characters/larva/eye_b.svg" id="3_0fbua"]
-[ext_resource type="Texture2D" uid="uid://bcohmtdweh0ao" path="res://Assets/graphics/characters/larva/eye_f.svg" id="4_ua41b"]
-[ext_resource type="Texture2D" uid="uid://d3eaaehk4puky" path="res://Assets/graphics/characters/larva/leg_1.svg" id="5_o40h6"]
-[ext_resource type="Texture2D" uid="uid://cx6w80sv5d8qa" path="res://Assets/graphics/characters/larva/feller_1.svg" id="6_losm7"]
-[ext_resource type="Texture2D" uid="uid://bq7i44lxwmqty" path="res://Assets/graphics/characters/larva/feller_2.svg" id="7_gwbvb"]
-[ext_resource type="Texture2D" uid="uid://d34v4pbbsrmmi" path="res://Assets/graphics/characters/larva/arm_1.svg" id="8_apa2f"]
-[ext_resource type="Texture2D" uid="uid://dno0jklef2fv4" path="res://Assets/graphics/characters/larva/head.svg" id="9_oawh3"]
-[ext_resource type="Texture2D" uid="uid://bmae8nmkwyayq" path="res://Assets/graphics/characters/larva/leg.svg" id="10_g7fwo"]
-[ext_resource type="Texture2D" uid="uid://b5rk0f08kkqjn" path="res://Assets/graphics/characters/larva/mandible_b.svg" id="11_3360t"]
-[ext_resource type="Texture2D" uid="uid://bygtb821ge70j" path="res://Assets/graphics/characters/larva/mandible_f.svg" id="12_ywegr"]
-[ext_resource type="Script" uid="uid://blttbfe55ei7" path="res://Assets/scripts/characterData.gd" id="13_k8neb"]
-[ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://Assets/graphics/characters/larva/sword.svg" id="14_p72fl"]
+[ext_resource type="Texture2D" uid="uid://epvqp0q6ebxg" path="res://Assets/graphics/characters/larva/arm.svg" id="1_ucgas"]
+[ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://Assets/graphics/characters/larva/torso.svg" id="2_jbh3h"]
+[ext_resource type="Texture2D" uid="uid://c86kchkmsvmjy" path="res://Assets/graphics/characters/larva/eye_b.svg" id="3_lhb8j"]
+[ext_resource type="Texture2D" uid="uid://bcohmtdweh0ao" path="res://Assets/graphics/characters/larva/eye_f.svg" id="4_vlu5n"]
+[ext_resource type="Texture2D" uid="uid://d3eaaehk4puky" path="res://Assets/graphics/characters/larva/leg_1.svg" id="5_pjqtc"]
+[ext_resource type="Texture2D" uid="uid://cx6w80sv5d8qa" path="res://Assets/graphics/characters/larva/feller_1.svg" id="6_afl1s"]
+[ext_resource type="Texture2D" uid="uid://bq7i44lxwmqty" path="res://Assets/graphics/characters/larva/feller_2.svg" id="7_whwn1"]
+[ext_resource type="Texture2D" uid="uid://d34v4pbbsrmmi" path="res://Assets/graphics/characters/larva/arm_1.svg" id="8_cyd24"]
+[ext_resource type="Texture2D" uid="uid://dno0jklef2fv4" path="res://Assets/graphics/characters/larva/head.svg" id="9_n1juh"]
+[ext_resource type="Texture2D" uid="uid://bmae8nmkwyayq" path="res://Assets/graphics/characters/larva/leg.svg" id="10_g3v1o"]
+[ext_resource type="Texture2D" uid="uid://b5rk0f08kkqjn" path="res://Assets/graphics/characters/larva/mandible_b.svg" id="11_10k03"]
+[ext_resource type="Texture2D" uid="uid://bygtb821ge70j" path="res://Assets/graphics/characters/larva/mandible_f.svg" id="12_8vqi2"]
+[ext_resource type="Script" uid="uid://blttbfe55ei7" path="res://Assets/scripts/characterData.gd" id="13_vha7q"]
+[ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://Assets/graphics/characters/larva/sword.svg" id="14_7pd0p"]
 
 [resource]
-script = ExtResource("13_k8neb")
-body = ExtResource("2_qdjgy")
-sword = ExtResource("14_p72fl")
-leg = ExtResource("10_g7fwo")
-feet = ExtResource("5_o40h6")
-arm = ExtResource("1_b3vob")
-hand = ExtResource("8_apa2f")
-head = ExtResource("9_oawh3")
-eye_b = ExtResource("3_0fbua")
-eye_f = ExtResource("4_ua41b")
-feller_1 = ExtResource("6_losm7")
-feller_2 = ExtResource("7_gwbvb")
-mandible_f = ExtResource("12_ywegr")
-mandible_b = ExtResource("11_3360t")
+script = ExtResource("13_vha7q")
+body = ExtResource("2_jbh3h")
+sword = ExtResource("14_7pd0p")
+leg = ExtResource("10_g3v1o")
+feet = ExtResource("5_pjqtc")
+arm = ExtResource("1_ucgas")
+hand = ExtResource("8_cyd24")
+head = ExtResource("9_n1juh")
+eye_b = ExtResource("3_lhb8j")
+eye_f = ExtResource("4_vlu5n")
+feller_1 = ExtResource("6_afl1s")
+feller_2 = ExtResource("7_whwn1")
+mandible_f = ExtResource("12_8vqi2")
+mandible_b = ExtResource("11_10k03")
 body_color = Color(0.863997, 0.762666, 0.68544, 1)
 head_color = Color(0.634826, 0.541009, 0.470594, 1)
 mandibles_color = Color(0.843151, 0.730404, 0.644235, 1)
 weapon_color = Color(0.74327, 0.87, 0.4698, 1)
 health_max = 100
-stamina_max = 500.0
-stamina_regen_rate = 50.0
+stamina_max = 1000.0
+stamina_regen_rate = 100.0
 stamina_regen_delay = 1.0
-speed = 400.0
-jump_velocity = -300.0
+speed = 500.0
+jump_velocity = -450.0
 jump_release_multiplier = 0.3
 air_movement_friction = 0.1
 big_attack_air_friction = 0.1

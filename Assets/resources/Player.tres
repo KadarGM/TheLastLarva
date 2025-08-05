@@ -108,5 +108,6 @@ near_ground_ray_length = 100.0
 ceiling_ray_length = 200.0
 patrol_state_min_time = 1.0
 patrol_state_max_time = 4.0
+patrol_idle_chance = 0.3
 detection_range = 600.0
 position_tolerance = 50.0
