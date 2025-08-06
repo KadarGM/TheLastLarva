@@ -21,6 +21,27 @@ enum State {
 	DEATH,
 	CHASING
 }
+@export_group("Options")
+@export_subgroup("Movement Options")
+@export var can_walk: bool = true
+@export var can_jump: bool = true
+@export var can_double_jump: bool = false
+@export var can_triple_jump: bool = false
+@export var can_wall_jump: bool = false
+var can_charge_big_jump: bool = false
+@export var can_big_jump: bool = false
+@export var can_wall_slide: bool = false
+@export var can_dash: bool = false
+
+@export_subgroup("Combat Options")
+@export var can_attack: bool = true
+@export var can_air_attack: bool = false
+@export var can_big_attack: bool = false
+@export var can_dash_attack: bool = false
+
+@export_subgroup("AI Options")
+@export var can_chase: bool = false
+@export var can_patrol: bool = false
 
 @export_group("Sprites")
 @export var body: Texture2D

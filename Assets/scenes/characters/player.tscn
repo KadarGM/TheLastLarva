@@ -1,7 +1,8 @@
-[gd_scene load_steps=44 format=3 uid="uid://df1dloofeb6le"]
+[gd_scene load_steps=45 format=3 uid="uid://df1dloofeb6le"]
 
 [ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://Assets/scripts/playerManager.gd" id="1_t8iac"]
 [ext_resource type="Script" uid="uid://dcts54drik3ds" path="res://Assets/scripts/characterVisualizer.gd" id="2_25l4c"]
+[ext_resource type="Resource" uid="uid://d125kkggxi83n" path="res://Assets/resources/Player.tres" id="2_x3ddt"]
 [ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://Assets/graphics/characters/larva/torso.svg" id="4_m4tvu"]
 [ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://Assets/graphics/characters/larva/sword.svg" id="5_fveyi"]
 [ext_resource type="Texture2D" uid="uid://bmae8nmkwyayq" path="res://Assets/graphics/characters/larva/leg.svg" id="6_ylwl8"]
@@ -6087,6 +6088,7 @@ height = 483.582
 z_index = -100
 collision_layer = 2
 script = ExtResource("1_t8iac")
+character_data = ExtResource("2_x3ddt")
 metadata/_edit_horizontal_guides_ = [69.6705]
 metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
 

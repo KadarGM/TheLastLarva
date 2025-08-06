@@ -17,6 +17,21 @@
 
 [resource]
 script = ExtResource("13_vha7q")
+can_walk = true
+can_jump = true
+can_double_jump = false
+can_triple_jump = false
+can_wall_jump = false
+can_wall_slide = false
+can_dash = false
+can_big_jump = false
+can_attack = true
+can_air_attack = false
+can_combo_attack = false
+can_big_attack = false
+can_dash_attack = false
+can_chase = false
+can_patrol = false
 body = ExtResource("2_jbh3h")
 sword = ExtResource("14_7pd0p")
 leg = ExtResource("10_g3v1o")

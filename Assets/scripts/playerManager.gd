@@ -264,6 +264,8 @@ func change_state(new_state) -> void:
 			dash_attack_damaged_entities.clear()
 			big_jump_charged = false
 		character_data.State.BIG_ATTACK:
+			if not character_data.can_big_attack:
+				return
 			invulnerability = true
 			print("character_data.State invulnerability activated - BIG_ATTACK")
 			big_attack_pending = true
@@ -386,6 +388,8 @@ func handle_current_state(delta) -> void:
 					perform_attack()
 
 func handle_ground_movement(input_direction: float) -> void:
+	if not character_data.can_walk:
+		return
 	if input_direction:
 		velocity.x = input_direction * character_data.speed
 		if current_state == character_data.State.CHARGING_JUMP:
@@ -394,6 +398,8 @@ func handle_ground_movement(input_direction: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, character_data.speed)
 
 func handle_air_movement(input_direction: float) -> void:
+	if not character_data.can_walk:
+		return
 	if current_state == character_data.State.BIG_ATTACK or current_state == character_data.State.BIG_ATTACK_LANDING:
 		velocity.x = move_toward(velocity.x, 0, character_data.speed * character_data.big_attack_air_friction)
 		return
@@ -432,13 +438,27 @@ func handle_ground_actions() -> void:
 		attempt_dash()
 	
 	if Input.is_action_just_pressed("L_attack"):
+		if not character_data.can_attack:
+			return
 		if stamina_current >= character_data.attack_stamina_cost:
 			var old_stamina = stamina_current
 			stamina_current -= character_data.attack_stamina_cost
 			stamina_regen_timer = character_data.stamina_regen_delay
 			print("Attack stamina cost - Stamina: ", old_stamina, " -> ", stamina_current)
 			perform_attack()
-	
+
+	if not character_data.can_big_jump and not character_data.can_dash_attack:
+		character_data.can_charge_big_jump = false
+	elif character_data.can_big_jump and not character_data.can_dash_attack:
+		character_data.can_charge_big_jump = true
+	elif not character_data.can_big_jump and character_data.can_dash_attack:
+		character_data.can_charge_big_jump = true
+	elif character_data.can_big_jump and character_data.can_dash_attack:
+		character_data.can_charge_big_jump = true
+
+	if not character_data.can_charge_big_jump:
+		return
+
 	if Input.is_action_pressed("J_dash") and velocity.x == 0 and can_big_jump:
 		start_big_jump_charge()
 
@@ -474,6 +494,8 @@ func handle_air_actions() -> void:
 		attempt_dash()
 	
 	if Input.is_action_just_pressed("L_attack"):
+		if not character_data.can_attack or not character_data.can_air_attack:
+			return
 		if stamina_current >= character_data.attack_stamina_cost:
 			var old_stamina = stamina_current
 			stamina_current -= character_data.attack_stamina_cost
@@ -482,6 +504,8 @@ func handle_air_actions() -> void:
 			perform_attack()
 	
 	if Input.is_action_just_pressed("S_charge_jump"):
+		if not character_data.can_big_attack:
+			return
 		var ground = ground_check_ray.is_colliding() or ground_check_ray_2.is_colliding() or ground_check_ray_3.is_colliding()
 		if stamina_current >= character_data.big_attack_stamina_cost:
 			var old_stamina = stamina_current
@@ -495,6 +519,8 @@ func handle_wall_actions(delta) -> void:
 	var input_direction = Input.get_axis("A_left", "D_right")
 	
 	if Input.is_action_just_pressed("W_jump") and can_wall_jump:
+		if not character_data.can_wall_jump:
+			return
 		perform_wall_jump()
 		return
 	
@@ -510,6 +536,8 @@ func handle_wall_actions(delta) -> void:
 			return
 	
 	if input_direction != 0 and can_wall_jump:
+		if not character_data.can_wall_jump:
+				return
 		var wall_direction = get_wall_jump_direction()
 		if (input_direction > 0 and wall_direction > 0) or (input_direction < 0 and wall_direction < 0):
 			perform_wall_jump_away()
@@ -519,14 +547,18 @@ func handle_wall_actions(delta) -> void:
 		big_jump_charged = false
 	
 	if Input.is_action_pressed("J_dash") and velocity.y < gravity * delta and can_big_jump:
+		
 		if Input.is_action_just_pressed("S_charge_jump"):
 			cancel_big_jump_charge()
 		else:
+			
 			start_big_jump_charge()
 	else:
 		cancel_big_jump_charge()
 	
 	if Input.is_action_just_pressed("J_dash"):
+		if not character_data.can_dash:
+				return
 		attempt_dash()
 
 func handle_attack_movement() -> void:
@@ -585,7 +617,10 @@ func handle_gravity(delta: float) -> void:
 		if current_state == character_data.State.WALL_SLIDING and (is_wall_hanging_left() or is_wall_hanging_right()):
 			return
 		elif current_state == character_data.State.WALL_SLIDING:
+			
 			if Input.is_action_pressed("S_charge_jump"):
+				if not character_data.can_wall_slide:
+					return
 				velocity.y += gravity * delta * character_data.wall_slide_gravity_multiplier
 			elif  Input.is_action_just_released("S_charge_jump"):
 				velocity.y = gravity * delta / character_data.wall_slide_initial_velocity_divisor
@@ -664,11 +699,15 @@ func handle_stamina_regeneration(delta: float) -> void:
 	stamina_current = min(stamina_current, character_data.stamina_max)
 
 func perform_jump() -> void:
+	if not character_data.can_jump:
+		return
 	velocity.y = character_data.jump_velocity
 	is_jump_held = true
 	change_state(character_data.State.JUMPING)
 
 func perform_double_jump() -> void:
+	if not character_data.can_double_jump:
+		return
 	velocity.y = character_data.jump_velocity * character_data.double_jump_multiplier
 	can_double_jump = false
 	is_double_jump_held = true
@@ -678,6 +717,8 @@ func perform_double_jump() -> void:
 	animation_player.queue("Jump")
 
 func perform_triple_jump() -> void:
+	if not character_data.can_triple_jump:
+		return
 	if stamina_current >= character_data.triple_jump_stamina_cost:
 		var old_stamina = stamina_current
 		stamina_current -= character_data.triple_jump_stamina_cost
@@ -693,6 +734,8 @@ func perform_triple_jump() -> void:
 		animation_player.queue("Jump")
 
 func perform_wall_jump() -> void:
+	if not character_data.can_wall_jump:
+		return
 	var wall_direction = get_wall_jump_direction()
 	velocity.y = character_data.jump_velocity * 0.3
 	velocity.x = wall_direction * character_data.wall_jump_force * character_data.wall_jump_away_multiplier
@@ -701,6 +744,8 @@ func perform_wall_jump() -> void:
 	can_wall_jump = false
 
 func perform_wall_jump_away() -> void:
+	if not character_data.can_wall_jump:
+		return
 	var wall_direction = get_wall_jump_direction()
 	velocity.y = 0
 	velocity.x = wall_direction * character_data.wall_jump_force * character_data.wall_jump_away_multiplier
@@ -709,6 +754,8 @@ func perform_wall_jump_away() -> void:
 	can_wall_jump = false
 
 func attempt_dash() -> void:
+	if not character_data.can_dash:
+		return
 	if not can_dash:
 		return
 	
@@ -738,6 +785,8 @@ func attempt_dash() -> void:
 	change_state(character_data.State.DASHING)
 
 func perform_dash_attack() -> void:
+	if not character_data.can_dash_attack or not character_data.can_attack:
+		return
 	var attack_dir = get_attack_direction()
 	dash_attack_direction = Vector2(attack_dir, 0)
 	
@@ -769,6 +818,8 @@ func end_dash_attack() -> void:
 	change_state(character_data.State.JUMPING)
 
 func perform_attack() -> void:
+	if not character_data.can_attack:
+		return
 	if not before_attack_timer.is_stopped():
 		return
 	
@@ -791,6 +842,7 @@ func perform_attack() -> void:
 	before_attack_timer.start()
 
 func start_big_jump_charge() -> void:
+	print("START CHARGING")
 	if big_jump_charged or big_jump_timer.time_left > 0 or not can_big_jump:
 		return
 	can_big_jump = false
@@ -803,6 +855,8 @@ func cancel_big_jump_charge() -> void:
 		big_jump_charged = false
 
 func perform_directional_big_jump(direction: Vector2) -> void:
+	if not character_data.can_big_jump:
+		return
 	big_jump_charged = false
 	big_jump_direction = direction
 	change_state(character_data.State.BIG_JUMPING)
@@ -1031,6 +1085,8 @@ func handle_animations() -> void:
 		character_data.State.BIG_JUMPING:
 			animation_player.play("Dash")
 		character_data.State.BIG_ATTACK:
+			if not character_data.can_big_attack:
+				return
 			if is_high_big_attack and animation_player.current_animation != "Big_attack":
 				animation_player.play("Big_attack_prepare")
 				update_weapon_visibility("both")
@@ -1038,7 +1094,7 @@ func handle_animations() -> void:
 			if animation_player.current_animation != "Big_attack_landing":
 				animation_player.play("Big_attack_landing")
 		character_data.State.WALL_SLIDING:
-			if (big_jump_timer.time_left > 0) or (big_jump_charged and Input.is_action_pressed("J_dash")):
+			if Input.is_action_pressed("J_dash"):
 				animation_player.play("Big_jump_wall_charge")
 			else:
 				animation_player.play("Sliding_wall")
