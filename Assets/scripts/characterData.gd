@@ -21,6 +21,7 @@ enum State {
 	DEATH,
 	CHASING
 }
+
 @export_group("Options")
 @export_subgroup("Movement Options")
 @export var can_walk: bool = true
@@ -28,8 +29,8 @@ enum State {
 @export var can_double_jump: bool = false
 @export var can_triple_jump: bool = false
 @export var can_wall_jump: bool = false
-var can_charge_big_jump: bool = false
 @export var can_big_jump: bool = false
+@export var can_wall_big_jump: bool = false
 @export var can_wall_slide: bool = false
 @export var can_dash: bool = false
 
@@ -38,6 +39,13 @@ var can_charge_big_jump: bool = false
 @export var can_air_attack: bool = false
 @export var can_big_attack: bool = false
 @export var can_dash_attack: bool = false
+
+@export_subgroup("Damage Physics Options")
+@export var invulnerability: bool = false
+@export var can_take_damage: bool = true
+@export var can_get_damage: bool = true
+@export var can_take_knockback: bool = true
+@export var can_get_knockback: bool = true
 
 @export_subgroup("AI Options")
 @export var can_chase: bool = false
