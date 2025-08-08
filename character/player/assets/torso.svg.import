@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bi87eyepnqq63"
-path="res://.godot/imported/icon.svg-62fb85dd4c00ba1e4651494355fcb2c0.ctex"
+uid="uid://bd7ao8oa4baxx"
+path="res://.godot/imported/torso.svg-075da2771510bd5cc66ac1597864bfd7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/graphics/icons/icon.svg"
-dest_files=["res://.godot/imported/icon.svg-62fb85dd4c00ba1e4651494355fcb2c0.ctex"]
+source_file="res://character/player/assets/torso.svg"
+dest_files=["res://.godot/imported/torso.svg-075da2771510bd5cc66ac1597864bfd7.ctex"]
 
 [params]
 

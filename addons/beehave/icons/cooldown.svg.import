@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bi87eyepnqq63"
-path="res://.godot/imported/icon.svg-62fb85dd4c00ba1e4651494355fcb2c0.ctex"
+uid="uid://b3s1hnwqfdygg"
+path="res://.godot/imported/cooldown.svg-2fb8975b5974e35bedad825abb9faf66.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/graphics/icons/icon.svg"
-dest_files=["res://.godot/imported/icon.svg-62fb85dd4c00ba1e4651494355fcb2c0.ctex"]
+source_file="res://addons/beehave/icons/cooldown.svg"
+dest_files=["res://.godot/imported/cooldown.svg-2fb8975b5974e35bedad825abb9faf66.ctex"]
 
 [params]
 

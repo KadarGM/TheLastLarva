@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bi87eyepnqq63"
-path="res://.godot/imported/icon.svg-62fb85dd4c00ba1e4651494355fcb2c0.ctex"
+uid="uid://c86kchkmsvmjy"
+path="res://.godot/imported/eye_b.svg-829e27c58060777b63413e3a4ac281f7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/graphics/icons/icon.svg"
-dest_files=["res://.godot/imported/icon.svg-62fb85dd4c00ba1e4651494355fcb2c0.ctex"]
+source_file="res://character/player/assets/eye_b.svg"
+dest_files=["res://.godot/imported/eye_b.svg-829e27c58060777b63413e3a4ac281f7.ctex"]
 
 [params]
 

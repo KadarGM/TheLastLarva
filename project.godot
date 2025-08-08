@@ -11,13 +11,15 @@ config_version=5
 [application]
 
 config/name="TheLastLarva"
-run/main_scene="res://Assets/scenes/main.tscn"
+run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
-config/icon="res://Assets/graphics/icons/icon.svg"
+config/icon="res://assets/graphics/icons/icon.svg"
 
 [autoload]
 
-CharacterGlobalManager="*res://Assets/scripts/characterGlobalManager.gd"
+CharacterGlobalManager="*res://character/base/characterGlobalManager.gd"
+BeehaveGlobalMetrics="*res://addons/beehave/metrics/beehave_global_metrics.gd"
+BeehaveGlobalDebugger="*res://addons/beehave/debug/global_debugger.gd"
 
 [display]
 
@@ -25,7 +27,7 @@ window/stretch/mode="viewport"
 
 [editor_plugins]
 
-enabled=PackedStringArray()
+enabled=PackedStringArray("res://addons/beehave/plugin.cfg")
 
 [global_group]
 
