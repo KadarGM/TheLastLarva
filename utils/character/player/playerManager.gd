@@ -215,7 +215,6 @@ func enter_new_state(new_state) -> void:
 		character_data.State.WALL_JUMPING:
 			wall_jump_control_timer.start()
 			has_wall_jumped = true
-			jump_controller.on_wall_jump()
 		character_data.State.WALL_SLIDING:
 			jump_controller.on_wall_jump()
 			can_wall_jump = true
@@ -267,6 +266,7 @@ func enter_new_state(new_state) -> void:
 			velocity.x = 0
 			death_animation_played = false
 			print("Character DEATH - Final health: ", health_current)
+
 
 func update_state_transitions() -> void:
 	if current_state == character_data.State.STUNNED or current_state == character_data.State.ATTACKING or current_state == character_data.State.KNOCKBACK or current_state == character_data.State.DEATH:
@@ -349,8 +349,6 @@ func process_current_state(delta) -> void:
 			process_wall_slide(delta)
 		character_data.State.WALL_JUMPING:
 			if wall_jump_control_timer.is_stopped():
-				jump_controller.has_double_jump = true
-				jump_controller.has_triple_jump = true
 				process_air_movement(input_direction)
 			process_air_input()
 		character_data.State.DASHING:
@@ -666,6 +664,9 @@ func execute_wall_jump() -> void:
 	velocity.y = character_data.jump_velocity * 0.3
 	velocity.x = wall_direction * character_data.wall_jump_force * character_data.wall_jump_away_multiplier
 	reset_air_time()
+	jump_controller.jump_count = 1
+	jump_controller.has_double_jump = true
+	jump_controller.has_triple_jump = false
 	state_machine.transition_to(character_data.State.WALL_JUMPING)
 	can_wall_jump = false
 
@@ -674,6 +675,9 @@ func execute_wall_jump_away() -> void:
 	velocity.y = 0
 	velocity.x = wall_direction * character_data.wall_jump_force * character_data.wall_jump_away_multiplier
 	reset_air_time()
+	jump_controller.jump_count = 1
+	jump_controller.has_double_jump = true
+	jump_controller.has_triple_jump = false
 	state_machine.transition_to(character_data.State.WALL_JUMPING)
 	can_wall_jump = false
 
@@ -901,7 +905,7 @@ func perform_air_attack() -> void:
 		execute_attack()
 
 func perform_air_jump() -> void:
-	if state_machine.current_state != CharacterData.State.WALL_JUMPING and state_machine.current_state != CharacterData.State.ATTACKING:
+	if state_machine.current_state != CharacterData.State.ATTACKING:
 		if jump_controller.has_double_jump and jump_controller.jump_count == 1:
 			execute_double_jump()
 		elif jump_controller.has_triple_jump and jump_controller.jump_count == 2:

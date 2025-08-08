@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://utils/character/player/playerManager.gd" id="1_b2kln"]
 [ext_resource type="Resource" uid="uid://d125kkggxi83n" path="res://utils/character/player/Player.tres" id="2_we0b7"]
-[ext_resource type="Script" uid="uid://blvqjroan8kap" path="res://utils/character/player/bodyController.gd" id="3_wobrw"]
+[ext_resource type="Script" uid="uid://blvqjroan8kap" path="res://utils/character/controllers/bodyController.gd" id="3_wobrw"]
 [ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://utils/character/player/assets/torso.svg" id="4_eyb6c"]
 [ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://utils/character/player/assets/sword.svg" id="5_221hk"]
 [ext_resource type="Texture2D" uid="uid://bmae8nmkwyayq" path="res://utils/character/player/assets/leg.svg" id="6_ghoj8"]
@@ -16,11 +16,11 @@
 [ext_resource type="Texture2D" uid="uid://bq7i44lxwmqty" path="res://utils/character/player/assets/feller_2.svg" id="14_bwdx1"]
 [ext_resource type="Texture2D" uid="uid://b5rk0f08kkqjn" path="res://utils/character/player/assets/mandible_b.svg" id="15_vewsg"]
 [ext_resource type="Texture2D" uid="uid://bygtb821ge70j" path="res://utils/character/player/assets/mandible_f.svg" id="16_2soq1"]
-[ext_resource type="Script" uid="uid://bn7n06imbkeei" path="res://utils/character/abilities/jumpController.gd" id="17_i6sc0"]
-[ext_resource type="Script" uid="uid://du76mpiul5ejs" path="res://utils/character/player/timersController.gd" id="17_qg1ig"]
+[ext_resource type="Script" uid="uid://bn7n06imbkeei" path="res://utils/character/controllers/jumpController.gd" id="17_i6sc0"]
+[ext_resource type="Script" uid="uid://du76mpiul5ejs" path="res://utils/character/controllers/timersController.gd" id="17_qg1ig"]
 [ext_resource type="Script" uid="uid://bdl5dtjiwdwke" path="res://utils/character/base/stateMachine.gd" id="18_i6sc0"]
-[ext_resource type="Script" uid="uid://d23d04rsyp41w" path="res://utils/character/player/areasController.gd" id="18_mpolx"]
-[ext_resource type="Script" uid="uid://ciuxhepgisrjw" path="res://utils/character/player/rayCastsController.gd" id="19_ngkt6"]
+[ext_resource type="Script" uid="uid://d23d04rsyp41w" path="res://utils/character/controllers/areasController.gd" id="18_mpolx"]
+[ext_resource type="Script" uid="uid://ciuxhepgisrjw" path="res://utils/character/controllers/rayCastsController.gd" id="19_ngkt6"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_mol8u"]
 radius = 165.967

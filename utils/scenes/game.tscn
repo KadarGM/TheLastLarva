@@ -94,28 +94,34 @@ rotation = 1.5708
 shape = SubResource("RectangleShape2D_ihnug")
 
 [node name="Polygon2D" type="Polygon2D" parent="Obstacles"]
+visible = false
 antialiased = true
 polygon = PackedVector2Array(751, 147, 885, 147, 886, 479, 1408, 479, 1408, 615, 1132, 615, 1132, 1638, 1222, 1639, 1221, 1773, 1132, 1773, 1132, 1946, 1337, 1948, 1336, 2081, 1132, 2082, 1132, 2286, 1508, 2286, 1508, 2420, 1132, 2420, 1132, 2577, 3127, 2578, 3131, 2713, 285, 2718, 338, 161)
 
 [node name="Polygon2D2" type="Polygon2D" parent="Obstacles"]
+visible = false
 antialiased = true
 polygon = PackedVector2Array(1728, 453, 1863, 453, 1863, 2355, 1727, 2354)
 
 [node name="Polygon2D3" type="Polygon2D" parent="Obstacles"]
+visible = false
 antialiased = true
 polygon = PackedVector2Array(2097, 731, 2238, 730, 2240, 632, 2377, 632, 2375, 730, 3251, 730, 3253, 863, 2097, 865)
 
 [node name="Polygon2D4" type="Polygon2D" parent="Obstacles"]
+visible = false
 antialiased = true
 polygon = PackedVector2Array(2296, 995, 3450, 996, 3451, 1135, 2292, 1136)
 
 [node name="Polygon2D5" type="Polygon2D" parent="Obstacles"]
+visible = false
 position = Vector2(2288, 1414)
 offset = Vector2(-2422, -1106)
 antialiased = true
 polygon = PackedVector2Array(2296, 995, 3451, 996, 3451, 1135, 2292, 1136)
 
 [node name="Polygon2D6" type="Polygon2D" parent="Obstacles"]
+visible = false
 position = Vector2(2171, 1706)
 offset = Vector2(-2422, -1106)
 antialiased = true
