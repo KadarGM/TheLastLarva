@@ -297,28 +297,32 @@ func handle_attack_animation_finished(anim_name: String):
 				state_machine.transition_to(owner_body.character_data.State.JUMPING)
 
 func update_attack_animations():
+	var anim_name = ""
 	if owner_body.is_on_floor():
 		match count_of_attack:
 			1: 
-				owner_body.play_animation("Attack_ground_1")
+				anim_name = "Attack_ground_1"
 				set_weapon_visibility("back")
 			2:  
-				owner_body.play_animation("Attack_ground_2")
+				anim_name = "Attack_ground_2"
 				set_weapon_visibility("front")
 			3:  
-				owner_body.play_animation("Attack_ground_3")
+				anim_name = "Attack_ground_3"
 				set_weapon_visibility("both")
-	elif not owner_body.is_on_floor():
+	else:
 		match count_of_attack:
 			1: 
-				owner_body.play_animation("Attack_air_1")
+				anim_name = "Attack_air_1"
 				set_weapon_visibility("back")
 			2:  
-				owner_body.play_animation("Attack_air_2")
+				anim_name = "Attack_air_2"
 				set_weapon_visibility("front")
 			3:  
-				owner_body.play_animation("Attack_air_3")
+				anim_name = "Attack_air_3"
 				set_weapon_visibility("both")
+	
+	if animation_player.current_animation != anim_name:
+		owner_body.play_animation(anim_name)
 
 func get_attack_direction() -> float:
 	return -body_node.scale.x

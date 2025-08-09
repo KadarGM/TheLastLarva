@@ -170,11 +170,9 @@ func enter_new_state(new_state) -> void:
 			jump_controller.jump_count = 2
 			jump_controller.has_triple_jump = true
 			play_animation("Double_jump")
-			queue_animation("Jump")
 		character_data.State.TRIPLE_JUMPING:
 			jump_controller.jump_count = 3
 			play_animation("Triple_jump")
-			queue_animation("Jump")
 		character_data.State.DASHING:
 			invulnerability_temp = true
 			print("character_data.State invulnerability_temp activated - DASHING")
@@ -849,7 +847,8 @@ func update_animations() -> void:
 		character_data.State.WALKING:
 			play_animation("Walk")
 		character_data.State.JUMPING, character_data.State.WALL_JUMPING:
-			play_animation("Jump")
+			if not animation_player.current_animation.begins_with("Attack_air"):
+				play_animation("Jump")
 		character_data.State.BIG_JUMPING:
 			play_animation("Dash")
 		character_data.State.BIG_ATTACK:
