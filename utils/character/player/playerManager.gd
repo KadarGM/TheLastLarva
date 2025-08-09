@@ -50,12 +50,6 @@ var can_wall_jump: bool = true
 var has_wall_jumped: bool = false
 var was_on_wall: bool = false
 
-var count_of_attack: int = 0
-var velocity_before_attack: float = 0.0
-var damage_applied_this_attack: bool = false
-var pending_knockback_force: Vector2 = Vector2.ZERO
-var dash_attack_damaged_entities: Array = []
-
 var big_attack_pending: bool = false
 var is_high_big_attack: bool = false
 
@@ -78,11 +72,13 @@ func _ready() -> void:
 	timers_handler.setup_timers()
 	ray_casts_handler.setup_raycasts()
 	setup_signals()
-	set_weapon_visibility("hide")
+	combat_controller.set_weapon_visibility("hide")
 
 func setup_controllers():
 	if jump_controller:
 		jump_controller.setup(self, state_machine)
+	if combat_controller:
+		combat_controller.setup(self, state_machine, animation_player, body_node, areas_handler, timers_handler)
 	if state_machine:
 		state_machine.state_changed.connect(_on_state_changed)
 		state_machine.transition_to(CharacterData.State.IDLE)
@@ -129,8 +125,6 @@ func _physics_process(delta: float) -> void:
 
 func setup_signals() -> void:
 	animation_player.animation_finished.connect(_on_animation_finished)
-	areas_handler.attack_area.body_entered.connect(_on_attack_area_body_entered)
-	areas_handler.attack_area.body_exited.connect(_on_attack_area_body_exited)
 	areas_handler.damage_area.body_entered.connect(_on_damage_area_body_entered)
 
 func transition_to_state(new_state) -> void:
@@ -148,7 +142,7 @@ func transition_to_state(new_state) -> void:
 
 func exit_current_state() -> void:
 	if current_state == character_data.State.ATTACKING and current_state != character_data.State.KNOCKBACK and current_state != character_data.State.DASH_ATTACK:
-		pending_knockback_force = Vector2.ZERO
+		combat_controller.on_attack_state_exit()
 	
 	if current_state == character_data.State.DASHING or current_state == character_data.State.BIG_ATTACK or current_state == character_data.State.DASH_ATTACK:
 		invulnerability_temp = false
@@ -187,7 +181,7 @@ func enter_new_state(new_state) -> void:
 		character_data.State.DASH_ATTACK:
 			invulnerability_temp = true
 			print("character_data.State invulnerability_temp activated - DASH_ATTACK")
-			dash_attack_damaged_entities.clear()
+			combat_controller.dash_attack_damaged_entities.clear()
 			big_jump_charged = false
 		character_data.State.BIG_ATTACK:
 			if not character_data.can_big_attack:
@@ -201,13 +195,11 @@ func enter_new_state(new_state) -> void:
 				air_time = character_data.air_time_initial
 				effective_air_time = character_data.air_time_initial
 		character_data.State.BIG_ATTACK_LANDING:
-			execute_damage_to_entities()
+			combat_controller.execute_damage_to_entities()
 		character_data.State.BIG_JUMPING:
 			big_jump_charged = false
 		character_data.State.ATTACKING:
-			velocity_before_attack = velocity.x
-			damage_applied_this_attack = false
-			timers_handler.damage_timer.start()
+			combat_controller.on_attack_state_enter()
 		character_data.State.KNOCKBACK:
 			pass
 		character_data.State.DEATH:
@@ -215,7 +207,6 @@ func enter_new_state(new_state) -> void:
 			velocity.x = 0
 			death_animation_played = false
 			print("Character DEATH - Final health: ", health_current)
-
 
 func update_state_transitions() -> void:
 	if current_state == character_data.State.STUNNED or current_state == character_data.State.ATTACKING or current_state == character_data.State.KNOCKBACK or current_state == character_data.State.DEATH:
@@ -231,8 +222,9 @@ func update_state_transitions() -> void:
 		check_dash_attack_input_release()
 		return
 	
-	if not timers_handler.dash_timer.is_stopped():
-		state_machine.transition_to(character_data.State.DASHING)
+	if current_state == character_data.State.DASHING:
+		if timers_handler.dash_timer.is_stopped():
+			state_machine.transition_to(character_data.State.IDLE)
 		return
 	
 	if is_on_floor():
@@ -315,9 +307,7 @@ func process_current_state(delta) -> void:
 		character_data.State.BIG_ATTACK_LANDING:
 			velocity.x = 0
 		character_data.State.ATTACKING:
-			process_attack_movement()
-			if timers_handler.before_attack_timer.is_stopped() and Input.is_action_just_pressed("L_attack"):
-				execute_attack()
+			combat_controller.process_attack_movement()
 
 func process_ground_movement(input_direction: float) -> void:
 	if not character_data.can_walk:
@@ -362,7 +352,7 @@ func process_ground_input() -> void:
 		if big_jump_charged and Input.is_action_pressed("J_dash"):
 			execute_dash_attack()
 		else:
-			perform_attack()
+			combat_controller.perform_attack()
 	
 	perform_charge_big_jump()
 
@@ -379,7 +369,7 @@ func process_air_input() -> void:
 		if big_jump_charged and Input.is_action_pressed("J_dash"):
 			execute_dash_attack()
 		else:
-			perform_air_attack()
+			combat_controller.perform_attack()
 	
 	if Input.is_action_just_pressed("S_charge_jump"):
 		perform_big_attack()
@@ -435,25 +425,6 @@ func process_big_jump_input() -> void:
 	if big_jump_charged and Input.is_action_just_released("J_dash"):
 		cancel_big_jump_charge()
 		big_jump_charged = false
-
-func process_attack_movement() -> void:
-	if has_nearby_enemy():
-		velocity.x = move_toward(velocity.x, 0, character_data.attack_movement_friction * character_data.enemy_nearby_friction_multiplier)
-		return
-		
-	if is_on_floor():
-		var attack_force = character_data.attack_movement_force * character_data.ground_attack_force_multiplier
-		if count_of_attack == 3:
-			attack_force *= character_data.attack_movement_multiplier
-		velocity.x = get_attack_direction() * attack_force
-	else:
-		var air_attack_force = character_data.attack_movement_force * character_data.air_attack_force_multiplier
-		velocity.x = get_attack_direction() * air_attack_force
-	
-	if is_on_floor():
-		velocity.x = move_toward(velocity.x, 0, character_data.attack_movement_friction * character_data.ground_friction_multiplier)
-	else:
-		velocity.x = move_toward(velocity.x, 0, character_data.attack_movement_friction * character_data.air_friction_multiplier)
 
 func process_charge_jump() -> void:
 	if not Input.is_action_pressed("J_dash"):
@@ -567,7 +538,7 @@ func update_stamina_regeneration(delta: float) -> void:
 		stamina_regen_timer -= delta
 		return
 	
-	stamina_current += character_data.dash_stamina_cost * delta * character_data.stamina_regen_rate
+	stamina_current += delta * character_data.stamina_regen_rate
 	stamina_current = min(stamina_current, character_data.stamina_max)
 
 func check_continuous_damage(delta: float) -> void:
@@ -634,7 +605,7 @@ func execute_dash_attack() -> void:
 	if not character_data.can_dash_attack or not character_data.can_attack:
 		print("Can't dash attack")
 		return
-	var attack_dir = get_attack_direction()
+	var attack_dir = combat_controller.get_attack_direction()
 	dash_attack_direction = Vector2(attack_dir, 0)
 	
 	print("Starting dash attack in direction: ", attack_dir)
@@ -648,158 +619,6 @@ func execute_directional_big_jump(direction: Vector2) -> void:
 	big_jump_charged = false
 	big_jump_direction = direction
 	state_machine.transition_to(character_data.State.BIG_JUMPING)
-
-func execute_attack() -> void:
-	if not character_data.can_attack:
-		print("Can't attack")
-		return
-	if not timers_handler.before_attack_timer.is_stopped():
-		return
-	
-	if current_state == character_data.State.ATTACKING:
-		return
-	
-	var max_count_of_attack = 3
-	
-	state_machine.transition_to(character_data.State.ATTACKING)
-	
-	if count_of_attack < max_count_of_attack:
-		count_of_attack += 1
-	else:
-		count_of_attack = 1
-	
-	print("Performing attack ", count_of_attack, " of ", max_count_of_attack)
-	
-	timers_handler.hide_weapon_timer.stop()
-	timers_handler.hide_weapon_timer.start()
-	timers_handler.before_attack_timer.start()
-
-func execute_damage_to_entities() -> void:
-	if not character_data.can_take_damage:
-		print("Can't take damage")
-		return
-		
-	if current_state == character_data.State.BIG_ATTACK_LANDING:
-		apply_big_attack_damage()
-	else:
-		apply_normal_attack_damage()
-
-func apply_big_attack_damage() -> void:
-	if not character_data.can_take_damage:
-		print("Can't take damage")
-		return
-		
-	var front_bodies = areas_handler.big_attack_area.get_overlapping_bodies()
-	var back_bodies = areas_handler.big_attack_area_2.get_overlapping_bodies()
-	
-	var damage = character_data.big_attack_dmg
-	var base_knockback_force = character_data.knockback_force * character_data.knockback_force_multiplier
-	var attack_dir = get_attack_direction()
-	var hit_count = 0
-	
-	print("Applying big attack damage - Damage: ", damage)
-	print("attack dir: ", attack_dir)
-
-	for entity in front_bodies:
-		if entity == self:
-			continue
-		hit_count += 1
-		print("Hit entity in front area: ", entity.name)
-		
-		if entity.has_method("take_damage"):
-			entity.take_damage(damage)
-		
-		if character_data.can_take_knockback:
-			var knockback_force = Vector2(
-				1 * base_knockback_force * 2.0,
-				character_data.jump_velocity * character_data.knockback_vertical_multiplier
-			)
-			
-			if entity.has_method("apply_knockback"):
-				entity.apply_knockback(knockback_force)
-	
-	for entity in back_bodies:
-		if entity == self or entity in front_bodies:
-			continue
-		hit_count += 1
-		print("Hit entity in back area: ", entity.name)
-		
-		if entity.has_method("take_damage"):
-			entity.take_damage(damage)
-		
-		if character_data.can_take_knockback:
-			var knockback_force = Vector2(
-				-1 * base_knockback_force * 2.0,
-				character_data.jump_velocity * character_data.knockback_vertical_multiplier
-			)
-			
-			if entity.has_method("apply_knockback"):
-				entity.apply_knockback(knockback_force)
-	
-	if hit_count > 0:
-		var reaction_force = Vector2(
-			-attack_dir * base_knockback_force * character_data.knockback_reaction_multiplier * character_data.knockback_reaction_force_multiplier,
-			character_data.jump_velocity * character_data.knockback_reaction_jump_multiplier
-		)
-		apply_knockback(reaction_force)
-
-func apply_normal_attack_damage() -> void:
-	if not character_data.can_take_damage:
-		print("Can't take damage")
-		return
-		
-	var overlapping_bodies = areas_handler.attack_area.get_overlapping_bodies()
-	
-	if overlapping_bodies.is_empty():
-		return
-	
-	var damage = 0
-	match count_of_attack:
-		1:
-			damage = character_data.attack_1_dmg
-		2:
-			damage = character_data.attack_2_dmg
-		3:
-			damage = character_data.attack_3_dmg
-	
-	print("Applying damage - Attack type: ", current_state, ", Damage: ", damage)
-	
-	var base_knockback_force = character_data.knockback_force
-	if count_of_attack == 3:
-		base_knockback_force *= character_data.knockback_force_multiplier
-	
-	var attack_dir = get_attack_direction()
-	var hit_count = 0
-	
-	for entity in overlapping_bodies:
-		if entity == self:
-			continue
-		
-		hit_count += 1
-		print("Hit entity: ", entity.name)
-		
-		if entity.has_method("take_damage"):
-			entity.take_damage(damage)
-		
-		if character_data.can_take_knockback:
-			var knockback_force = Vector2(
-				attack_dir * base_knockback_force,
-				character_data.jump_velocity * character_data.knockback_vertical_multiplier
-			)
-			
-			if entity.has_method("apply_knockback"):
-				entity.apply_knockback(knockback_force)
-	
-	if hit_count > 0:
-		var reaction_force = Vector2(
-			-attack_dir * base_knockback_force * character_data.knockback_reaction_multiplier * character_data.knockback_reaction_force_multiplier,
-			character_data.jump_velocity * character_data.knockback_reaction_jump_multiplier
-		)
-		
-		if current_state == character_data.State.ATTACKING:
-			pending_knockback_force = reaction_force
-		else:
-			apply_knockback(reaction_force)
 
 func perform_dash() -> void:
 	if not character_data.can_dash or not can_dash:
@@ -830,28 +649,6 @@ func perform_dash() -> void:
 	timers_handler.dash_timer.start()
 	timers_handler.dash_cooldown_timer.start()
 	state_machine.transition_to(character_data.State.DASHING)
-
-func perform_attack() -> void:
-	if not character_data.can_attack:
-		print("Can't attack")
-		return
-	if stamina_current >= character_data.attack_stamina_cost:
-		var old_stamina = stamina_current
-		stamina_current -= character_data.attack_stamina_cost
-		stamina_regen_timer = character_data.stamina_regen_delay
-		print("Attack stamina cost - Stamina: ", old_stamina, " -> ", stamina_current)
-		execute_attack()
-
-func perform_air_attack() -> void:
-	if not character_data.can_attack or not character_data.can_air_attack:
-		print("Can't air attack")
-		return
-	if stamina_current >= character_data.attack_stamina_cost:
-		var old_stamina = stamina_current
-		stamina_current -= character_data.attack_stamina_cost
-		stamina_regen_timer = character_data.stamina_regen_delay
-		print("Attack stamina cost - Stamina: ", old_stamina, " -> ", stamina_current)
-		execute_attack()
 
 func perform_air_jump() -> void:
 	if state_machine.current_state != CharacterData.State.ATTACKING:
@@ -938,7 +735,7 @@ func check_dash_attack_input_release() -> void:
 
 func end_dash_attack() -> void:
 	dash_attack_direction = Vector2.ZERO
-	dash_attack_damaged_entities.clear()
+	combat_controller.dash_attack_damaged_entities.clear()
 	stamina_regen_timer = character_data.stamina_regen_delay
 	state_machine.transition_to(character_data.State.JUMPING)
 	timers_handler.hide_weapon_timer.stop()
@@ -981,15 +778,6 @@ func is_wall_hanging_right() -> bool:
 	var colliding = ray_casts_handler.right_wall_ray.is_colliding()
 	var input_direction = Input.get_axis("A_left", "D_right")
 	return colliding and input_direction > 0
-
-func has_nearby_enemy() -> bool:
-	var overlapping_bodies = areas_handler.attack_area.get_overlapping_bodies()
-	
-	for entity in overlapping_bodies:
-		if entity == self:
-			continue
-		return true
-	return false
 
 func apply_knockback(force: Vector2) -> void:
 	if not character_data.can_get_knockback:
@@ -1070,7 +858,7 @@ func update_animations() -> void:
 				return
 			if is_high_big_attack and animation_player.current_animation != "Big_attack":
 				play_animation("Big_attack_prepare")
-				set_weapon_visibility("both")
+				combat_controller.set_weapon_visibility("both")
 		character_data.State.BIG_ATTACK_LANDING:
 			if animation_player.current_animation != "Big_attack_landing":
 				play_animation("Big_attack_landing")
@@ -1083,7 +871,7 @@ func update_animations() -> void:
 			play_animation("Dash")
 		character_data.State.DASH_ATTACK:
 			play_animation("Dash_attack")
-			set_weapon_visibility("both")
+			combat_controller.set_weapon_visibility("both")
 		character_data.State.CHARGING_JUMP:
 			play_animation("Big_jump_charge")
 		character_data.State.STUNNED:
@@ -1093,28 +881,7 @@ func update_animations() -> void:
 		character_data.State.DOUBLE_JUMPING, character_data.State.TRIPLE_JUMPING:
 			pass
 		character_data.State.ATTACKING:
-			if is_on_floor():
-				match count_of_attack:
-					1: 
-						play_animation("Attack_ground_1")
-						set_weapon_visibility("back")
-					2:  
-						play_animation("Attack_ground_2")
-						set_weapon_visibility("front")
-					3:  
-						play_animation("Attack_ground_3")
-						set_weapon_visibility("both")
-			elif not is_on_floor():
-				match count_of_attack:
-					1: 
-						play_animation("Attack_air_1")
-						set_weapon_visibility("back")
-					2:  
-						play_animation("Attack_air_2")
-						set_weapon_visibility("front")
-					3:  
-						play_animation("Attack_air_3")
-						set_weapon_visibility("both")
+			combat_controller.update_attack_animations()
 		character_data.State.DEATH:
 			if not death_animation_played and animation_player.current_animation != "Death":
 				animation_player.stop()
@@ -1134,33 +901,6 @@ func update_ui() -> void:
 	health_bar.value = health_current
 	health_bar.max_value = character_data.health_max
 
-func set_weapon_visibility(state: String) -> void:
-	match state:
-		"hide":
-			body_node.sword_f.visible = false
-			body_node.sword_b.visible = false
-			body_node.sword_body_2.visible = true
-			body_node.sword_body.visible = true
-		"front":
-			body_node.sword_f.visible = true
-			body_node.sword_b.visible = false
-			body_node.sword_body_2.visible = true
-			body_node.sword_body.visible = false
-		"back":
-			body_node.sword_f.visible = false
-			body_node.sword_b.visible = true
-			body_node.sword_body_2.visible = false
-			body_node.sword_body.visible = true
-		"both":
-			body_node.sword_f.visible = true
-			body_node.sword_b.visible = true
-			body_node.sword_body_2.visible = false
-			body_node.sword_body.visible = false
-
-func _on_hide_weapon_timer_timeout() -> void:
-	set_weapon_visibility("hide")
-	count_of_attack = 1
-
 func _on_big_jump_timer_timeout() -> void:
 	big_jump_charged = true
 
@@ -1172,11 +912,6 @@ func _on_stun_timer_timeout() -> void:
 
 func _on_dash_cooldown_timer_timeout() -> void:
 	can_dash = true
-
-func _on_damage_timer_timeout() -> void:
-	if not damage_applied_this_attack:
-		damage_applied_this_attack = true
-		execute_damage_to_entities()
 
 func _on_invulnerability_timer_timeout() -> void:
 	invulnerability_temp = false
@@ -1199,61 +934,9 @@ func _on_damage_area_body_entered(_body: Node2D) -> void:
 		var damage = _body.get_damage()
 		take_damage(damage, _body.global_position)
 
-func _on_attack_area_body_entered(_body: Node2D) -> void:
-	if current_state != character_data.State.DASH_ATTACK or _body == self:
-		return
-		
-	if _body in dash_attack_damaged_entities:
-		return
-	
-	if not character_data.can_take_damage:
-		print("Can't take damage")
-		return
-	
-	dash_attack_damaged_entities.append(_body)
-	
-	var damage = character_data.dash_attack_dmg
-	var base_knockback_force = character_data.knockback_force * character_data.knockback_force_multiplier
-	var attack_dir = get_attack_direction()
-	
-	print("Dash attack hit entity: ", _body.name, " - Damage: ", damage)
-	
-	if _body.has_method("take_damage"):
-		_body.take_damage(damage)
-	
-	if character_data.can_take_knockback:
-		var knockback_force = Vector2(
-			attack_dir * base_knockback_force * 1.5,
-			character_data.jump_velocity * character_data.knockback_vertical_multiplier
-		)
-		
-		if _body.has_method("apply_knockback"):
-			_body.apply_knockback(knockback_force)
-	
-	var reaction_force = Vector2(
-		-attack_dir * base_knockback_force * character_data.knockback_reaction_multiplier,
-		0
-	)
-	pending_knockback_force = reaction_force
-
-func _on_attack_area_body_exited(_body: Node2D) -> void:
-	pass
-
 func _on_animation_finished(anim_name: String) -> void:
 	if current_state == character_data.State.ATTACKING:
-		if anim_name.begins_with("Attack_ground"):
-			if pending_knockback_force.length() > 0:
-				apply_knockback(pending_knockback_force)
-				pending_knockback_force = Vector2.ZERO
-			else:
-				velocity.x = velocity_before_attack
-				state_machine.transition_to(character_data.State.IDLE)
-		elif anim_name.begins_with("Attack_air"):
-			if pending_knockback_force.length() > 0:
-				apply_knockback(pending_knockback_force)
-				pending_knockback_force = Vector2.ZERO
-			else:
-				state_machine.transition_to(character_data.State.JUMPING)
+		combat_controller.handle_attack_animation_finished(anim_name)
 	elif current_state == character_data.State.DASH_ATTACK and anim_name == "Dash_attack":
 		end_dash_attack()
 	elif current_state == character_data.State.BIG_ATTACK and anim_name == "Big_attack_prepare":

@@ -20,12 +20,8 @@
 [ext_resource type="Script" uid="uid://du76mpiul5ejs" path="res://utils/character/handlers/timersHandler.gd" id="17_qg1ig"]
 [ext_resource type="Script" uid="uid://bdl5dtjiwdwke" path="res://utils/character/base/stateMachine.gd" id="18_i6sc0"]
 [ext_resource type="Script" uid="uid://d23d04rsyp41w" path="res://utils/character/controllers/areasHandler.gd" id="18_mpolx"]
-[ext_resource type="Script" uid="uid://bf55lqyjyku7g" path="res://utils/character/player/controllerManager.gd" id="18_ngkt6"]
+[ext_resource type="Script" uid="uid://0cd78ehdvt30" path="res://utils/character/controllers/combatController.gd" id="19_mpolx"]
 [ext_resource type="Script" uid="uid://ciuxhepgisrjw" path="res://utils/character/handlers/rayCastsHandler.gd" id="19_ngkt6"]
-
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_mol8u"]
-radius = 165.967
-height = 483.582
 
 [sub_resource type="Animation" id="Animation_o5lcw"]
 resource_name = "Attack_air_1"
@@ -6090,20 +6086,24 @@ size = Vector2(400, 141)
 radius = 65.7999
 height = 180.182
 
-[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("body_node", "animation_player", "animation_state", "camera_2d", "state_machine", "ray_casts_handler", "timers_handler", "areas_handler", "jump_controller", "stamina_bar", "health_bar") groups=["Player"]]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_mol8u"]
+radius = 165.967
+height = 483.582
+
+[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("body_node", "animation_player", "camera_2d", "state_machine", "ray_casts_handler", "timers_handler", "areas_handler", "jump_controller", "combat_controller", "stamina_bar", "health_bar") groups=["Player"]]
 z_index = -100
 collision_layer = 2
 script = ExtResource("1_b2kln")
 character_data = ExtResource("2_we0b7")
 body_node = NodePath("Body")
 animation_player = NodePath("AnimationPlayer")
-animation_state = NodePath("")
 camera_2d = NodePath("Camera2D")
 state_machine = NodePath("CallableStateMachine")
 ray_casts_handler = NodePath("Handlers/RayCastsHandler")
 timers_handler = NodePath("Handlers/TimersHandler")
 areas_handler = NodePath("Handlers/AreasHandler")
 jump_controller = NodePath("ControllerManager/JumpController")
+combat_controller = NodePath("ControllerManager/CombatController")
 stamina_bar = NodePath("GameUI/MarginContainer/HBoxContainer/VBoxContainer/StaminaBar")
 health_bar = NodePath("GameUI/MarginContainer/HBoxContainer/VBoxContainer/HealthBar")
 metadata/_edit_horizontal_guides_ = [69.6705]
@@ -6113,15 +6113,6 @@ metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
 script = ExtResource("3_wobrw")
 character = NodePath("..")
 metadata/_custom_type_script = "uid://blvqjroan8kap"
-
-[node name="AttackArea" type="Area2D" parent="Body"]
-z_index = -100
-collision_layer = 2
-collision_mask = 4
-
-[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Body/AttackArea"]
-position = Vector2(-152.033, -85.091)
-shape = SubResource("CapsuleShape2D_mol8u")
 
 [node name="body" type="Sprite2D" parent="Body"]
 self_modulate = Color(0.863997, 0.762666, 0.68544, 1)
@@ -6379,15 +6370,11 @@ anchors_preset = 0
 script = ExtResource("18_i6sc0")
 metadata/_custom_type_script = "uid://bdl5dtjiwdwke"
 
-[node name="ControllerManager" type="Control" parent="." node_paths=PackedStringArray("character", "state_machine")]
+[node name="ControllerManager" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
-script = ExtResource("18_ngkt6")
-character = NodePath("..")
-state_machine = NodePath("../CallableStateMachine")
-metadata/_custom_type_script = "uid://bf55lqyjyku7g"
 
 [node name="JumpController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body", "state_machine")]
 physics_interpolation_mode = 0
@@ -6397,15 +6384,24 @@ owner_body = NodePath("../..")
 state_machine = NodePath("../../CallableStateMachine")
 metadata/_custom_type_script = "uid://bn7n06imbkeei"
 
-[node name="CombatController" type="Control" parent="ControllerManager"]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
 [node name="MovementController" type="Control" parent="ControllerManager"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+
+[node name="CombatController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body", "state_machine", "animation_player", "body_node", "areas_handler", "timers_handler")]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("19_mpolx")
+owner_body = NodePath("../..")
+state_machine = NodePath("../../CallableStateMachine")
+animation_player = NodePath("../../AnimationPlayer")
+body_node = NodePath("../../Body")
+areas_handler = NodePath("../../Handlers/AreasHandler")
+timers_handler = NodePath("../../Handlers/TimersHandler")
+metadata/_custom_type_script = "uid://0cd78ehdvt30"
 
 [node name="Handlers" type="Control" parent="."]
 layout_mode = 3
@@ -6521,16 +6517,17 @@ metadata/_custom_type_script = "uid://du76mpiul5ejs"
 
 [node name="InvulnerabilityTimer" type="Timer" parent="Handlers/TimersHandler"]
 
-[node name="AreasHandler" type="Control" parent="Handlers" node_paths=PackedStringArray("big_attack_area", "big_attack_area_2", "damage_area", "attack_area")]
+[node name="AreasHandler" type="Control" parent="Handlers" node_paths=PackedStringArray("character_manager", "big_attack_area", "big_attack_area_2", "damage_area", "attack_area")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("18_mpolx")
+character_manager = NodePath("../..")
 big_attack_area = NodePath("BigAttackArea")
 big_attack_area_2 = NodePath("BigAttackArea2")
 damage_area = NodePath("DamageArea")
-attack_area = NodePath("../../Body/AttackArea")
+attack_area = NodePath("AttackArea")
 metadata/_custom_type_script = "uid://d23d04rsyp41w"
 
 [node name="BigAttackArea" type="Area2D" parent="Handlers/AreasHandler"]
@@ -6560,3 +6557,12 @@ collision_mask = 4
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="Handlers/AreasHandler/DamageArea"]
 position = Vector2(0, -69.091)
 shape = SubResource("CapsuleShape2D_mhwdb")
+
+[node name="AttackArea" type="Area2D" parent="Handlers/AreasHandler"]
+z_index = -100
+collision_layer = 2
+collision_mask = 4
+
+[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Handlers/AreasHandler/AttackArea"]
+position = Vector2(-152.033, -85.091)
+shape = SubResource("CapsuleShape2D_mol8u")
