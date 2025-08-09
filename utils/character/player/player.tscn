@@ -1,4 +1,4 @@
-[gd_scene load_steps=50 format=3 uid="uid://df1dloofeb6le"]
+[gd_scene load_steps=51 format=3 uid="uid://df1dloofeb6le"]
 
 [ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://utils/character/player/playerManager.gd" id="1_b2kln"]
 [ext_resource type="Resource" uid="uid://d125kkggxi83n" path="res://utils/character/player/Player.tres" id="2_we0b7"]
@@ -17,17 +17,15 @@
 [ext_resource type="Texture2D" uid="uid://b5rk0f08kkqjn" path="res://utils/character/player/assets/mandible_b.svg" id="15_vewsg"]
 [ext_resource type="Texture2D" uid="uid://bygtb821ge70j" path="res://utils/character/player/assets/mandible_f.svg" id="16_2soq1"]
 [ext_resource type="Script" uid="uid://bn7n06imbkeei" path="res://utils/character/controllers/jumpController.gd" id="17_i6sc0"]
-[ext_resource type="Script" uid="uid://du76mpiul5ejs" path="res://utils/character/controllers/timersController.gd" id="17_qg1ig"]
+[ext_resource type="Script" uid="uid://du76mpiul5ejs" path="res://utils/character/handlers/timersHandler.gd" id="17_qg1ig"]
 [ext_resource type="Script" uid="uid://bdl5dtjiwdwke" path="res://utils/character/base/stateMachine.gd" id="18_i6sc0"]
-[ext_resource type="Script" uid="uid://d23d04rsyp41w" path="res://utils/character/controllers/areasController.gd" id="18_mpolx"]
-[ext_resource type="Script" uid="uid://ciuxhepgisrjw" path="res://utils/character/controllers/rayCastsController.gd" id="19_ngkt6"]
+[ext_resource type="Script" uid="uid://d23d04rsyp41w" path="res://utils/character/controllers/areasHandler.gd" id="18_mpolx"]
+[ext_resource type="Script" uid="uid://bf55lqyjyku7g" path="res://utils/character/player/controllerManager.gd" id="18_ngkt6"]
+[ext_resource type="Script" uid="uid://ciuxhepgisrjw" path="res://utils/character/handlers/rayCastsHandler.gd" id="19_ngkt6"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_mol8u"]
 radius = 165.967
 height = 483.582
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_wpu1s"]
-size = Vector2(121.704, 219.043)
 
 [sub_resource type="Animation" id="Animation_o5lcw"]
 resource_name = "Attack_air_1"
@@ -6079,6 +6077,9 @@ _data = {
 &"Walk": SubResource("Animation_naawg")
 }
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wpu1s"]
+size = Vector2(121.704, 219.043)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mol8u"]
 size = Vector2(400, 141)
 
@@ -6089,17 +6090,20 @@ size = Vector2(400, 141)
 radius = 65.7999
 height = 180.182
 
-[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("body_controller", "animation_player", "camera_2d", "state_machine", "ray_casts_controller", "jump_controller") groups=["Player"]]
+[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("body_node", "animation_player", "animation_state", "camera_2d", "state_machine", "ray_casts_handler", "timers_handler", "areas_handler", "jump_controller") groups=["Player"]]
 z_index = -100
 collision_layer = 2
 script = ExtResource("1_b2kln")
 character_data = ExtResource("2_we0b7")
-body_controller = NodePath("Body")
+body_node = NodePath("Body")
 animation_player = NodePath("AnimationPlayer")
+animation_state = NodePath("")
 camera_2d = NodePath("Camera2D")
-state_machine = NodePath("Controllers/CallableStateMachine")
-ray_casts_controller = NodePath("RayCasts")
-jump_controller = NodePath("Controllers/JumpController")
+state_machine = NodePath("CallableStateMachine")
+ray_casts_handler = NodePath("Handlers/RayCastsHandler")
+timers_handler = NodePath("Handlers/TimersHandler")
+areas_handler = NodePath("Handlers/AreasHandler")
+jump_controller = NodePath("ControllerManager/JumpController")
 metadata/_edit_horizontal_guides_ = [69.6705]
 metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
 
@@ -6316,7 +6320,13 @@ scale = Vector2(0.999815, 0.999815)
 texture = ExtResource("16_2soq1")
 offset = Vector2(-3.25712, 15.8394)
 
-[node name="Visualizer" type="Node2D" parent="."]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_aeyl4")
+}
+autoplay = "Idle"
+playback_auto_capture = false
+playback_default_blend_time = 0.2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(-2.2816, -39.5507)
@@ -6360,82 +6370,51 @@ layout_mode = 2
 step = 1.0
 show_percentage = false
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-&"": SubResource("AnimationLibrary_aeyl4")
-}
-autoplay = "Idle"
-playback_auto_capture = false
-playback_default_blend_time = 0.2
-
-[node name="Timers" type="Control" parent="."]
+[node name="CallableStateMachine" type="Control" parent="."]
+physics_interpolation_mode = 0
 layout_mode = 3
 anchors_preset = 0
-script = ExtResource("17_qg1ig")
+script = ExtResource("18_i6sc0")
+metadata/_custom_type_script = "uid://bdl5dtjiwdwke"
 
-[node name="BetweenStatesTimer" type="Timer" parent="Timers"]
-
-[node name="EmergencyTimer" type="Timer" parent="Timers"]
-
-[node name="BigJumpTimer" type="Timer" parent="Timers"]
-
-[node name="BigJumpCooldownTimer" type="Timer" parent="Timers"]
-
-[node name="HideWeaponTimer" type="Timer" parent="Timers"]
-
-[node name="DashTimer" type="Timer" parent="Timers"]
-
-[node name="StunTimer" type="Timer" parent="Timers"]
-
-[node name="DashCooldownTimer" type="Timer" parent="Timers"]
-
-[node name="WallJumpControlTimer" type="Timer" parent="Timers"]
-
-[node name="AttackCooldownTimer" type="Timer" parent="Timers"]
-
-[node name="DamageTimer" type="Timer" parent="Timers"]
-
-[node name="BeforeAttackTimer" type="Timer" parent="Timers"]
-
-[node name="InvulnerabilityTimer" type="Timer" parent="Timers"]
-
-[node name="Areas" type="Control" parent="."]
-z_index = -100
+[node name="ControllerManager" type="Control" parent="." node_paths=PackedStringArray("character", "state_machine")]
 layout_mode = 3
 anchors_preset = 0
-script = ExtResource("18_mpolx")
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("18_ngkt6")
+character = NodePath("..")
+state_machine = NodePath("../CallableStateMachine")
+metadata/_custom_type_script = "uid://bf55lqyjyku7g"
 
-[node name="BigAttackArea" type="Area2D" parent="Areas"]
-collision_layer = 2
-collision_mask = 4
-metadata/_edit_lock_ = true
+[node name="JumpController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body", "state_machine")]
+physics_interpolation_mode = 0
+anchors_preset = 0
+script = ExtResource("17_i6sc0")
+owner_body = NodePath("../..")
+state_machine = NodePath("../../CallableStateMachine")
+metadata/_custom_type_script = "uid://bn7n06imbkeei"
 
-[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Areas/BigAttackArea"]
-position = Vector2(205, 0)
-shape = SubResource("RectangleShape2D_mol8u")
-metadata/_edit_lock_ = true
+[node name="CombatController" type="Control" parent="ControllerManager"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
 
-[node name="BigAttackArea2" type="Area2D" parent="Areas"]
-collision_layer = 2
-collision_mask = 4
-metadata/_edit_lock_ = true
+[node name="MovementController" type="Control" parent="ControllerManager"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
 
-[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Areas/BigAttackArea2"]
-position = Vector2(-205, 0)
-shape = SubResource("RectangleShape2D_sa4r2")
-metadata/_edit_lock_ = true
-
-[node name="DamageArea" type="Area2D" parent="Areas"]
-collision_layer = 2
-collision_mask = 4
-
-[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Areas/DamageArea"]
-position = Vector2(0, -69.091)
-shape = SubResource("CapsuleShape2D_mhwdb")
-
-[node name="RayCasts" type="Control" parent="." node_paths=PackedStringArray("ground_check_ray", "ground_check_ray_2", "ground_check_ray_3", "near_ground_ray", "near_ground_ray_2", "near_ground_ray_3", "left_wall_ray", "right_wall_ray", "ceiling_ray", "ceiling_ray_2", "ceiling_ray_3")]
+[node name="Handlers" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="RayCastsHandler" type="Control" parent="Handlers" node_paths=PackedStringArray("ground_check_ray", "ground_check_ray_2", "ground_check_ray_3", "near_ground_ray", "near_ground_ray_2", "near_ground_ray_3", "left_wall_ray", "right_wall_ray", "ceiling_ray", "ceiling_ray_2", "ceiling_ray_3")]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
 script = ExtResource("19_ngkt6")
 ground_check_ray = NodePath("GroundCheckRay")
 ground_check_ray_2 = NodePath("GroundCheckRay2")
@@ -6448,70 +6427,134 @@ right_wall_ray = NodePath("RightWallRay")
 ceiling_ray = NodePath("CeilingRay")
 ceiling_ray_2 = NodePath("CeilingRay2")
 ceiling_ray_3 = NodePath("CeilingRay3")
+metadata/_custom_type_script = "uid://ciuxhepgisrjw"
 
-[node name="GroundCheckRay" type="RayCast2D" parent="RayCasts"]
+[node name="GroundCheckRay" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 target_position = Vector2(0, 800)
 
-[node name="GroundCheckRay2" type="RayCast2D" parent="RayCasts"]
+[node name="GroundCheckRay2" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(52.1514, 0)
 target_position = Vector2(0, 800)
 
-[node name="GroundCheckRay3" type="RayCast2D" parent="RayCasts"]
+[node name="GroundCheckRay3" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(-54.2842, 0)
 target_position = Vector2(0, 800)
 
-[node name="NearGroundRay" type="RayCast2D" parent="RayCasts"]
+[node name="NearGroundRay" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 target_position = Vector2(0, 800)
 
-[node name="NearGroundRay2" type="RayCast2D" parent="RayCasts"]
+[node name="NearGroundRay2" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(60.404, 0)
 target_position = Vector2(0, 800)
 
-[node name="NearGroundRay3" type="RayCast2D" parent="RayCasts"]
+[node name="NearGroundRay3" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(-60.9337, 0)
 target_position = Vector2(0, 800)
 
-[node name="LeftWallRay" type="RayCast2D" parent="RayCasts"]
+[node name="LeftWallRay" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(0.513153, -77.5973)
 target_position = Vector2(-100, 0)
 
-[node name="RightWallRay" type="RayCast2D" parent="RayCasts"]
+[node name="RightWallRay" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(0.513153, -77.5973)
 target_position = Vector2(100, 0)
 
-[node name="CeilingRay" type="RayCast2D" parent="RayCasts"]
+[node name="CeilingRay" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(0.513153, -77.5973)
 target_position = Vector2(0, 200)
 
-[node name="CeilingRay2" type="RayCast2D" parent="RayCasts"]
+[node name="CeilingRay2" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(52.1513, -77.5973)
 target_position = Vector2(0, 200)
 
-[node name="CeilingRay3" type="RayCast2D" parent="RayCasts"]
+[node name="CeilingRay3" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(-54.0788, -77.5973)
 target_position = Vector2(0, 200)
 
-[node name="Controllers" type="Control" parent="."]
+[node name="TimersHandler" type="Control" parent="Handlers" node_paths=PackedStringArray("character_manager", "between_states_timer", "emergency_timer", "big_jump_timer", "big_jump_cooldown_timer", "hide_weapon_timer", "dash_timer", "stun_timer", "dash_cooldown_timer", "wall_jump_control_timer", "attack_cooldown_timer", "damage_timer", "before_attack_timer", "invulnerability_timer")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+script = ExtResource("17_qg1ig")
+character_manager = NodePath("../..")
+between_states_timer = NodePath("BetweenStatesTimer")
+emergency_timer = NodePath("EmergencyTimer")
+big_jump_timer = NodePath("BigJumpTimer")
+big_jump_cooldown_timer = NodePath("BigJumpCooldownTimer")
+hide_weapon_timer = NodePath("HideWeaponTimer")
+dash_timer = NodePath("DashTimer")
+stun_timer = NodePath("StunTimer")
+dash_cooldown_timer = NodePath("DashCooldownTimer")
+wall_jump_control_timer = NodePath("WallJumpControlTimer")
+attack_cooldown_timer = NodePath("AttackCooldownTimer")
+damage_timer = NodePath("DamageTimer")
+before_attack_timer = NodePath("BeforeAttackTimer")
+invulnerability_timer = NodePath("InvulnerabilityTimer")
+metadata/_custom_type_script = "uid://du76mpiul5ejs"
 
-[node name="CallableStateMachine" type="Control" parent="Controllers"]
-physics_interpolation_mode = 0
-anchors_preset = 0
-script = ExtResource("18_i6sc0")
-metadata/_custom_type_script = "uid://bdl5dtjiwdwke"
+[node name="BetweenStatesTimer" type="Timer" parent="Handlers/TimersHandler"]
 
-[node name="JumpController" type="Control" parent="Controllers" node_paths=PackedStringArray("owner_body", "state_machine")]
-physics_interpolation_mode = 0
-anchors_preset = 0
-script = ExtResource("17_i6sc0")
-owner_body = NodePath("../..")
-state_machine = NodePath("../CallableStateMachine")
-metadata/_custom_type_script = "uid://bn7n06imbkeei"
+[node name="EmergencyTimer" type="Timer" parent="Handlers/TimersHandler"]
 
-[node name="AnimationState" type="Control" parent="Controllers"]
+[node name="BigJumpTimer" type="Timer" parent="Handlers/TimersHandler"]
+
+[node name="BigJumpCooldownTimer" type="Timer" parent="Handlers/TimersHandler"]
+
+[node name="HideWeaponTimer" type="Timer" parent="Handlers/TimersHandler"]
+
+[node name="DashTimer" type="Timer" parent="Handlers/TimersHandler"]
+
+[node name="StunTimer" type="Timer" parent="Handlers/TimersHandler"]
+
+[node name="DashCooldownTimer" type="Timer" parent="Handlers/TimersHandler"]
+
+[node name="WallJumpControlTimer" type="Timer" parent="Handlers/TimersHandler"]
+
+[node name="AttackCooldownTimer" type="Timer" parent="Handlers/TimersHandler"]
+
+[node name="DamageTimer" type="Timer" parent="Handlers/TimersHandler"]
+
+[node name="BeforeAttackTimer" type="Timer" parent="Handlers/TimersHandler"]
+
+[node name="InvulnerabilityTimer" type="Timer" parent="Handlers/TimersHandler"]
+
+[node name="AreasHandler" type="Control" parent="Handlers" node_paths=PackedStringArray("big_attack_area", "big_attack_area_2", "damage_area", "attack_area")]
+layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+script = ExtResource("18_mpolx")
+big_attack_area = NodePath("BigAttackArea")
+big_attack_area_2 = NodePath("BigAttackArea2")
+damage_area = NodePath("DamageArea")
+attack_area = NodePath("../../Body/AttackArea")
+metadata/_custom_type_script = "uid://d23d04rsyp41w"
+
+[node name="BigAttackArea" type="Area2D" parent="Handlers/AreasHandler"]
+collision_layer = 2
+collision_mask = 4
+metadata/_edit_lock_ = true
+
+[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Handlers/AreasHandler/BigAttackArea"]
+position = Vector2(205, 0)
+shape = SubResource("RectangleShape2D_mol8u")
+metadata/_edit_lock_ = true
+
+[node name="BigAttackArea2" type="Area2D" parent="Handlers/AreasHandler"]
+collision_layer = 2
+collision_mask = 4
+metadata/_edit_lock_ = true
+
+[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Handlers/AreasHandler/BigAttackArea2"]
+position = Vector2(-205, 0)
+shape = SubResource("RectangleShape2D_sa4r2")
+metadata/_edit_lock_ = true
+
+[node name="DamageArea" type="Area2D" parent="Handlers/AreasHandler"]
+collision_layer = 2
+collision_mask = 4
+
+[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Handlers/AreasHandler/DamageArea"]
+position = Vector2(0, -69.091)
+shape = SubResource("CapsuleShape2D_mhwdb")

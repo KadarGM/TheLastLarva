@@ -1,5 +1,5 @@
 extends Control
-class_name RayCastsController
+class_name RayCastsHandler
 
 @export_category("Setup")
 @export var ground_check_ray_length: float = 100.0

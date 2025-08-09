@@ -1,5 +1,6 @@
 @tool 
 extends Node2D
+class_name BodyNode
 
 @export var character: CharacterManager
 
