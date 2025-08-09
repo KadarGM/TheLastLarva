@@ -21,8 +21,9 @@ class_name CharacterManager
 @export var jump_controller: JumpController
 @export var combat_controller: CombatController
 
-@onready var stamina_bar: ProgressBar = $GameUI/MarginContainer/HBoxContainer/VBoxContainer/StaminaBar
-@onready var health_bar: ProgressBar = $GameUI/MarginContainer/HBoxContainer/VBoxContainer/HealthBar
+@export_category("UI")
+@export var stamina_bar: ProgressBar
+@export var health_bar: ProgressBar
 
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 var invulnerability_temp: bool = false

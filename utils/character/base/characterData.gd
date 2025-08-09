@@ -28,7 +28,6 @@ enum State {
 @export var stamina_regen_rate: float = 100.0
 @export var stamina_regen_delay: float = 1.0
 
-# Jumping Variables
 @export_group("Jumps Options")
 @export var can_jump: bool = true
 @export var can_double_jump: bool = false

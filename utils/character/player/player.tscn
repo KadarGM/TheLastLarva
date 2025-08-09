@@ -6090,7 +6090,7 @@ size = Vector2(400, 141)
 radius = 65.7999
 height = 180.182
 
-[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("body_node", "animation_player", "animation_state", "camera_2d", "state_machine", "ray_casts_handler", "timers_handler", "areas_handler", "jump_controller") groups=["Player"]]
+[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("body_node", "animation_player", "animation_state", "camera_2d", "state_machine", "ray_casts_handler", "timers_handler", "areas_handler", "jump_controller", "stamina_bar", "health_bar") groups=["Player"]]
 z_index = -100
 collision_layer = 2
 script = ExtResource("1_b2kln")
@@ -6104,6 +6104,8 @@ ray_casts_handler = NodePath("Handlers/RayCastsHandler")
 timers_handler = NodePath("Handlers/TimersHandler")
 areas_handler = NodePath("Handlers/AreasHandler")
 jump_controller = NodePath("ControllerManager/JumpController")
+stamina_bar = NodePath("GameUI/MarginContainer/HBoxContainer/VBoxContainer/StaminaBar")
+health_bar = NodePath("GameUI/MarginContainer/HBoxContainer/VBoxContainer/HealthBar")
 metadata/_edit_horizontal_guides_ = [69.6705]
 metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
 

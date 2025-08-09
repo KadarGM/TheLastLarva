@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="TheLastLarva"
-run/main_scene="res://utils/scenes/main.tscn"
+run/main_scene="uid://bsdifa856lgkr"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 
 [autoload]
