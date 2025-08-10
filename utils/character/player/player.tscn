@@ -1,4 +1,4 @@
-[gd_scene load_steps=51 format=3 uid="uid://df1dloofeb6le"]
+[gd_scene load_steps=52 format=3 uid="uid://df1dloofeb6le"]
 
 [ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://utils/character/player/playerManager.gd" id="1_b2kln"]
 [ext_resource type="Resource" uid="uid://d125kkggxi83n" path="res://utils/character/player/Player.tres" id="2_we0b7"]
@@ -17,6 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://b5rk0f08kkqjn" path="res://utils/character/player/assets/mandible_b.svg" id="15_vewsg"]
 [ext_resource type="Texture2D" uid="uid://bygtb821ge70j" path="res://utils/character/player/assets/mandible_f.svg" id="16_2soq1"]
 [ext_resource type="Script" uid="uid://bn7n06imbkeei" path="res://utils/character/controllers/jumpController.gd" id="17_i6sc0"]
+[ext_resource type="PackedScene" uid="uid://bo151bnxrkxp6" path="res://utils/ui/DebugHelper.tscn" id="17_ngkt6"]
 [ext_resource type="Script" uid="uid://du76mpiul5ejs" path="res://utils/character/handlers/timersHandler.gd" id="17_qg1ig"]
 [ext_resource type="Script" uid="uid://bdl5dtjiwdwke" path="res://utils/character/base/stateMachine.gd" id="18_i6sc0"]
 [ext_resource type="Script" uid="uid://d23d04rsyp41w" path="res://utils/character/controllers/areasHandler.gd" id="18_mpolx"]
@@ -6090,7 +6091,7 @@ height = 180.182
 radius = 165.967
 height = 483.582
 
-[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("body_node", "animation_player", "camera_2d", "state_machine", "ray_casts_handler", "timers_handler", "areas_handler", "jump_controller", "combat_controller", "stamina_bar", "health_bar") groups=["Player"]]
+[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("body_node", "animation_player", "camera_2d", "state_machine", "ray_casts_handler", "timers_handler", "areas_handler", "jump_controller", "combat_controller", "stamina_bar", "health_bar", "debug_helper") groups=["Player"]]
 z_index = -100
 collision_layer = 2
 script = ExtResource("1_b2kln")
@@ -6106,6 +6107,7 @@ jump_controller = NodePath("ControllerManager/JumpController")
 combat_controller = NodePath("ControllerManager/CombatController")
 stamina_bar = NodePath("GameUI/MarginContainer/StatsHBox/VBoxContainer/StaminaBar")
 health_bar = NodePath("GameUI/MarginContainer/StatsHBox/VBoxContainer/HealthBar")
+debug_helper = NodePath("DebugHelper")
 metadata/_edit_horizontal_guides_ = [69.6705]
 metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
 
@@ -6329,6 +6331,11 @@ shape = SubResource("RectangleShape2D_wpu1s")
 [node name="Camera2D" type="Camera2D" parent="."]
 scale = Vector2(3.33333, 3.33333)
 
+[node name="DebugHelper" parent="." node_paths=PackedStringArray("character", "state_machine") instance=ExtResource("17_ngkt6")]
+layer = 100
+character = NodePath("..")
+state_machine = NodePath("../CallableStateMachine")
+
 [node name="GameUI" type="CanvasLayer" parent="."]
 
 [node name="MarginContainer" type="MarginContainer" parent="GameUI"]
@@ -6362,9 +6369,6 @@ custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 step = 1.0
 show_percentage = false
-
-[node name="Debug" type="HBoxContainer" parent="GameUI/MarginContainer"]
-layout_mode = 2
 
 [node name="CallableStateMachine" type="Control" parent="."]
 physics_interpolation_mode = 0

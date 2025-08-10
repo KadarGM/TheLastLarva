@@ -22,6 +22,9 @@ class_name CharacterManager
 @export var stamina_bar: ProgressBar
 @export var health_bar: ProgressBar
 
+@export_category("Debug")
+@export var debug_helper: DebugHelper
+
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 var invulnerability_temp: bool = false
 
@@ -84,7 +87,6 @@ func _on_state_changed(old_state, new_state):
 	exit_current_state()
 	current_state = new_state
 	previous_state = old_state
-	print("State changed: ", state_machine.State.keys()[old_state], " -> ", state_machine.State.keys()[new_state])
 	enter_new_state(new_state)
 
 func _process(delta: float) -> void:
@@ -119,7 +121,6 @@ func _physics_process(delta: float) -> void:
 	update_animations()
 	move_and_slide()
 
-
 func setup_signals() -> void:
 	animation_player.animation_finished.connect(_on_animation_finished)
 	areas_handler.damage_area.body_entered.connect(_on_damage_area_body_entered)
@@ -133,8 +134,6 @@ func transition_to_state(new_state) -> void:
 	previous_state = current_state
 	current_state = new_state
 	
-	print("State changed: ", state_machine.State.keys()[previous_state], " -> ", state_machine.State.keys()[new_state])
-	
 	enter_new_state(new_state)
 
 func exit_current_state() -> void:
@@ -143,7 +142,6 @@ func exit_current_state() -> void:
 	
 	if current_state == state_machine.State.DASHING or current_state == state_machine.State.BIG_ATTACK or current_state == state_machine.State.DASH_ATTACK:
 		invulnerability_temp = false
-		print("State invulnerability_temp deactivated - Leaving state: ", state_machine.State.keys()[current_state])
 
 func enter_new_state(new_state) -> void:
 	match new_state:
@@ -172,18 +170,14 @@ func enter_new_state(new_state) -> void:
 			play_animation("Triple_jump")
 		state_machine.State.DASHING:
 			invulnerability_temp = true
-			print("state_machine.State invulnerability_temp activated - DASHING")
 		state_machine.State.DASH_ATTACK:
 			invulnerability_temp = true
-			print("state_machine.State invulnerability_temp activated - DASH_ATTACK")
 			combat_controller.dash_attack_damaged_entities.clear()
 			big_jump_charged = false
 		state_machine.State.BIG_ATTACK:
 			if not character_data.can_big_attack:
-				print("Can't big attack")
 				return
 			invulnerability_temp = true
-			print("state_machine.State invulnerability_temp activated - BIG_ATTACK")
 			big_attack_pending = true
 			timers_handler.hide_weapon_timer.stop()
 			if air_time == 0:
@@ -201,7 +195,6 @@ func enter_new_state(new_state) -> void:
 			areas_handler.damage_area.monitorable = false
 			velocity.x = 0
 			death_animation_played = false
-			print("Character DEATH - Final health: ", health_current)
 
 func update_state_transitions() -> void:
 	if current_state == state_machine.State.STUNNED or current_state == state_machine.State.ATTACKING or current_state == state_machine.State.KNOCKBACK or current_state == state_machine.State.DEATH:
@@ -306,7 +299,8 @@ func process_current_state(delta) -> void:
 
 func process_ground_movement(input_direction: float) -> void:
 	if not character_data.can_walk:
-		print("Can't walk on the ground")
+		if debug_helper.console_debug:
+			debug_helper.log_ability_blocked("Walk", "Disabled in character data")
 		return
 	if input_direction:
 		velocity.x = input_direction * character_data.speed
@@ -317,7 +311,8 @@ func process_ground_movement(input_direction: float) -> void:
 
 func process_air_movement(input_direction: float) -> void:
 	if not character_data.can_walk:
-		print("Can't walk in the air")
+		if debug_helper.console_debug:
+			debug_helper.log_ability_blocked("Air Walk", "Disabled in character data")
 		return
 	if current_state == state_machine.State.BIG_ATTACK or current_state == state_machine.State.BIG_ATTACK_LANDING:
 		velocity.x = move_toward(velocity.x, 0, character_data.speed * character_data.big_attack_air_friction)
@@ -514,7 +509,6 @@ func update_big_jump_stamina(delta: float) -> void:
 		stamina_current -= character_data.big_jump_stamina_drain_rate * delta
 		if stamina_current <= 0:
 			stamina_current = 0
-			print("Big jump ended - Stamina depleted")
 			end_big_jump()
 
 func update_dash_attack_stamina(delta: float) -> void:
@@ -522,7 +516,6 @@ func update_dash_attack_stamina(delta: float) -> void:
 		stamina_current -= character_data.dash_attack_stamina_drain_rate * delta
 		if stamina_current <= 0:
 			stamina_current = 0
-			print("Dash attack ended - Stamina depleted")
 			end_dash_attack()
 
 func update_stamina_regeneration(delta: float) -> void:
@@ -558,11 +551,15 @@ func check_continuous_damage(delta: float) -> void:
 
 func execute_jump() -> void:
 	if jump_controller.handle_ground_jump():
+		if debug_helper.console_debug:
+			debug_helper.log_jump("Jump")
 		state_machine.transition_to(state_machine.State.JUMPING)
 
 func execute_double_jump() -> void:
 	var result = jump_controller.handle_air_jump(stamina_current)
 	if result.success and result.type == "double":
+		if debug_helper.console_debug:
+			debug_helper.log_jump("Double Jump")
 		reset_air_time()
 		state_machine.transition_to(state_machine.State.DOUBLE_JUMPING)
 
@@ -571,6 +568,8 @@ func execute_triple_jump() -> void:
 	if result.success and result.type == "triple":
 		stamina_current -= result.stamina_cost
 		stamina_regen_timer = character_data.stamina_regen_delay
+		if debug_helper.console_debug:
+			debug_helper.log_jump("Triple Jump")
 		reset_air_time()
 		state_machine.transition_to(state_machine.State.TRIPLE_JUMPING)
 
@@ -582,6 +581,8 @@ func execute_wall_jump() -> void:
 	jump_controller.jump_count = 1
 	jump_controller.has_double_jump = true
 	jump_controller.has_triple_jump = false
+	if debug_helper.console_debug:
+		debug_helper.log_wall_interaction("Wall Jump")
 	state_machine.transition_to(state_machine.State.WALL_JUMPING)
 	can_wall_jump = false
 
@@ -593,31 +594,39 @@ func execute_wall_jump_away() -> void:
 	jump_controller.jump_count = 1
 	jump_controller.has_double_jump = true
 	jump_controller.has_triple_jump = false
+	if debug_helper.console_debug:
+		debug_helper.log_wall_interaction("Wall Jump Away")
 	state_machine.transition_to(state_machine.State.WALL_JUMPING)
 	can_wall_jump = false
 
 func execute_dash_attack() -> void:
 	if not character_data.can_dash_attack or not character_data.can_attack:
-		print("Can't dash attack")
+		if debug_helper.console_debug:
+			debug_helper.log_ability_blocked("Dash Attack", "Not available")
 		return
 	var attack_dir = combat_controller.get_attack_direction()
 	dash_attack_direction = Vector2(attack_dir, 0)
 	
-	print("Starting dash attack in direction: ", attack_dir)
+	if debug_helper.console_debug:
+		debug_helper.log_attack("Dash Attack")
 	
 	state_machine.transition_to(state_machine.State.DASH_ATTACK)
 
 func execute_directional_big_jump(direction: Vector2) -> void:
 	if not character_data.can_big_jump:
-		print("Can't big jump")
+		if debug_helper.console_debug:
+			debug_helper.log_ability_blocked("Big Jump", "Not available")
 		return
 	big_jump_charged = false
 	big_jump_direction = direction
+	if debug_helper.console_debug:
+		debug_helper.log_jump("Big Jump")
 	state_machine.transition_to(state_machine.State.BIG_JUMPING)
 
 func perform_dash() -> void:
 	if not character_data.can_dash or not can_dash:
-		print("Can't dash")
+		if debug_helper.console_debug:
+			debug_helper.log_ability_blocked("Dash", "On cooldown or disabled")
 		return
 	
 	if stamina_current < character_data.dash_stamina_cost:
@@ -630,16 +639,18 @@ func perform_dash() -> void:
 	velocity.x = dash_direction * character_data.dash_speed
 	velocity.y = 0
 	can_dash = false
-	var old_stamina = stamina_current
 	stamina_current -= character_data.dash_stamina_cost
 	stamina_regen_timer = character_data.stamina_regen_delay
-	print("Dash stamina cost - Stamina: ", old_stamina, " -> ", stamina_current)
 	
 	if big_jump_charged:
 		timers_handler.dash_timer.wait_time = character_data.dash_duration * character_data.big_jump_dash_multiplier
 		big_jump_charged = false
+		if debug_helper.console_debug:
+			debug_helper.log_dash("charged")
 	else:
 		timers_handler.dash_timer.wait_time = character_data.dash_duration
+		if debug_helper.console_debug:
+			debug_helper.log_dash("normal")
 	
 	timers_handler.dash_timer.start()
 	timers_handler.dash_cooldown_timer.start()
@@ -654,15 +665,16 @@ func perform_air_jump() -> void:
 
 func perform_big_attack() -> void:
 	if not character_data.can_big_attack:
-		print("Can't big attack")
+		if debug_helper.console_debug:
+			debug_helper.log_ability_blocked("Big Attack", "Not available")
 		return
 	var ground = ray_casts_handler.ground_check_ray.is_colliding() or ray_casts_handler.ground_check_ray_2.is_colliding() or ray_casts_handler.ground_check_ray_3.is_colliding()
 	if stamina_current >= character_data.big_attack_stamina_cost:
-		var old_stamina = stamina_current
 		stamina_current -= character_data.big_attack_stamina_cost
 		stamina_regen_timer = character_data.stamina_regen_delay
-		print("Big attack stamina cost - Stamina: ", old_stamina, " -> ", stamina_current)
 		is_high_big_attack = not ground
+		if debug_helper.console_debug:
+			debug_helper.log_attack("Big Attack")
 		state_machine.transition_to(state_machine.State.BIG_ATTACK)
 
 func perform_charge_big_jump() -> void:
@@ -776,7 +788,8 @@ func is_wall_hanging_right() -> bool:
 
 func apply_knockback(force: Vector2) -> void:
 	if not character_data.can_get_knockback:
-		print("Can't get knockback")
+		if debug_helper.console_debug:
+			debug_helper.log_ability_blocked("Knockback", "Immune to knockback")
 		return
 		
 	if current_state == state_machine.State.BIG_ATTACK or current_state == state_machine.State.BIG_ATTACK_LANDING or current_state == state_machine.State.BIG_JUMPING or current_state == state_machine.State.KNOCKBACK or current_state == state_machine.State.DEATH or current_state == state_machine.State.DASH_ATTACK:
@@ -785,38 +798,39 @@ func apply_knockback(force: Vector2) -> void:
 	knockback_velocity = Vector2(force.x * character_data.knockback_force_horizontal_multiplier, force.y)
 	knockback_timer = character_data.knockback_duration
 	
+	if debug_helper.console_debug:
+		debug_helper.log_knockback(force)
+	
 	state_machine.transition_to(state_machine.State.KNOCKBACK)
 
 func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void:
 	if not character_data.can_get_damage:
-		print("Can't get damage")
+		if debug_helper.console_debug:
+			debug_helper.log_ability_blocked("Damage", "Immune to damage")
 		return
 		
 	if current_state == state_machine.State.DEATH:
 		return
 	
 	if character_data.invulnerability:
-		print("Damage blocked - Character has permanent invulnerability")
+		if debug_helper.console_debug:
+			debug_helper.log_ability_blocked("Damage", "Permanent invulnerability")
 		return
 	
 	if invulnerability_temp:
-		print("Damage blocked - Character is temporarily invulnerable")
+		if debug_helper.console_debug:
+			debug_helper.log_ability_blocked("Damage", "Temporary invulnerability")
 		return
 		
-	var old_health = health_current
 	health_current -= amount
 	health_current = max(0, health_current)
 	
-	var old_stamina = stamina_current
 	stamina_current -= character_data.damage_stamina_cost
 	stamina_current = max(0, stamina_current)
 	stamina_regen_timer = character_data.stamina_regen_delay
 	
-	print("Damage taken: ", amount, " - Health: ", old_health, " -> ", health_current, ", Stamina: ", old_stamina, " -> ", stamina_current)
-	
 	invulnerability_temp = true
 	timers_handler.invulnerability_timer.start()
-	print("Invulnerability activated for ", character_data.invulnerability_after_damage, " seconds")
 	
 	if character_data.can_get_knockback and current_state != state_machine.State.KNOCKBACK:
 		var knockback_direction: Vector2
@@ -850,7 +864,6 @@ func update_animations() -> void:
 			play_animation("Dash")
 		state_machine.State.BIG_ATTACK:
 			if not character_data.can_big_attack:
-				print("Can't big attack")
 				return
 			if is_high_big_attack and animation_player.current_animation != "Big_attack":
 				play_animation("Big_attack_prepare")
@@ -911,19 +924,15 @@ func _on_dash_cooldown_timer_timeout() -> void:
 
 func _on_invulnerability_timer_timeout() -> void:
 	invulnerability_temp = false
-	print("Invulnerability deactivated - Timer expired")
 
 func _on_damage_area_body_entered(_body: Node2D) -> void:
 	if not character_data.can_get_damage:
-		print("Can't get damage")
 		return
 		
 	if character_data.invulnerability:
-		print("Damage area entered but character has permanent invulnerability")
 		return
 		
 	if invulnerability_temp:
-		print("Damage area entered but character is temporarily invulnerable")
 		return
 		
 	if _body.has_method("get_damage") and _body != self:
@@ -933,6 +942,11 @@ func _on_damage_area_body_entered(_body: Node2D) -> void:
 func _on_animation_finished(anim_name: String) -> void:
 	if current_state == state_machine.State.ATTACKING:
 		combat_controller.handle_attack_animation_finished(anim_name)
+	
+	elif current_state == state_machine.State.DOUBLE_JUMPING and anim_name == "Double_jump":
+		play_animation("Jump")
+	elif current_state == state_machine.State.TRIPLE_JUMPING and anim_name == "Triple_jump":
+		play_animation("Jump")
 	elif current_state == state_machine.State.DASH_ATTACK and anim_name == "Dash_attack":
 		end_dash_attack()
 	elif current_state == state_machine.State.BIG_ATTACK and anim_name == "Big_attack_prepare":

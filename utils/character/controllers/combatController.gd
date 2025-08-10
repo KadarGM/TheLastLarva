@@ -40,7 +40,6 @@ func reset_combat_state():
 
 func can_perform_attack() -> bool:
 	if not owner_body.character_data.can_attack:
-		print("Can't attack")
 		return false
 	if not timers_handler.before_attack_timer.is_stopped():
 		return false
@@ -50,7 +49,6 @@ func can_perform_attack() -> bool:
 
 func can_perform_air_attack() -> bool:
 	if not owner_body.character_data.can_attack or not owner_body.character_data.can_air_attack:
-		print("Can't air attack")
 		return false
 	return true
 
@@ -65,7 +63,8 @@ func execute_attack():
 	else:
 		count_of_attack = 1
 	
-	print("Performing attack ", count_of_attack, " of ", max_count_of_attack)
+	if owner_body.debug_helper.console_debug:
+		owner_body.debug_helper.log_attack("Normal Attack", count_of_attack)
 	
 	state_machine.transition_to(owner_body.state_machine.State.ATTACKING)
 	
@@ -75,20 +74,16 @@ func execute_attack():
 
 func perform_attack():
 	if owner_body.stamina_current >= owner_body.character_data.attack_stamina_cost:
-		var old_stamina = owner_body.stamina_current
 		owner_body.stamina_current -= owner_body.character_data.attack_stamina_cost
 		owner_body.stamina_regen_timer = owner_body.character_data.stamina_regen_delay
-		print("Attack stamina cost - Stamina: ", old_stamina, " -> ", owner_body.stamina_current)
 		execute_attack()
 
 func perform_air_attack():
 	if not can_perform_air_attack():
 		return
 	if owner_body.stamina_current >= owner_body.character_data.attack_stamina_cost:
-		var old_stamina = owner_body.stamina_current
 		owner_body.stamina_current -= owner_body.character_data.attack_stamina_cost
 		owner_body.stamina_regen_timer = owner_body.character_data.stamina_regen_delay
-		print("Attack stamina cost - Stamina: ", old_stamina, " -> ", owner_body.stamina_current)
 		execute_attack()
 
 func on_attack_state_enter():
@@ -121,7 +116,6 @@ func process_attack_movement():
 
 func execute_damage_to_entities():
 	if not owner_body.character_data.can_take_damage:
-		print("Can't take damage")
 		return
 		
 	if owner_body.current_state == owner_body.state_machine.State.BIG_ATTACK_LANDING:
@@ -131,7 +125,6 @@ func execute_damage_to_entities():
 
 func apply_normal_attack_damage():
 	if not owner_body.character_data.can_take_damage:
-		print("Can't take damage")
 		return
 		
 	var overlapping_bodies = areas_handler.attack_area.get_overlapping_bodies()
@@ -148,8 +141,6 @@ func apply_normal_attack_damage():
 		3:
 			damage = owner_body.character_data.attack_3_dmg
 	
-	print("Applying damage - Attack type: ", owner_body.current_state, ", Damage: ", damage)
-	
 	var base_knockback_force = owner_body.character_data.knockback_force
 	if count_of_attack == 3:
 		base_knockback_force *= owner_body.character_data.knockback_force_multiplier
@@ -162,7 +153,9 @@ func apply_normal_attack_damage():
 			continue
 		
 		hit_count += 1
-		print("Hit entity: ", entity.name)
+		
+		if owner_body.debug_helper:
+			owner_body.debug_helper.log_damage_dealt(entity.name, damage, "Attack " + str(count_of_attack))
 		
 		if entity.has_method("take_damage"):
 			entity.take_damage(damage)
@@ -189,7 +182,6 @@ func apply_normal_attack_damage():
 
 func apply_big_attack_damage():
 	if not owner_body.character_data.can_take_damage:
-		print("Can't take damage")
 		return
 		
 	var front_bodies = areas_handler.big_attack_area.get_overlapping_bodies()
@@ -199,15 +191,14 @@ func apply_big_attack_damage():
 	var base_knockback_force = owner_body.character_data.knockback_force * owner_body.character_data.knockback_force_multiplier
 	var attack_dir = get_attack_direction()
 	var hit_count = 0
-	
-	print("Applying big attack damage - Damage: ", damage)
-	print("attack dir: ", attack_dir)
 
 	for entity in front_bodies:
 		if entity == owner_body:
 			continue
 		hit_count += 1
-		print("Hit entity in front area: ", entity.name)
+		
+		if owner_body.debug_helper:
+			owner_body.debug_helper.log_damage_dealt(entity.name, damage, "Big Attack Front")
 		
 		if entity.has_method("take_damage"):
 			entity.take_damage(damage)
@@ -225,7 +216,9 @@ func apply_big_attack_damage():
 		if entity == owner_body or entity in front_bodies:
 			continue
 		hit_count += 1
-		print("Hit entity in back area: ", entity.name)
+		
+		if owner_body.debug_helper:
+			owner_body.debug_helper.log_damage_dealt(entity.name, damage, "Big Attack Back")
 		
 		if entity.has_method("take_damage"):
 			entity.take_damage(damage)
@@ -251,7 +244,6 @@ func apply_dash_attack_damage(body: Node2D):
 		return
 	
 	if not owner_body.character_data.can_take_damage:
-		print("Can't take damage")
 		return
 	
 	dash_attack_damaged_entities.append(body)
@@ -260,7 +252,8 @@ func apply_dash_attack_damage(body: Node2D):
 	var base_knockback_force = owner_body.character_data.knockback_force * owner_body.character_data.knockback_force_multiplier
 	var attack_dir = get_attack_direction()
 	
-	print("Dash attack hit entity: ", body.name, " - Damage: ", damage)
+	if owner_body.debug_helper:
+		owner_body.debug_helper.log_damage_dealt(body.name, damage, "Dash Attack")
 	
 	if body.has_method("take_damage"):
 		body.take_damage(damage)
