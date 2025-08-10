@@ -8,7 +8,7 @@ class_name AreasHandler
 @export var damage_area: Area2D
 @export var attack_area: Area2D
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	attack_area_flip()
 
 func attack_area_flip() -> void:

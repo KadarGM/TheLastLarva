@@ -6104,8 +6104,8 @@ timers_handler = NodePath("Handlers/TimersHandler")
 areas_handler = NodePath("Handlers/AreasHandler")
 jump_controller = NodePath("ControllerManager/JumpController")
 combat_controller = NodePath("ControllerManager/CombatController")
-stamina_bar = NodePath("GameUI/MarginContainer/HBoxContainer/VBoxContainer/StaminaBar")
-health_bar = NodePath("GameUI/MarginContainer/HBoxContainer/VBoxContainer/HealthBar")
+stamina_bar = NodePath("GameUI/MarginContainer/StatsHBox/VBoxContainer/StaminaBar")
+health_bar = NodePath("GameUI/MarginContainer/StatsHBox/VBoxContainer/HealthBar")
 metadata/_edit_horizontal_guides_ = [69.6705]
 metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
 
@@ -6342,26 +6342,29 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="HBoxContainer" type="HBoxContainer" parent="GameUI/MarginContainer"]
+[node name="StatsHBox" type="HBoxContainer" parent="GameUI/MarginContainer"]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="GameUI/MarginContainer/HBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="GameUI/MarginContainer/StatsHBox"]
 custom_minimum_size = Vector2(300, 30)
 layout_mode = 2
 size_flags_vertical = 0
 
-[node name="StaminaBar" type="ProgressBar" parent="GameUI/MarginContainer/HBoxContainer/VBoxContainer"]
+[node name="StaminaBar" type="ProgressBar" parent="GameUI/MarginContainer/StatsHBox/VBoxContainer"]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 max_value = 1000.0
 step = 0.5
 show_percentage = false
 
-[node name="HealthBar" type="ProgressBar" parent="GameUI/MarginContainer/HBoxContainer/VBoxContainer"]
+[node name="HealthBar" type="ProgressBar" parent="GameUI/MarginContainer/StatsHBox/VBoxContainer"]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 step = 1.0
 show_percentage = false
+
+[node name="Debug" type="HBoxContainer" parent="GameUI/MarginContainer"]
+layout_mode = 2
 
 [node name="CallableStateMachine" type="Control" parent="."]
 physics_interpolation_mode = 0

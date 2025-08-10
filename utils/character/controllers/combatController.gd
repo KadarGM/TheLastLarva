@@ -44,7 +44,7 @@ func can_perform_attack() -> bool:
 		return false
 	if not timers_handler.before_attack_timer.is_stopped():
 		return false
-	if owner_body.current_state == owner_body.character_data.State.ATTACKING:
+	if owner_body.current_state == owner_body.state_machine.State.ATTACKING:
 		return false
 	return true
 
@@ -67,7 +67,7 @@ func execute_attack():
 	
 	print("Performing attack ", count_of_attack, " of ", max_count_of_attack)
 	
-	state_machine.transition_to(owner_body.character_data.State.ATTACKING)
+	state_machine.transition_to(owner_body.state_machine.State.ATTACKING)
 	
 	timers_handler.hide_weapon_timer.stop()
 	timers_handler.hide_weapon_timer.start()
@@ -97,7 +97,7 @@ func on_attack_state_enter():
 	timers_handler.damage_timer.start()
 
 func on_attack_state_exit():
-	if owner_body.current_state != owner_body.character_data.State.KNOCKBACK and owner_body.current_state != owner_body.character_data.State.DASH_ATTACK:
+	if owner_body.current_state != owner_body.state_machine.State.KNOCKBACK and owner_body.current_state != owner_body.state_machine.State.DASH_ATTACK:
 		pending_knockback_force = Vector2.ZERO
 
 func process_attack_movement():
@@ -124,7 +124,7 @@ func execute_damage_to_entities():
 		print("Can't take damage")
 		return
 		
-	if owner_body.current_state == owner_body.character_data.State.BIG_ATTACK_LANDING:
+	if owner_body.current_state == owner_body.state_machine.State.BIG_ATTACK_LANDING:
 		apply_big_attack_damage()
 	else:
 		apply_normal_attack_damage()
@@ -182,7 +182,7 @@ func apply_normal_attack_damage():
 			owner_body.character_data.jump_velocity * owner_body.character_data.knockback_reaction_jump_multiplier
 		)
 		
-		if owner_body.current_state == owner_body.character_data.State.ATTACKING:
+		if owner_body.current_state == owner_body.state_machine.State.ATTACKING:
 			pending_knockback_force = reaction_force
 		else:
 			owner_body.apply_knockback(reaction_force)
@@ -281,20 +281,20 @@ func apply_dash_attack_damage(body: Node2D):
 	pending_knockback_force = reaction_force
 
 func handle_attack_animation_finished(anim_name: String):
-	if owner_body.current_state == owner_body.character_data.State.ATTACKING:
+	if owner_body.current_state == owner_body.state_machine.State.ATTACKING:
 		if anim_name.begins_with("Attack_ground"):
 			if pending_knockback_force.length() > 0:
 				owner_body.apply_knockback(pending_knockback_force)
 				pending_knockback_force = Vector2.ZERO
 			else:
 				owner_body.velocity.x = velocity_before_attack
-				state_machine.transition_to(owner_body.character_data.State.IDLE)
+				state_machine.transition_to(owner_body.state_machine.State.IDLE)
 		elif anim_name.begins_with("Attack_air"):
 			if pending_knockback_force.length() > 0:
 				owner_body.apply_knockback(pending_knockback_force)
 				pending_knockback_force = Vector2.ZERO
 			else:
-				state_machine.transition_to(owner_body.character_data.State.JUMPING)
+				state_machine.transition_to(owner_body.state_machine.State.JUMPING)
 
 func update_attack_animations():
 	var anim_name = ""
@@ -360,7 +360,7 @@ func set_weapon_visibility(state: String):
 			body_node.sword_body.visible = false
 
 func _on_attack_area_body_entered(_body: Node2D):
-	if owner_body.current_state != owner_body.character_data.State.DASH_ATTACK or _body == owner_body:
+	if owner_body.current_state != owner_body.state_machine.State.DASH_ATTACK or _body == owner_body:
 		return
 	
 	apply_dash_attack_damage(_body)
