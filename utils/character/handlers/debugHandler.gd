@@ -24,7 +24,7 @@ var timers: bool = true
 @onready var combat_button: CheckBox = $VBoxContainer/Buttons/CombatButton
 @onready var movement_button: CheckBox = $VBoxContainer/Buttons/MovementButton
 @onready var jump_controller_button: CheckBox = $VBoxContainer/Buttons/JumpControllerButton
-@onready var wall_check_button: CheckBox = $VBoxContainer/Buttons/WallCheckButton
+@onready var rays_button: CheckBox = $VBoxContainer/Buttons/RaysButton
 @onready var areas_button: CheckBox = $VBoxContainer/Buttons/AreasButton
 @onready var timers_button: CheckBox = $VBoxContainer/Buttons/TimersButton
 @onready var console_debug_button = $VBoxContainer/Buttons/ConsoleDebugButton
@@ -34,7 +34,7 @@ var timers: bool = true
 @onready var combat_holder = $DebugHolder/HBoxContainer/Line2/VBoxContainer/Combat
 @onready var movement_holder = $DebugHolder/HBoxContainer/Line2/VBoxContainer/Movement
 @onready var jump_controller_holder = $DebugHolder/HBoxContainer/Line3/VBoxContainer/JumpController
-@onready var wall_check_holder = $DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck
+@onready var rays_holder = $DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays
 @onready var areas_holder = $DebugHolder/HBoxContainer/Line4/VBoxContainer/Areas
 @onready var timers_holder = $DebugHolder/HBoxContainer/Line4/VBoxContainer/Timers
 
@@ -73,7 +73,7 @@ func section_visibility() -> void:
 	combat_button.visible = enable_debug_button.button_pressed
 	movement_button.visible = enable_debug_button.button_pressed
 	jump_controller_button.visible = enable_debug_button.button_pressed
-	wall_check_button.visible = enable_debug_button.button_pressed
+	rays_button.visible = enable_debug_button.button_pressed
 	areas_button.visible = enable_debug_button.button_pressed
 	timers_button.visible = enable_debug_button.button_pressed
 	
@@ -82,7 +82,7 @@ func section_visibility() -> void:
 	combat_holder.visible = combat_button.button_pressed
 	movement_holder.visible = movement_button.button_pressed
 	jump_controller_holder.visible = jump_controller_button.button_pressed
-	wall_check_holder.visible = wall_check_button.button_pressed
+	rays_holder.visible = rays_button.button_pressed
 	areas_holder.visible = areas_button.button_pressed
 	timers_holder.visible = timers_button.button_pressed
 

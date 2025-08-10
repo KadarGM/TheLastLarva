@@ -13,6 +13,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(0.75, 0.75)
 script = ExtResource("2_6jifn")
 air_time_text = NodePath("HBoxContainer/Line2/VBoxContainer/Movement/EffectiveAirTime/EffectiveAirTimeText")
 effective_air_time_text = NodePath("HBoxContainer/Line2/VBoxContainer/Movement/EffectiveAirTime/EffectiveAirTimeText")
@@ -27,15 +28,15 @@ damage_applied_text = NodePath("HBoxContainer/Line2/VBoxContainer/Combat/DamageA
 velocity_before_attack_text = NodePath("HBoxContainer/Line2/VBoxContainer/Combat/VelocityBeforeAttack/VelocityBeforeAttackText")
 pending_knockback_text = NodePath("HBoxContainer/Line2/VBoxContainer/Combat/PendingKnockback/PendingKnockbackText")
 dash_attack_entities_hit_text = NodePath("HBoxContainer/Line2/VBoxContainer/Combat/DashAttackEntitiesHit/DashAttackEntitiesHitText")
-left_wall_text = NodePath("HBoxContainer/Line3/VBoxContainer/WallCheck/LeftWall/LeftWallText")
-right_wall_text = NodePath("HBoxContainer/Line3/VBoxContainer/WallCheck/RightWall/RightWallText")
-ceiling_text = NodePath("HBoxContainer/Line3/VBoxContainer/WallCheck/Ceiling/CeilingText")
-ceiling_2_text = NodePath("HBoxContainer/Line3/VBoxContainer/WallCheck/Ceiling2/Ceiling2Text")
-ceiling_3_text = NodePath("HBoxContainer/Line3/VBoxContainer/WallCheck/Ceiling3/Ceiling3Text")
-ground_check_text = NodePath("HBoxContainer/Line3/VBoxContainer/WallCheck/GroundCheck/GroundCheckText")
-near_ground_text = NodePath("HBoxContainer/Line3/VBoxContainer/WallCheck/NearGround/NearGroundText")
-near_ground_2_text = NodePath("HBoxContainer/Line3/VBoxContainer/WallCheck/NearGround2/NearGround2Text")
-near_ground_3_text = NodePath("HBoxContainer/Line3/VBoxContainer/WallCheck/NearGround3/NearGround3Text")
+left_wall_text = NodePath("HBoxContainer/Line3/VBoxContainer/Rays/LeftWall/LeftWallText")
+right_wall_text = NodePath("HBoxContainer/Line3/VBoxContainer/Rays/RightWall/RightWallText")
+ceiling_text = NodePath("HBoxContainer/Line3/VBoxContainer/Rays/Ceiling/CeilingText")
+ceiling_2_text = NodePath("HBoxContainer/Line3/VBoxContainer/Rays/Ceiling2/Ceiling2Text")
+ceiling_3_text = NodePath("HBoxContainer/Line3/VBoxContainer/Rays/Ceiling3/Ceiling3Text")
+ground_check_text = NodePath("HBoxContainer/Line3/VBoxContainer/Rays/GroundCheck/GroundCheckText")
+near_ground_text = NodePath("HBoxContainer/Line3/VBoxContainer/Rays/NearGround/NearGroundText")
+near_ground_2_text = NodePath("HBoxContainer/Line3/VBoxContainer/Rays/NearGround2/NearGround2Text")
+near_ground_3_text = NodePath("HBoxContainer/Line3/VBoxContainer/Rays/NearGround3/NearGround3Text")
 jump_count_text = NodePath("HBoxContainer/Line3/VBoxContainer/JumpController/JumpCount/JumpCountText")
 has_double_jump_text = NodePath("HBoxContainer/Line3/VBoxContainer/JumpController/HasDoubleJump/HasDoubleJumpText")
 has_triple_jump_text = NodePath("HBoxContainer/Line3/VBoxContainer/JumpController/HasTripleJump/HasTripleJumpText")
@@ -434,7 +435,7 @@ size_flags_horizontal = 3
 
 [node name="JumpController" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/JumpController"]
 layout_mode = 2
-text = "MOVEMENT"
+text = "JUMP CONTROLLER"
 
 [node name="JumpCount" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/JumpController"]
 layout_mode = 2
@@ -496,102 +497,102 @@ text = "Is Triple Jump Held:"
 [node name="IsTripleJumpHeldText" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/JumpController/IsTripleJumpHeld"]
 layout_mode = 2
 
-[node name="WallCheck" type="VBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer"]
+[node name="Rays" type="VBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="WallCheck" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck"]
+[node name="Rays" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays"]
 layout_mode = 2
-text = "WALL CHECK"
+text = "RAYS"
 
-[node name="LeftWall" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck"]
+[node name="LeftWall" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays"]
 layout_mode = 2
 
-[node name="LeftWallLabel" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/LeftWall"]
+[node name="LeftWallLabel" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/LeftWall"]
 layout_mode = 2
 text = "Left Wall:"
 
-[node name="LeftWallText" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/LeftWall"]
+[node name="LeftWallText" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/LeftWall"]
 layout_mode = 2
 
-[node name="RightWall" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck"]
+[node name="RightWall" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays"]
 layout_mode = 2
 
-[node name="RightWallLabel" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/RightWall"]
+[node name="RightWallLabel" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/RightWall"]
 layout_mode = 2
 text = "Right Wall:"
 
-[node name="RightWallText" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/RightWall"]
+[node name="RightWallText" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/RightWall"]
 layout_mode = 2
 
-[node name="Ceiling" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck"]
+[node name="Ceiling" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays"]
 layout_mode = 2
 
-[node name="CeilingLabel" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/Ceiling"]
+[node name="CeilingLabel" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/Ceiling"]
 layout_mode = 2
 text = "Ceiling:"
 
-[node name="CeilingText" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/Ceiling"]
+[node name="CeilingText" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/Ceiling"]
 layout_mode = 2
 
-[node name="Ceiling2" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck"]
+[node name="Ceiling2" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays"]
 layout_mode = 2
 
-[node name="Ceiling2Label" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/Ceiling2"]
+[node name="Ceiling2Label" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/Ceiling2"]
 layout_mode = 2
 text = "Ceiling 2:"
 
-[node name="Ceiling2Text" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/Ceiling2"]
+[node name="Ceiling2Text" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/Ceiling2"]
 layout_mode = 2
 
-[node name="Ceiling3" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck"]
+[node name="Ceiling3" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays"]
 layout_mode = 2
 
-[node name="Ceiling3Label" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/Ceiling3"]
+[node name="Ceiling3Label" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/Ceiling3"]
 layout_mode = 2
 text = "Ceiling 3:"
 
-[node name="Ceiling3Text" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/Ceiling3"]
+[node name="Ceiling3Text" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/Ceiling3"]
 layout_mode = 2
 
-[node name="GroundCheck" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck"]
+[node name="GroundCheck" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays"]
 layout_mode = 2
 
-[node name="GroundCheckLabel" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/GroundCheck"]
+[node name="GroundCheckLabel" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/GroundCheck"]
 layout_mode = 2
 text = "Ground Check:"
 
-[node name="GroundCheckText" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/GroundCheck"]
+[node name="GroundCheckText" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/GroundCheck"]
 layout_mode = 2
 
-[node name="NearGround" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck"]
+[node name="NearGround" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays"]
 layout_mode = 2
 
-[node name="NearGroundLabel" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/NearGround"]
+[node name="NearGroundLabel" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/NearGround"]
 layout_mode = 2
 text = "Near Ground:"
 
-[node name="NearGroundText" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/NearGround"]
+[node name="NearGroundText" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/NearGround"]
 layout_mode = 2
 
-[node name="NearGround2" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck"]
+[node name="NearGround2" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays"]
 layout_mode = 2
 
-[node name="NearGround2Label" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/NearGround2"]
+[node name="NearGround2Label" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/NearGround2"]
 layout_mode = 2
 text = "Near Ground 2:"
 
-[node name="NearGround2Text" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/NearGround2"]
+[node name="NearGround2Text" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/NearGround2"]
 layout_mode = 2
 
-[node name="NearGround3" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck"]
+[node name="NearGround3" type="HBoxContainer" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays"]
 layout_mode = 2
 
-[node name="NearGround3Label" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/NearGround3"]
+[node name="NearGround3Label" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/NearGround3"]
 layout_mode = 2
 text = "Near Ground 3:"
 
-[node name="NearGround3Text" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/WallCheck/NearGround3"]
+[node name="NearGround3Text" type="Label" parent="DebugHolder/HBoxContainer/Line3/VBoxContainer/Rays/NearGround3"]
 layout_mode = 2
 
 [node name="Line4" type="MarginContainer" parent="DebugHolder/HBoxContainer"]
@@ -823,10 +824,10 @@ button_pressed = true
 text = "Jump Controller"
 flat = true
 
-[node name="WallCheckButton" type="CheckBox" parent="VBoxContainer/Buttons"]
+[node name="RaysButton" type="CheckBox" parent="VBoxContainer/Buttons"]
 layout_mode = 2
 button_pressed = true
-text = "Wall Check"
+text = "Rays"
 flat = true
 
 [node name="AreasButton" type="CheckBox" parent="VBoxContainer/Buttons"]
