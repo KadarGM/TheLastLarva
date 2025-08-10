@@ -7,6 +7,7 @@ class_name CombatController
 @export var body_node: BodyNode
 @export var areas_handler: AreasHandler
 @export var timers_handler: TimersHandler
+@export var stats_controller: StatsController
 
 var count_of_attack: int = 0
 var velocity_before_attack: float = 0.0
@@ -21,6 +22,9 @@ func setup(body: CharacterManager, sm: CallableStateMachine, anim_player: Animat
 	body_node = bn
 	areas_handler = ah
 	timers_handler = th
+	
+	if owner_body.stats_controller:
+		stats_controller = owner_body.stats_controller
 	
 	setup_signals()
 	set_weapon_visibility("hide")
@@ -73,17 +77,15 @@ func execute_attack():
 	timers_handler.before_attack_timer.start()
 
 func perform_attack():
-	if owner_body.stamina_current >= owner_body.character_data.attack_stamina_cost:
-		owner_body.stamina_current -= owner_body.character_data.attack_stamina_cost
-		owner_body.stamina_regen_timer = owner_body.character_data.stamina_regen_delay
+	if stats_controller and stats_controller.is_stamina_available(owner_body.character_data.attack_stamina_cost):
+		stats_controller.consume_stamina(owner_body.character_data.attack_stamina_cost)
 		execute_attack()
 
 func perform_air_attack():
 	if not can_perform_air_attack():
 		return
-	if owner_body.stamina_current >= owner_body.character_data.attack_stamina_cost:
-		owner_body.stamina_current -= owner_body.character_data.attack_stamina_cost
-		owner_body.stamina_regen_timer = owner_body.character_data.stamina_regen_delay
+	if stats_controller and stats_controller.is_stamina_available(owner_body.character_data.attack_stamina_cost):
+		stats_controller.consume_stamina(owner_body.character_data.attack_stamina_cost)
 		execute_attack()
 
 func on_attack_state_enter():

@@ -123,22 +123,22 @@ func update_ui_debug() -> void:
 		debug_holder.stamina_regen_timer_text.text = str("%.2f" % character.stamina_regen_timer)
 	
 	if debug_holder.big_jump_charged_text:
-		debug_holder.big_jump_charged_text.text = str(character.big_jump_charged)
+		debug_holder.big_jump_charged_text.text = str(character.movement_controller.big_jump_charged)
 	
 	if debug_holder.can_big_jump_text:
-		debug_holder.can_big_jump_text.text = str(character.can_big_jump)
+		debug_holder.can_big_jump_text.text = str(character.movement_controller.can_big_jump)
 	
 	if debug_holder.can_dash_text:
-		debug_holder.can_dash_text.text = str(character.can_dash)
+		debug_holder.can_dash_text.text = str(character.movement_controller.can_dash)
 	
 	if debug_holder.can_wall_jump_text:
-		debug_holder.can_wall_jump_text.text = str(character.can_wall_jump)
+		debug_holder.can_wall_jump_text.text = str(character.movement_controller.can_wall_jump)
 	
 	if debug_holder.has_wall_jumped_text:
-		debug_holder.has_wall_jumped_text.text = str(character.has_wall_jumped)
+		debug_holder.has_wall_jumped_text.text = str(character.movement_controller.has_wall_jumped)
 	
 	if debug_holder.was_on_wall_text:
-		debug_holder.was_on_wall_text.text = str(character.was_on_wall)
+		debug_holder.was_on_wall_text.text = str(character.movement_controller.was_on_wall)
 	
 	if debug_holder.invulnerable_text:
 		debug_holder.invulnerable_text.text = str(character.invulnerability_temp)
@@ -163,28 +163,28 @@ func update_ui_debug() -> void:
 			debug_holder.dash_attack_entities_hit_text.text = str(character.combat_controller.dash_attack_damaged_entities.size())
 	
 	if debug_holder.air_time_text:
-		debug_holder.air_time_text.text = str("%.2f" % character.air_time)
+		debug_holder.air_time_text.text = str("%.2f" % character.movement_controller.air_time)
 	
 	if debug_holder.effective_air_time_text:
-		debug_holder.effective_air_time_text.text = str("%.2f" % character.effective_air_time)
+		debug_holder.effective_air_time_text.text = str("%.2f" % character.movement_controller.effective_air_time)
 	
 	if debug_holder.big_attack_pending_text:
-		debug_holder.big_attack_pending_text.text = str(character.big_attack_pending)
+		debug_holder.big_attack_pending_text.text = str(character.movement_controller.big_attack_pending)
 	
 	if debug_holder.is_high_big_attack_text:
-		debug_holder.is_high_big_attack_text.text = str(character.is_high_big_attack)
+		debug_holder.is_high_big_attack_text.text = str(character.movement_controller.is_high_big_attack)
 	
 	if debug_holder.big_jump_direction_text:
-		debug_holder.big_jump_direction_text.text = str(character.big_jump_direction)
+		debug_holder.big_jump_direction_text.text = str(character.movement_controller.big_jump_direction)
 	
 	if debug_holder.dash_attack_direction_text:
-		debug_holder.dash_attack_direction_text.text = str(character.dash_attack_direction)
+		debug_holder.dash_attack_direction_text.text = str(character.movement_controller.dash_attack_direction)
 	
 	if debug_holder.knockback_velocity_text:
-		debug_holder.knockback_velocity_text.text = str(character.knockback_velocity)
+		debug_holder.knockback_velocity_text.text = str(character.movement_controller.knockback_velocity)
 	
 	if debug_holder.knockback_timer_text:
-		debug_holder.knockback_timer_text.text = str("%.2f" % character.knockback_timer)
+		debug_holder.knockback_timer_text.text = str("%.2f" % character.movement_controller.knockback_timer)
 	
 	if character.jump_controller:
 		if debug_holder.jump_count_text:
@@ -299,29 +299,29 @@ func check_changes() -> void:
 			log_velocity_change(previous_velocity, character.velocity)
 			previous_velocity = character.velocity
 	
-	if character.big_jump_charged != previous_big_jump_charged:
-		log_big_jump_charged_change(previous_big_jump_charged, character.big_jump_charged)
-		previous_big_jump_charged = character.big_jump_charged
+	if character.movement_controller.big_jump_charged != previous_big_jump_charged:
+		log_big_jump_charged_change(previous_big_jump_charged, character.movement_controller.big_jump_charged)
+		previous_big_jump_charged = character.movement_controller.big_jump_charged
 	
-	if character.can_dash != previous_can_dash:
-		log_can_dash_change(previous_can_dash, character.can_dash)
-		previous_can_dash = character.can_dash
+	if character.movement_controller.can_dash != previous_can_dash:
+		log_can_dash_change(previous_can_dash, character.movement_controller.can_dash)
+		previous_can_dash = character.movement_controller.can_dash
 	
-	if character.can_big_jump != previous_can_big_jump:
-		log_can_big_jump_change(previous_can_big_jump, character.can_big_jump)
-		previous_can_big_jump = character.can_big_jump
+	if character.movement_controller.can_big_jump != previous_can_big_jump:
+		log_can_big_jump_change(previous_can_big_jump, character.movement_controller.can_big_jump)
+		previous_can_big_jump = character.movement_controller.can_big_jump
 	
-	if character.can_wall_jump != previous_can_wall_jump:
-		log_can_wall_jump_change(previous_can_wall_jump, character.can_wall_jump)
-		previous_can_wall_jump = character.can_wall_jump
+	if character.movement_controller.can_wall_jump != previous_can_wall_jump:
+		log_can_wall_jump_change(previous_can_wall_jump, character.movement_controller.can_wall_jump)
+		previous_can_wall_jump = character.movement_controller.can_wall_jump
 	
-	if character.health_current != previous_health:
-		log_health_change(previous_health, character.health_current)
-		previous_health = character.health_current
+	if character.stats_controller.health_current != previous_health:
+		log_health_change(previous_health, character.stats_controller.health_current)
+		previous_health = character.stats_controller.health_current
 	
-	if abs(character.stamina_current - previous_stamina) > 10:
-		log_stamina_change(previous_stamina, character.stamina_current)
-		previous_stamina = character.stamina_current
+	if abs(character.stats_controller.stamina_current - previous_stamina) > 10:
+		log_stamina_change(previous_stamina, character.stats_controller.stamina_current)
+		previous_stamina = character.stats_controller.stamina_current
 	
 	if character.invulnerability_temp != previous_invulnerability:
 		log_invulnerability_change(previous_invulnerability, character.invulnerability_temp)
