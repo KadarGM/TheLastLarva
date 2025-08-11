@@ -118,7 +118,10 @@ func process_wall_slide(_delta) -> void:
 	var big_jump_executed = false
 	if big_jump_controller:
 		big_jump_executed = big_jump_controller.process_big_jump_input()
-
+	
+	if Input.is_action_pressed("W_jump") and can_wall_jump and not big_jump_executed and input_direction != 0:
+		return
+	
 	if Input.is_action_just_pressed("W_jump") and can_wall_jump and not big_jump_executed:
 		if character_data.can_wall_jump:
 			execute_wall_jump()
@@ -128,6 +131,7 @@ func process_wall_slide(_delta) -> void:
 		if (input_direction > 0 and wall_direction > 0) or (input_direction < 0 and wall_direction < 0):
 			execute_wall_jump_away()
 			return
+
 	
 	if big_jump_controller:
 		big_jump_controller.perform_wall_charge_attempt()
@@ -135,6 +139,7 @@ func process_wall_slide(_delta) -> void:
 	if Input.is_action_just_pressed("J_dash"):
 		if character_data.can_dash:
 			perform_dash()
+
 
 func process_charge_jump() -> void:
 	if not Input.is_action_pressed("J_dash"):
@@ -408,6 +413,8 @@ func on_state_enter(new_state) -> void:
 		state_machine.State.WALL_SLIDING:
 			jump_controller.on_wall_jump()
 			can_wall_jump = true
+		state_machine.State.WALL_WALKING:
+			can_wall_jump = false
 		state_machine.State.DASH_ATTACK:
 			combat_controller.dash_attack_damaged_entities.clear()
 		state_machine.State.BIG_ATTACK:

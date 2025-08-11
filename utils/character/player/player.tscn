@@ -1,4 +1,4 @@
-[gd_scene load_steps=55 format=3 uid="uid://df1dloofeb6le"]
+[gd_scene load_steps=56 format=3 uid="uid://df1dloofeb6le"]
 
 [ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://utils/character/player/playerManager.gd" id="1_b2kln"]
 [ext_resource type="Resource" uid="uid://d125kkggxi83n" path="res://utils/character/player/Player.tres" id="2_we0b7"]
@@ -26,6 +26,7 @@
 [ext_resource type="Script" uid="uid://di4qt65lho3yt" path="res://utils/character/controllers/movementController.gd" id="20_w5qsj"]
 [ext_resource type="Script" uid="uid://cnnuxdvjhvw2j" path="res://utils/character/controllers/statsController.gd" id="22_idh7e"]
 [ext_resource type="Script" uid="uid://dpmgvpy6tfsfs" path="res://utils/character/controllers/bigJumpController.gd" id="23_ncn8l"]
+[ext_resource type="Script" uid="uid://dwa3hpiumihn" path="res://utils/character/controllers/inputController.gd" id="24_4utgv"]
 
 [sub_resource type="Animation" id="Animation_o5lcw"]
 resource_name = "Attack_air_1"
@@ -6458,6 +6459,13 @@ ray_casts_handler = NodePath("../../Handlers/RayCastsHandler")
 stats_controller = NodePath("../StatsController")
 debug_helper = NodePath("../../DebugHelper")
 metadata/_custom_type_script = "uid://dpmgvpy6tfsfs"
+
+[node name="InputController" type="Control" parent="ControllerManager"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("24_4utgv")
+metadata/_custom_type_script = "uid://dwa3hpiumihn"
 
 [node name="Handlers" type="Control" parent="."]
 layout_mode = 3
