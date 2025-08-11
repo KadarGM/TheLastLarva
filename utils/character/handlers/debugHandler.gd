@@ -123,10 +123,10 @@ func update_ui_debug() -> void:
 		debug_holder.stamina_regen_timer_text.text = str("%.2f" % character.stamina_regen_timer)
 	
 	if debug_holder.big_jump_charged_text:
-		debug_holder.big_jump_charged_text.text = str(character.movement_controller.big_jump_charged)
+		debug_holder.big_jump_charged_text.text = str(character.big_jump_controller.big_jump_charged)
 	
 	if debug_holder.can_big_jump_text:
-		debug_holder.can_big_jump_text.text = str(character.movement_controller.can_big_jump)
+		debug_holder.can_big_jump_text.text = str(character.big_jump_controller.can_big_jump)
 	
 	if debug_holder.can_dash_text:
 		debug_holder.can_dash_text.text = str(character.movement_controller.can_dash)
@@ -175,7 +175,7 @@ func update_ui_debug() -> void:
 		debug_holder.is_high_big_attack_text.text = str(character.movement_controller.is_high_big_attack)
 	
 	if debug_holder.big_jump_direction_text:
-		debug_holder.big_jump_direction_text.text = str(character.movement_controller.big_jump_direction)
+		debug_holder.big_jump_direction_text.text = str(character.big_jump_controller.big_jump_direction)
 	
 	if debug_holder.dash_attack_direction_text:
 		debug_holder.dash_attack_direction_text.text = str(character.movement_controller.dash_attack_direction)
@@ -299,17 +299,17 @@ func check_changes() -> void:
 			log_velocity_change(previous_velocity, character.velocity)
 			previous_velocity = character.velocity
 	
-	if character.movement_controller.big_jump_charged != previous_big_jump_charged:
-		log_big_jump_charged_change(previous_big_jump_charged, character.movement_controller.big_jump_charged)
-		previous_big_jump_charged = character.movement_controller.big_jump_charged
+	if character.big_jump_controller.big_jump_charged != previous_big_jump_charged:
+		log_big_jump_charged_change(previous_big_jump_charged, character.big_jump_controller.big_jump_charged)
+		previous_big_jump_charged = character.big_jump_controller.big_jump_charged
 	
 	if character.movement_controller.can_dash != previous_can_dash:
 		log_can_dash_change(previous_can_dash, character.movement_controller.can_dash)
 		previous_can_dash = character.movement_controller.can_dash
 	
-	if character.movement_controller.can_big_jump != previous_can_big_jump:
-		log_can_big_jump_change(previous_can_big_jump, character.movement_controller.can_big_jump)
-		previous_can_big_jump = character.movement_controller.can_big_jump
+	if character.big_jump_controller.can_big_jump != previous_can_big_jump:
+		log_can_big_jump_change(previous_can_big_jump, character.big_jump_controller.can_big_jump)
+		previous_can_big_jump = character.big_jump_controller.can_big_jump
 	
 	if character.movement_controller.can_wall_jump != previous_can_wall_jump:
 		log_can_wall_jump_change(previous_can_wall_jump, character.movement_controller.can_wall_jump)

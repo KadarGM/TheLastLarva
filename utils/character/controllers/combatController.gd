@@ -77,12 +77,16 @@ func execute_attack():
 	timers_handler.before_attack_timer.start()
 
 func perform_attack():
+	if not can_perform_attack():
+		return
 	if stats_controller and stats_controller.is_stamina_available(owner_body.character_data.attack_stamina_cost):
 		stats_controller.consume_stamina(owner_body.character_data.attack_stamina_cost)
 		execute_attack()
 
 func perform_air_attack():
 	if not can_perform_air_attack():
+		return
+	if not can_perform_attack():
 		return
 	if stats_controller and stats_controller.is_stamina_available(owner_body.character_data.attack_stamina_cost):
 		stats_controller.consume_stamina(owner_body.character_data.attack_stamina_cost)

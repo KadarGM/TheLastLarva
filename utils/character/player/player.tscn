@@ -1,4 +1,4 @@
-[gd_scene load_steps=54 format=3 uid="uid://df1dloofeb6le"]
+[gd_scene load_steps=55 format=3 uid="uid://df1dloofeb6le"]
 
 [ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://utils/character/player/playerManager.gd" id="1_b2kln"]
 [ext_resource type="Resource" uid="uid://d125kkggxi83n" path="res://utils/character/player/Player.tres" id="2_we0b7"]
@@ -25,6 +25,7 @@
 [ext_resource type="Script" uid="uid://ciuxhepgisrjw" path="res://utils/character/handlers/rayCastsHandler.gd" id="19_ngkt6"]
 [ext_resource type="Script" uid="uid://di4qt65lho3yt" path="res://utils/character/controllers/movementController.gd" id="20_w5qsj"]
 [ext_resource type="Script" uid="uid://cnnuxdvjhvw2j" path="res://utils/character/controllers/statsController.gd" id="22_idh7e"]
+[ext_resource type="Script" uid="uid://dpmgvpy6tfsfs" path="res://utils/character/controllers/bigJumpController.gd" id="23_ncn8l"]
 
 [sub_resource type="Animation" id="Animation_o5lcw"]
 resource_name = "Attack_air_1"
@@ -6093,7 +6094,7 @@ height = 180.182
 radius = 165.967
 height = 483.582
 
-[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("body_node", "animation_player", "camera_2d", "state_machine", "ray_casts_handler", "timers_handler", "areas_handler", "movement_controller", "jump_controller", "combat_controller", "stats_controller", "stamina_bar", "health_bar", "debug_helper") groups=["Player"]]
+[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("body_node", "animation_player", "camera_2d", "state_machine", "ray_casts_handler", "timers_handler", "areas_handler", "movement_controller", "jump_controller", "combat_controller", "stats_controller", "big_jump_controller", "stamina_bar", "health_bar", "debug_helper") groups=["Player"]]
 z_index = -100
 collision_layer = 2
 script = ExtResource("1_b2kln")
@@ -6109,6 +6110,7 @@ movement_controller = NodePath("ControllerManager/MovementController")
 jump_controller = NodePath("ControllerManager/JumpController")
 combat_controller = NodePath("ControllerManager/CombatController")
 stats_controller = NodePath("ControllerManager/StatsController")
+big_jump_controller = NodePath("ControllerManager/BigJumpController")
 stamina_bar = NodePath("GameUI/MarginContainer/StatsHBox/VBoxContainer/StaminaBar")
 health_bar = NodePath("GameUI/MarginContainer/StatsHBox/VBoxContainer/HealthBar")
 debug_helper = NodePath("DebugHelper")
@@ -6395,7 +6397,7 @@ owner_body = NodePath("../..")
 state_machine = NodePath("../../CallableStateMachine")
 metadata/_custom_type_script = "uid://bn7n06imbkeei"
 
-[node name="MovementController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body", "state_machine", "body_node", "animation_player", "ray_casts_handler", "timers_handler", "jump_controller", "combat_controller", "stats_controller")]
+[node name="MovementController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body", "state_machine", "body_node", "animation_player", "ray_casts_handler", "timers_handler", "jump_controller", "combat_controller", "stats_controller", "big_jump_controller")]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6410,9 +6412,10 @@ timers_handler = NodePath("../../Handlers/TimersHandler")
 jump_controller = NodePath("../JumpController")
 combat_controller = NodePath("../CombatController")
 stats_controller = NodePath("../StatsController")
+big_jump_controller = NodePath("../BigJumpController")
 metadata/_custom_type_script = "uid://di4qt65lho3yt"
 
-[node name="CombatController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body", "state_machine", "animation_player", "body_node", "areas_handler", "timers_handler")]
+[node name="CombatController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body", "state_machine", "animation_player", "body_node", "areas_handler", "timers_handler", "stats_controller")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -6424,6 +6427,7 @@ animation_player = NodePath("../../AnimationPlayer")
 body_node = NodePath("../../Body")
 areas_handler = NodePath("../../Handlers/AreasHandler")
 timers_handler = NodePath("../../Handlers/TimersHandler")
+stats_controller = NodePath("../StatsController")
 metadata/_custom_type_script = "uid://0cd78ehdvt30"
 
 [node name="StatsController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body", "state_machine", "timers_handler", "areas_handler", "movement_controller", "debug_helper")]
@@ -6440,6 +6444,20 @@ areas_handler = NodePath("../../Handlers/AreasHandler")
 movement_controller = NodePath("../MovementController")
 debug_helper = NodePath("../../DebugHelper")
 metadata/_custom_type_script = "uid://cnnuxdvjhvw2j"
+
+[node name="BigJumpController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body", "state_machine", "timers_handler", "ray_casts_handler", "stats_controller", "debug_helper")]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("23_ncn8l")
+owner_body = NodePath("../..")
+state_machine = NodePath("../../CallableStateMachine")
+character_data = ExtResource("2_we0b7")
+timers_handler = NodePath("../../Handlers/TimersHandler")
+ray_casts_handler = NodePath("../../Handlers/RayCastsHandler")
+stats_controller = NodePath("../StatsController")
+debug_helper = NodePath("../../DebugHelper")
+metadata/_custom_type_script = "uid://dpmgvpy6tfsfs"
 
 [node name="Handlers" type="Control" parent="."]
 layout_mode = 3
@@ -6488,11 +6506,11 @@ position = Vector2(-60.9337, 0)
 target_position = Vector2(0, 800)
 
 [node name="LeftWallRay" type="RayCast2D" parent="Handlers/RayCastsHandler"]
-position = Vector2(0.513153, -77.5973)
+position = Vector2(0.513153, -172)
 target_position = Vector2(-100, 0)
 
 [node name="RightWallRay" type="RayCast2D" parent="Handlers/RayCastsHandler"]
-position = Vector2(0.513153, -77.5973)
+position = Vector2(0.513153, -172)
 target_position = Vector2(100, 0)
 
 [node name="CeilingRay" type="RayCast2D" parent="Handlers/RayCastsHandler"]

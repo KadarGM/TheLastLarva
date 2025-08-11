@@ -18,6 +18,7 @@ class_name CharacterManager
 @export var jump_controller: JumpController
 @export var combat_controller: CombatController
 @export var stats_controller: StatsController
+@export var big_jump_controller: BigJumpController
 
 @export_category("UI")
 @export var stamina_bar: ProgressBar
@@ -84,6 +85,8 @@ func setup_controllers():
 		stats_controller.setup(self, character_data, state_machine, timers_handler, areas_handler, movement_controller, debug_helper)
 		stats_controller.health_changed.connect(_on_health_changed)
 		stats_controller.stamina_changed.connect(_on_stamina_changed)
+	if big_jump_controller:
+		big_jump_controller.setup(self, state_machine, character_data, timers_handler, ray_casts_handler, stats_controller, debug_helper)
 	if state_machine:
 		state_machine.state_changed.connect(_on_state_changed)
 		state_machine.transition_to(state_machine.State.IDLE)
@@ -98,7 +101,8 @@ func _process(delta: float) -> void:
 	if stats_controller:
 		stats_controller.process_stats(delta)
 	if current_state != state_machine.State.DEATH:
-		movement_controller.update_big_jump_stamina(delta)
+		if big_jump_controller:
+			big_jump_controller.update_big_jump_stamina(delta)
 		movement_controller.update_dash_attack_stamina(delta)
 	update_ui()
 
@@ -144,7 +148,6 @@ func enter_new_state(new_state) -> void:
 			jump_controller.reset_jump_state()
 		state_machine.State.STUNNED:
 			velocity.x = 0
-			movement_controller.cancel_big_jump_charge()
 		state_machine.State.JUMPING:
 			if previous_state == state_machine.State.IDLE or previous_state == state_machine.State.WALKING:
 				jump_controller.has_double_jump = true
@@ -189,36 +192,38 @@ func process_ground_input() -> void:
 	if current_state == state_machine.State.STUNNED:
 		return
 	
-	movement_controller.process_big_jump_input()
+	var big_jump_executed = false
+	if big_jump_controller:
+		big_jump_executed = big_jump_controller.process_big_jump_input()
 	
-	if Input.is_action_just_pressed("W_jump"):
-		if movement_controller.big_jump_charged and Input.is_action_pressed("J_dash"):
-			movement_controller.execute_directional_big_jump(Vector2(0, -1))
-		else:
-			movement_controller.execute_jump()
+	if Input.is_action_just_pressed("W_jump") and not big_jump_executed:
+		movement_controller.execute_jump()
 	
 	if Input.is_action_just_pressed("J_dash") and velocity.x != 0:
 		movement_controller.perform_dash()
 	
 	if Input.is_action_just_pressed("L_attack"):
-		if movement_controller.big_jump_charged and Input.is_action_pressed("J_dash"):
+		if big_jump_controller and big_jump_controller.is_charged() and Input.is_action_pressed("J_dash"):
 			movement_controller.execute_dash_attack()
 		else:
 			combat_controller.perform_attack()
 	
-	movement_controller.perform_charge_big_jump()
+	if big_jump_controller:
+		big_jump_controller.perform_charge_attempt()
 
 func process_air_input() -> void:
-	if Input.is_action_just_pressed("W_jump"):
-		movement_controller.perform_air_jump()
+	var big_jump_executed = false
+	if big_jump_controller:
+		big_jump_executed = big_jump_controller.process_big_jump_input()
 	
-	movement_controller.process_big_jump_input()
+	if Input.is_action_just_pressed("W_jump") and not big_jump_executed:
+		movement_controller.perform_air_jump()
 	
 	if Input.is_action_just_pressed("J_dash") and current_state != state_machine.State.ATTACKING:
 		movement_controller.perform_dash()
 	
 	if Input.is_action_just_pressed("L_attack"):
-		if movement_controller.big_jump_charged and Input.is_action_pressed("J_dash"):
+		if big_jump_controller and big_jump_controller.is_charged() and Input.is_action_pressed("J_dash"):
 			movement_controller.execute_dash_attack()
 		else:
 			combat_controller.perform_air_attack()
@@ -250,7 +255,7 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 func update_animations() -> void:
 	match current_state:
 		state_machine.State.IDLE:
-			if movement_controller.big_jump_charged and Input.is_action_pressed("J_dash"):
+			if big_jump_controller and big_jump_controller.is_charged() and Input.is_action_pressed("J_dash"):
 				play_animation("Big_jump_charge")
 			else:
 				play_animation("Idle")
@@ -317,10 +322,10 @@ func _on_stamina_changed(_new_stamina: float) -> void:
 	pass
 
 func _on_big_jump_timer_timeout() -> void:
-	movement_controller.on_big_jump_timer_timeout()
+	pass
 
 func _on_big_jump_cooldown_timer_timeout() -> void:
-	movement_controller.on_big_jump_cooldown_timer_timeout()
+	pass
 
 func _on_stun_timer_timeout() -> void:
 	state_machine.transition_to(state_machine.State.IDLE)

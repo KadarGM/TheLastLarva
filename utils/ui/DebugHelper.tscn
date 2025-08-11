@@ -796,49 +796,41 @@ flat = true
 
 [node name="DebugInfoButton" type="CheckBox" parent="VBoxContainer/Buttons"]
 layout_mode = 2
-button_pressed = true
 text = "Debug Info"
 flat = true
 
 [node name="StatesButton" type="CheckBox" parent="VBoxContainer/Buttons"]
 layout_mode = 2
-button_pressed = true
 text = "States"
 flat = true
 
 [node name="CombatButton" type="CheckBox" parent="VBoxContainer/Buttons"]
 layout_mode = 2
-button_pressed = true
 text = "Combat"
 flat = true
 
 [node name="MovementButton" type="CheckBox" parent="VBoxContainer/Buttons"]
 layout_mode = 2
-button_pressed = true
 text = "Movement"
 flat = true
 
 [node name="JumpControllerButton" type="CheckBox" parent="VBoxContainer/Buttons"]
 layout_mode = 2
-button_pressed = true
 text = "Jump Controller"
 flat = true
 
 [node name="RaysButton" type="CheckBox" parent="VBoxContainer/Buttons"]
 layout_mode = 2
-button_pressed = true
 text = "Rays"
 flat = true
 
 [node name="AreasButton" type="CheckBox" parent="VBoxContainer/Buttons"]
 layout_mode = 2
-button_pressed = true
 text = "Areas"
 flat = true
 
 [node name="TimersButton" type="CheckBox" parent="VBoxContainer/Buttons"]
 layout_mode = 2
-button_pressed = true
 text = "Timers"
 flat = true
 

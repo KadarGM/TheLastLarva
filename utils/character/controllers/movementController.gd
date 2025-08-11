@@ -11,13 +11,9 @@ class_name MovementController
 @export var jump_controller: JumpController
 @export var combat_controller: CombatController
 @export var stats_controller: StatsController
+@export var big_jump_controller: BigJumpController
 
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
-
-var big_jump_charged: bool = false
-var big_jump_direction: Vector2 = Vector2.ZERO
-var can_big_jump: bool = true
-var can_charge_big_jump: bool = false
 
 var dash_attack_direction: Vector2 = Vector2.ZERO
 var can_dash: bool = true
@@ -47,6 +43,8 @@ func setup(body: CharacterManager, sm: CallableStateMachine, data: CharacterData
 	
 	if owner_body.stats_controller:
 		stats_controller = owner_body.stats_controller
+	if owner_body.big_jump_controller:
+		big_jump_controller = owner_body.big_jump_controller
 
 func process_physics(delta: float) -> void:
 	if owner_body.current_state == state_machine.State.KNOCKBACK:
@@ -78,7 +76,8 @@ func process_state_movement(delta: float, input_direction: float) -> void:
 		state_machine.State.CHARGING_JUMP:
 			process_charge_jump()
 		state_machine.State.BIG_JUMPING:
-			process_big_jump_movement()
+			if big_jump_controller:
+				big_jump_controller.process_big_jump_movement()
 		state_machine.State.BIG_ATTACK:
 			process_air_movement(input_direction)
 		state_machine.State.BIG_ATTACK_LANDING:
@@ -94,7 +93,8 @@ func process_ground_movement(input_direction: float) -> void:
 	if input_direction:
 		owner_body.velocity.x = input_direction * character_data.speed
 		if owner_body.current_state == state_machine.State.CHARGING_JUMP:
-			cancel_big_jump_charge()
+			if big_jump_controller:
+				big_jump_controller.cancel_charge()
 	else:
 		owner_body.velocity.x = move_toward(owner_body.velocity.x, 0, character_data.speed)
 
@@ -112,42 +112,25 @@ func process_air_movement(input_direction: float) -> void:
 	else:
 		owner_body.velocity.x = move_toward(owner_body.velocity.x, 0, character_data.speed * character_data.air_movement_friction)
 
-func process_wall_slide(delta) -> void:
+func process_wall_slide(_delta) -> void:
 	var input_direction = Input.get_axis("A_left", "D_right")
 	
-	if big_jump_charged and Input.is_action_pressed("J_dash"):
-		if Input.is_action_just_pressed("W_jump"):
-			execute_directional_big_jump(Vector2(0, -1))
-			return
-		elif Input.is_action_just_pressed("A_left"):
-			execute_directional_big_jump(Vector2(-1, 0))
-			return
-		elif Input.is_action_just_pressed("D_right"):
-			execute_directional_big_jump(Vector2(1, 0))
-			return
-	
-	if Input.is_action_just_pressed("W_jump") and can_wall_jump:
+	var big_jump_executed = false
+	if big_jump_controller:
+		big_jump_executed = big_jump_controller.process_big_jump_input()
+
+	if Input.is_action_just_pressed("W_jump") and can_wall_jump and not big_jump_executed:
 		if character_data.can_wall_jump:
 			execute_wall_jump()
 			return
+	elif input_direction != 0 and can_wall_jump and not big_jump_executed:
+		var wall_direction = get_wall_jump_direction()
+		if (input_direction > 0 and wall_direction > 0) or (input_direction < 0 and wall_direction < 0):
+			execute_wall_jump_away()
+			return
 	
-	if input_direction != 0 and can_wall_jump:
-		if character_data.can_wall_jump:
-			var wall_direction = get_wall_jump_direction()
-			if (input_direction > 0 and wall_direction > 0) or (input_direction < 0 and wall_direction < 0):
-				execute_wall_jump_away()
-	
-	if big_jump_charged and Input.is_action_just_released("J_dash"):
-		cancel_big_jump_charge()
-		big_jump_charged = false
-	
-	if Input.is_action_pressed("J_dash") and owner_body.velocity.y < gravity * delta and can_big_jump:
-		if Input.is_action_just_pressed("S_charge_jump"):
-			cancel_big_jump_charge()
-		else:
-			start_big_jump_charge()
-	else:
-		cancel_big_jump_charge()
+	if big_jump_controller:
+		big_jump_controller.perform_wall_charge_attempt()
 	
 	if Input.is_action_just_pressed("J_dash"):
 		if character_data.can_dash:
@@ -155,20 +138,14 @@ func process_wall_slide(delta) -> void:
 
 func process_charge_jump() -> void:
 	if not Input.is_action_pressed("J_dash"):
-		cancel_big_jump_charge()
+		if big_jump_controller:
+			big_jump_controller.cancel_charge()
 	
-	process_big_jump_input()
+	if big_jump_controller:
+		big_jump_controller.process_big_jump_input()
 	
-	if owner_body.velocity.x != 0 and not big_jump_charged:
-		cancel_big_jump_charge()
-
-func process_big_jump_movement() -> void:
-	if big_jump_direction.y < 0:
-		owner_body.velocity.x = 0
-		owner_body.velocity.y = -character_data.big_jump_vertical_speed
-	elif big_jump_direction.x != 0:
-		owner_body.velocity.x = big_jump_direction.x * character_data.big_jump_horizontal_speed
-		owner_body.velocity.y = 0
+	if owner_body.velocity.x != 0 and big_jump_controller and not big_jump_controller.is_charged():
+		big_jump_controller.cancel_charge()
 
 func process_dash_attack_movement() -> void:
 	if dash_attack_direction.x != 0:
@@ -215,17 +192,6 @@ func process_jump_release() -> void:
 	if Input.is_action_just_released("W_jump") or owner_body.is_on_ceiling():
 		jump_controller.handle_jump_release()
 
-func process_big_jump_input() -> void:
-	if big_jump_charged and Input.is_action_pressed("J_dash"):
-		if Input.is_action_just_pressed("A_left"):
-			execute_directional_big_jump(Vector2(-1, 0))
-		elif Input.is_action_just_pressed("D_right"):
-			execute_directional_big_jump(Vector2(1, 0))
-	
-	if big_jump_charged and Input.is_action_just_released("J_dash"):
-		cancel_big_jump_charge()
-		big_jump_charged = false
-
 func execute_jump() -> void:
 	if jump_controller.handle_ground_jump():
 		if owner_body.debug_helper.console_debug:
@@ -255,8 +221,8 @@ func execute_triple_jump() -> void:
 
 func execute_wall_jump() -> void:
 	var wall_direction = get_wall_jump_direction()
-	owner_body.velocity.y = character_data.jump_velocity * 0.3
-	owner_body.velocity.x = wall_direction * character_data.wall_jump_force * character_data.wall_jump_away_multiplier
+	owner_body.velocity.y = character_data.jump_velocity * 1.5
+	owner_body.velocity.x = wall_direction * character_data.wall_jump_force * 2
 	reset_air_time()
 	jump_controller.jump_count = 1
 	jump_controller.has_double_jump = true
@@ -268,8 +234,8 @@ func execute_wall_jump() -> void:
 
 func execute_wall_jump_away() -> void:
 	var wall_direction = get_wall_jump_direction()
-	owner_body.velocity.y = 0
-	owner_body.velocity.x = wall_direction * character_data.wall_jump_force * character_data.wall_jump_away_multiplier
+	owner_body.velocity.y = character_data.jump_velocity * 0.2
+	owner_body.velocity.x = wall_direction * character_data.wall_jump_force * (1.0 + character_data.wall_jump_away_multiplier)
 	reset_air_time()
 	jump_controller.jump_count = 1
 	jump_controller.has_double_jump = true
@@ -292,17 +258,6 @@ func execute_dash_attack() -> void:
 	
 	state_machine.transition_to(state_machine.State.DASH_ATTACK)
 
-func execute_directional_big_jump(direction: Vector2) -> void:
-	if not character_data.can_big_jump:
-		if owner_body.debug_helper.console_debug:
-			owner_body.debug_helper.log_ability_blocked("Big Jump", "Not available")
-		return
-	big_jump_charged = false
-	big_jump_direction = direction
-	if owner_body.debug_helper.console_debug:
-		owner_body.debug_helper.log_jump("Big Jump")
-	state_machine.transition_to(state_machine.State.BIG_JUMPING)
-
 func perform_dash() -> void:
 	if not character_data.can_dash or not can_dash:
 		if owner_body.debug_helper.console_debug:
@@ -321,9 +276,9 @@ func perform_dash() -> void:
 	can_dash = false
 	stats_controller.consume_stamina(character_data.dash_stamina_cost)
 	
-	if big_jump_charged:
+	if big_jump_controller and big_jump_controller.is_charged():
 		timers_handler.dash_timer.wait_time = character_data.dash_duration * character_data.big_jump_dash_multiplier
-		big_jump_charged = false
+		big_jump_controller.cancel_charge()
 		if owner_body.debug_helper.console_debug:
 			owner_body.debug_helper.log_dash("charged")
 	else:
@@ -354,57 +309,6 @@ func perform_big_attack() -> void:
 		if owner_body.debug_helper.console_debug:
 			owner_body.debug_helper.log_attack("Big Attack")
 		state_machine.transition_to(state_machine.State.BIG_ATTACK)
-
-func perform_charge_big_jump() -> void:
-	if not character_data.can_big_jump and not character_data.can_dash_attack:
-		can_charge_big_jump = false
-	elif character_data.can_big_jump and not character_data.can_dash_attack:
-		can_charge_big_jump = true
-	elif not character_data.can_big_jump and character_data.can_dash_attack:
-		can_charge_big_jump = true
-	elif character_data.can_big_jump and character_data.can_dash_attack:
-		can_charge_big_jump = true
-
-	if not can_charge_big_jump:
-		return
-
-	if Input.is_action_pressed("J_dash") and owner_body.velocity.x == 0 and can_big_jump:
-		start_big_jump_charge()
-
-func start_big_jump_charge() -> void:
-	if big_jump_charged or timers_handler.big_jump_timer.time_left > 0 or not can_big_jump:
-		return
-	can_big_jump = false
-	timers_handler.big_jump_cooldown_timer.start()
-	timers_handler.big_jump_timer.start()
-
-func cancel_big_jump_charge() -> void:
-	if timers_handler.big_jump_timer.time_left > 0:
-		timers_handler.big_jump_timer.stop()
-		big_jump_charged = false
-
-func check_big_jump_collision() -> void:
-	var _ceil = ray_casts_handler.ceiling_ray.is_colliding() or ray_casts_handler.ceiling_ray_2.is_colliding() or ray_casts_handler.ceiling_ray_3.is_colliding()
-	var left = ray_casts_handler.left_wall_ray.is_colliding()
-	var right = ray_casts_handler.right_wall_ray.is_colliding()
-	if big_jump_direction.y < 0 and _ceil:
-		end_big_jump()
-	elif big_jump_direction.x < 0 and left:
-		end_big_jump()
-	elif big_jump_direction.x > 0 and right:
-		end_big_jump()
-
-func check_big_jump_input_release() -> void:
-	if big_jump_direction.x < 0 and not Input.is_action_pressed("A_left"):
-		end_big_jump()
-	elif big_jump_direction.x > 0 and not Input.is_action_pressed("D_right"):
-		end_big_jump()
-	elif big_jump_direction.y < 0 and not Input.is_action_pressed("W_jump"):
-		end_big_jump()
-
-func end_big_jump() -> void:
-	big_jump_direction = Vector2.ZERO
-	state_machine.transition_to(state_machine.State.JUMPING)
 
 func check_dash_attack_collision() -> void:
 	var left = ray_casts_handler.left_wall_ray.is_colliding()
@@ -438,7 +342,7 @@ func check_stun_on_landing() -> void:
 	big_attack_pending = false
 
 func update_air_time(delta: float) -> void:
-	if not owner_body.is_on_floor():
+	if not owner_body.is_on_floor() and owner_body.current_state != state_machine.State.WALL_SLIDING:
 		air_time += delta
 		if owner_body.current_state == state_machine.State.BIG_ATTACK or big_attack_pending:
 			effective_air_time += delta * character_data.landing_multiplier
@@ -448,13 +352,8 @@ func update_air_time(delta: float) -> void:
 		if owner_body.current_state == state_machine.State.BIG_ATTACK_LANDING or big_attack_pending:
 			check_stun_on_landing()
 		reset_air_time()
-
-func update_big_jump_stamina(delta: float) -> void:
-	if owner_body.current_state == state_machine.State.BIG_JUMPING:
-		if stats_controller:
-			stats_controller.drain_stamina(character_data.big_jump_stamina_drain_rate, delta)
-			if stats_controller.get_stamina() <= 0:
-				end_big_jump()
+	elif owner_body.current_state == state_machine.State.WALL_SLIDING:
+		pass
 
 func update_dash_attack_stamina(delta: float) -> void:
 	if owner_body.current_state == state_machine.State.DASH_ATTACK:
@@ -511,7 +410,6 @@ func on_state_enter(new_state) -> void:
 			can_wall_jump = true
 		state_machine.State.DASH_ATTACK:
 			combat_controller.dash_attack_damaged_entities.clear()
-			big_jump_charged = false
 		state_machine.State.BIG_ATTACK:
 			if not character_data.can_big_attack:
 				return
@@ -522,19 +420,22 @@ func on_state_enter(new_state) -> void:
 				effective_air_time = character_data.air_time_initial
 		state_machine.State.BIG_ATTACK_LANDING:
 			combat_controller.execute_damage_to_entities()
-		state_machine.State.BIG_JUMPING:
-			big_jump_charged = false
+	
+	if big_jump_controller:
+		big_jump_controller.on_state_enter(new_state)
 
-func on_state_exit(_old_state) -> void:
-	pass
+func on_state_exit(old_state) -> void:
+	if big_jump_controller:
+		big_jump_controller.on_state_exit(old_state)
 
 func update_state_transitions() -> void:
 	if owner_body.current_state == state_machine.State.STUNNED or owner_body.current_state == state_machine.State.ATTACKING or owner_body.current_state == state_machine.State.KNOCKBACK or owner_body.current_state == state_machine.State.DEATH:
 		return
 	
 	if owner_body.current_state == state_machine.State.BIG_JUMPING:
-		check_big_jump_collision()
-		check_big_jump_input_release()
+		if big_jump_controller:
+			big_jump_controller.check_big_jump_collision()
+			big_jump_controller.check_big_jump_input_release()
 		return
 	
 	if owner_body.current_state == state_machine.State.DASH_ATTACK:
@@ -592,12 +493,6 @@ func process_air_state_transition() -> void:
 	elif owner_body.current_state != state_machine.State.WALL_JUMPING and owner_body.current_state != state_machine.State.BIG_ATTACK and owner_body.current_state != state_machine.State.BIG_ATTACK_LANDING:
 		if owner_body.current_state != state_machine.State.DOUBLE_JUMPING and owner_body.current_state != state_machine.State.JUMPING and owner_body.current_state != state_machine.State.TRIPLE_JUMPING:
 			state_machine.transition_to(state_machine.State.JUMPING)
-
-func on_big_jump_timer_timeout() -> void:
-	big_jump_charged = true
-
-func on_big_jump_cooldown_timer_timeout() -> void:
-	can_big_jump = true
 
 func on_dash_cooldown_timer_timeout() -> void:
 	can_dash = true
