@@ -16,7 +16,6 @@ config/features=PackedStringArray("4.4", "GL Compatibility")
 
 [autoload]
 
-CharacterGlobalManager="*res://utils/character/base/characterGlobalManager.gd"
 BeehaveGlobalMetrics="*res://addons/beehave/metrics/beehave_global_metrics.gd"
 BeehaveGlobalDebugger="*res://addons/beehave/debug/global_debugger.gd"
 
