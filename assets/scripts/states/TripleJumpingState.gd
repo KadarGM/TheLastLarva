@@ -42,7 +42,7 @@ func process_air_movement(input_direction: float) -> void:
 		return
 	
 	if input_direction:
-		character.velocity.x = input_direction * character.character_data.speed
+		character.velocity.x = input_direction * character.character_data.jump_velocity * character.character_data.triple_jump_multiplier
 	else:
 		character.velocity.x = move_toward(character.velocity.x, 0, character.character_data.speed * character.character_data.air_movement_friction)
 

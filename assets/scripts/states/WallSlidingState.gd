@@ -86,8 +86,8 @@ func process_input() -> void:
 
 func execute_wall_jump() -> void:
 	var wall_direction = get_wall_direction()
-	character.velocity.y = character.character_data.jump_velocity * 1.5
-	character.velocity.x = wall_direction * character.character_data.wall_jump_force * 2
+	character.velocity.y = character.character_data.jump_velocity * 0.7
+	character.velocity.x = wall_direction * character.character_data.wall_jump_force
 	
 	character.reset_air_time()
 	character.jump_count = 1
@@ -100,7 +100,7 @@ func execute_wall_jump() -> void:
 func execute_wall_jump_away() -> void:
 	var wall_direction = get_wall_direction()
 	character.velocity.y = character.character_data.jump_velocity * 0.2
-	character.velocity.x = wall_direction * character.character_data.wall_jump_force * (1.0 + character.character_data.wall_jump_away_multiplier)
+	character.velocity.x = wall_direction * character.character_data.wall_jump_force * (1.0 + character.character_data.wall_jump_away_multiplier) * 0.8
 	
 	character.reset_air_time()
 	character.jump_count = 1
