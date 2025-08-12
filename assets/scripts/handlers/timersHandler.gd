@@ -65,4 +65,4 @@ func setup_timers() -> void:
 		big_jump_cooldown_timer.timeout.connect(character_manager._on_big_jump_cooldown_timer_timeout)
 
 func _on_dash_timer_timeout() -> void:
-	character_manager.state_machine.transition_to(character_manager.state_machine.State.IDLE)
+	character_manager.state_machine.transition_to("IdleState")

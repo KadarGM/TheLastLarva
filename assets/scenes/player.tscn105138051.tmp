@@ -6351,7 +6351,6 @@ scale = Vector2(3.33333, 3.33333)
 
 [node name="DebugHelper" parent="." instance=ExtResource("17_fdfoy")]
 layer = 100
-visible = false
 
 [node name="GameUI" type="CanvasLayer" parent="."]
 
@@ -6395,141 +6394,124 @@ offset_bottom = 40.0
 script = ExtResource("18_ay2jx")
 initial_state = NodePath("IdleState")
 
-[node name="AttackingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="AttackingState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("19_yitjv")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://d05m4hyc2gfjy"
 
-[node name="BigAttackLandingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="BigAttackLandingState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("20_qnek2")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://cap2qgwysvbuv"
 
-[node name="BigAttackState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="BigAttackState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("21_ike5y")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://c5pyq75t2im8l"
 
-[node name="BigJumpingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="BigJumpingState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("22_p0j5o")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://cj2vanir2okd8"
 
-[node name="ChargingBigJumpState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="ChargingBigJumpState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("23_ingmm")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://bljggvjayvgmm"
 
-[node name="DashAttackState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="DashAttackState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("24_w5a74")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://douevnsa1f2vl"
 
-[node name="DashingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="DashingState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("25_mpwc7")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://dm6cs7k55effd"
 
-[node name="DeathState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="DeathState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("26_c0byx")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://d6ly2y3bvt42"
 
-[node name="DoubleJumpingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="DoubleJumpingState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("27_qrijk")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://5pek5j5kqqgm"
 
-[node name="IdleState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="IdleState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("28_8k6dn")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://cjdfunpgfnms"
 
-[node name="JumpingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="JumpingState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("29_jpuse")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://obfnu6wn2aai"
 
-[node name="KnockbackState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="KnockbackState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("30_pmubu")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://bxk8somi3mohc"
 
-[node name="StunnedState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="StunnedState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("31_ypmlx")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://bkmco042d01vg"
 
-[node name="TripleJumpingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="TripleJumpingState" type="Control" parent="StateMachine"]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("32_xjbdu")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://dd1i6gg36v6of"
 
-[node name="WalkingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="WalkingState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("33_6hv0l")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://dr8pm6dr6shbb"
 
-[node name="WallJumpingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="WallJumpingState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("34_odcgf")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://c1u6gs01pwy5i"
 
-[node name="WallSlidingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+[node name="WallSlidingState" type="Control" parent="StateMachine"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("35_yh04f")
-character = NodePath("../..")
 metadata/_custom_type_script = "uid://c3bnwicgn7l8p"
 
 [node name="ControllerManager" type="Control" parent="."]
@@ -6538,25 +6520,43 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="JumpController" type="Control" parent="ControllerManager"]
+[node name="JumpController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body")]
 physics_interpolation_mode = 0
 anchors_preset = 0
 script = ExtResource("19_g5jhy")
+owner_body = NodePath("../..")
 metadata/_custom_type_script = "uid://bn7n06imbkeei"
 
-[node name="MovementController" type="Control" parent="ControllerManager"]
+[node name="MovementController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body", "body_node", "animation_player", "ray_casts_handler", "timers_handler", "jump_controller", "combat_controller", "stats_controller", "big_jump_controller")]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("20_holxr")
+character_data = ExtResource("2_pf23h")
+owner_body = NodePath("../..")
+state_machine = null
+body_node = NodePath("../../Body")
+animation_player = NodePath("../../AnimationPlayer")
+ray_casts_handler = NodePath("../../Handlers/RayCastsHandler")
+timers_handler = NodePath("../../Handlers/TimersHandler")
+jump_controller = NodePath("../JumpController")
+combat_controller = NodePath("../CombatController")
+stats_controller = NodePath("../StatsController")
+big_jump_controller = NodePath("../BigJumpController")
 metadata/_custom_type_script = "uid://di4qt65lho3yt"
 
-[node name="CombatController" type="Control" parent="ControllerManager"]
+[node name="CombatController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body", "animation_player", "body_node", "areas_handler", "timers_handler", "stats_controller")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("21_mx1m4")
+owner_body = NodePath("../..")
+animation_player = NodePath("../../AnimationPlayer")
+body_node = NodePath("../../Body")
+areas_handler = NodePath("../../Handlers/AreasHandler")
+timers_handler = NodePath("../../Handlers/TimersHandler")
+stats_controller = NodePath("../StatsController")
 metadata/_custom_type_script = "uid://0cd78ehdvt30"
 
 [node name="StatsController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body", "timers_handler", "areas_handler", "debug_helper")]
@@ -6572,11 +6572,18 @@ areas_handler = NodePath("../../Handlers/AreasHandler")
 debug_helper = NodePath("../../DebugHelper")
 metadata/_custom_type_script = "uid://cnnuxdvjhvw2j"
 
-[node name="BigJumpController" type="Control" parent="ControllerManager"]
+[node name="BigJumpController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body", "timers_handler", "ray_casts_handler", "stats_controller", "debug_helper")]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("23_u2ulf")
+character_data = ExtResource("2_pf23h")
+owner_body = NodePath("../..")
+state_machine = null
+timers_handler = NodePath("../../Handlers/TimersHandler")
+ray_casts_handler = NodePath("../../Handlers/RayCastsHandler")
+stats_controller = NodePath("../StatsController")
+debug_helper = NodePath("../../DebugHelper")
 metadata/_custom_type_script = "uid://dpmgvpy6tfsfs"
 
 [node name="InputController" type="Control" parent="ControllerManager"]

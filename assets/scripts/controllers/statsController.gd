@@ -3,10 +3,8 @@ class_name StatsController
 
 @export var owner_body: CharacterManager
 @export var character_data: CharacterData
-@export var state_machine: CallableStateMachine
 @export var timers_handler: TimersHandler
 @export var areas_handler: AreasHandler
-@export var movement_controller: MovementController
 @export var debug_helper: DebugHelper
 
 var health_current: int
@@ -21,13 +19,11 @@ signal health_changed(new_health: int)
 signal stamina_changed(new_stamina: float)
 signal died()
 
-func setup(body: CharacterManager, data: CharacterData, sm: CallableStateMachine, th: TimersHandler, ah: AreasHandler, mc: MovementController, dh: DebugHelper):
+func setup(body: CharacterManager, data: CharacterData, th: TimersHandler, ah: AreasHandler, dh: DebugHelper):
 	owner_body = body
 	character_data = data
-	state_machine = sm
 	timers_handler = th
 	areas_handler = ah
-	movement_controller = mc
 	debug_helper = dh
 	
 	health_current = character_data.health_max
@@ -42,7 +38,7 @@ func setup_signals():
 		timers_handler.invulnerability_timer.timeout.connect(_on_invulnerability_timer_timeout)
 
 func process_stats(delta: float) -> void:
-	if owner_body.current_state != state_machine.State.DEATH:
+	if owner_body.state_machine.current_state and owner_body.state_machine.current_state.name != "DeathState":
 		update_stamina_regeneration(delta)
 		check_continuous_damage(delta)
 	check_death()
@@ -109,23 +105,17 @@ func restore_stamina(amount: float) -> void:
 
 func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void:
 	if not character_data.can_get_damage:
-		if debug_helper and debug_helper.console_debug:
-			debug_helper.log_ability_blocked("Damage", "Immune to damage")
 		return
-		
-	if owner_body.current_state == state_machine.State.DEATH:
+	
+	if owner_body.state_machine.current_state and owner_body.state_machine.current_state.name == "DeathState":
 		return
 	
 	if character_data.invulnerability:
-		if debug_helper and debug_helper.console_debug:
-			debug_helper.log_ability_blocked("Damage", "Permanent invulnerability")
 		return
 	
 	if invulnerability_temp:
-		if debug_helper and debug_helper.console_debug:
-			debug_helper.log_ability_blocked("Damage", "Temporary invulnerability")
 		return
-		
+	
 	health_current -= amount
 	health_current = max(0, health_current)
 	health_changed.emit(health_current)
@@ -137,21 +127,22 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 	
 	activate_temporary_invulnerability()
 	
-	if character_data.can_get_knockback and owner_body.current_state != state_machine.State.KNOCKBACK:
-		var knockback_direction: Vector2
-		if attacker_position != Vector2.ZERO:
-			knockback_direction = (owner_body.global_position - attacker_position).normalized()
-		else:
-			knockback_direction = Vector2(randf_range(-1, 1), 0).normalized()
-		
-		if knockback_direction.x == 0:
-			knockback_direction.x = randf_range(-0.5, 0.5)
-		
-		var damage_knockback = Vector2(
-			knockback_direction.x * character_data.damage_knockback_force * 10.0,
-			-abs(character_data.damage_knockback_force * 0.8)
-		)
-		movement_controller.apply_knockback(damage_knockback)
+	if character_data.can_get_knockback:
+		if owner_body.state_machine.current_state and owner_body.state_machine.current_state.name != "KnockbackState":
+			var knockback_direction: Vector2
+			if attacker_position != Vector2.ZERO:
+				knockback_direction = (owner_body.global_position - attacker_position).normalized()
+			else:
+				knockback_direction = Vector2(randf_range(-1, 1), 0).normalized()
+			
+			if knockback_direction.x == 0:
+				knockback_direction.x = randf_range(-0.5, 0.5)
+			
+			var damage_knockback = Vector2(
+				knockback_direction.x * character_data.damage_knockback_force * 10.0,
+				-abs(character_data.damage_knockback_force * 0.8)
+			)
+			owner_body.apply_knockback(damage_knockback)
 
 func activate_temporary_invulnerability() -> void:
 	invulnerability_temp = true
@@ -162,9 +153,9 @@ func deactivate_temporary_invulnerability() -> void:
 	invulnerability_temp = false
 
 func check_death() -> void:
-	if health_current <= 0 and owner_body.current_state != state_machine.State.DEATH:
-		died.emit()
-		state_machine.transition_to(state_machine.State.DEATH)
+	if health_current <= 0:
+		if owner_body.state_machine.current_state and owner_body.state_machine.current_state.name != "DeathState":
+			died.emit()
 
 func get_health() -> int:
 	return health_current
@@ -196,31 +187,32 @@ func reset_stats() -> void:
 	health_changed.emit(health_current)
 	stamina_changed.emit(stamina_current)
 
-func on_state_enter(new_state) -> void:
-	match new_state:
-		state_machine.State.DASHING, state_machine.State.DASH_ATTACK, state_machine.State.BIG_ATTACK:
+func on_state_enter(state_name: String) -> void:
+	match state_name:
+		"DashingState", "DashAttackState", "BigAttackState", "BigJumpingState":
 			invulnerability_temp = true
-		state_machine.State.DEATH:
+		"DeathState":
 			if areas_handler and areas_handler.damage_area:
 				areas_handler.damage_area.monitorable = false
 
-func on_state_exit(old_state) -> void:
-	if old_state == state_machine.State.DASHING or old_state == state_machine.State.BIG_ATTACK or old_state == state_machine.State.DASH_ATTACK:
-		invulnerability_temp = false
+func on_state_exit(state_name: String) -> void:
+	match state_name:
+		"DashingState", "BigAttackState", "DashAttackState", "BigJumpingState":
+			invulnerability_temp = false
 
-func _on_damage_area_body_entered(_body: Node2D) -> void:
+func _on_damage_area_body_entered(body: Node2D) -> void:
 	if not character_data.can_get_damage:
 		return
-		
+	
 	if character_data.invulnerability:
 		return
-		
+	
 	if invulnerability_temp:
 		return
-		
-	if _body.has_method("get_damage") and _body != owner_body:
-		var damage = _body.get_damage()
-		take_damage(damage, _body.global_position)
+	
+	if body.has_method("get_damage") and body != owner_body:
+		var damage = body.get_damage()
+		take_damage(damage, body.global_position)
 
 func _on_invulnerability_timer_timeout() -> void:
 	invulnerability_temp = false
