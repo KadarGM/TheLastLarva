@@ -2,7 +2,6 @@ extends State
 class_name JumpingState
 
 func enter() -> void:
-	
 	if character.previous_state == "IdleState" or character.previous_state == "WalkingState":
 		character.has_double_jump = true
 		character.has_triple_jump = false
@@ -48,7 +47,6 @@ func process_air_movement(input_direction: float) -> void:
 
 func process_input() -> void:
 	if Input.is_action_just_pressed("W_jump"):
-		
 		if character.jump_count == 1 and character.has_double_jump and character.character_data.can_double_jump:
 			state_machine.transition_to("DoubleJumpingState")
 		elif character.jump_count == 2 and character.has_triple_jump and character.character_data.can_triple_jump:
@@ -61,8 +59,8 @@ func process_input() -> void:
 	if Input.is_action_just_pressed("L_attack"):
 		if character.big_jump_charged and Input.is_action_pressed("J_dash"):
 			state_machine.transition_to("DashAttackState")
-		else:
-			character.perform_air_attack()
+		elif character.character_data.can_attack and character.character_data.can_air_attack:
+			state_machine.transition_to("AttackingState")
 	
 	if Input.is_action_just_pressed("S_charge_jump"):
 		if character.character_data.can_big_attack:

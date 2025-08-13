@@ -341,16 +341,16 @@ func execute_damage_to_entities() -> void:
 func on_wall_jump() -> void:
 	can_wall_jump = true
 
-func on_attack_state_enter() -> void:
-	velocity_before_attack = velocity.x
-	damage_applied_this_attack = false
-	if timers_handler:
-		timers_handler.damage_timer.start()
+#func on_attack_state_enter() -> void:
+	#velocity_before_attack = velocity.x
+	#damage_applied_this_attack = false
+	#if timers_handler:
+		#timers_handler.damage_timer.start()
 
-func on_attack_state_exit() -> void:
-	pending_knockback_force = Vector2.ZERO
-	if timers_handler:
-		timers_handler.hide_weapon_timer.start()
+#func on_attack_state_exit() -> void:
+	#pending_knockback_force = Vector2.ZERO
+	#if timers_handler:
+		#timers_handler.hide_weapon_timer.start()
 
 func update_attack_animations() -> void:
 	var anim_name = ""
@@ -380,49 +380,44 @@ func update_attack_animations() -> void:
 	if animation_player.current_animation != anim_name:
 		play_animation(anim_name)
 
-func process_attack_movement() -> void:
-	var overlapping_bodies = areas_handler.attack_area.get_overlapping_bodies()
-	var has_nearby_enemy = false
-	
-	for entity in overlapping_bodies:
-		if entity != self:
-			has_nearby_enemy = true
-			break
-	
-	if has_nearby_enemy:
-		velocity.x = move_toward(velocity.x, 0, character_data.attack_movement_friction * character_data.enemy_nearby_friction_multiplier)
-		return
-	
-	if is_on_floor():
-		var attack_force = character_data.attack_movement_force * character_data.ground_attack_force_multiplier
-		if count_of_attack == 3:
-			attack_force *= character_data.attack_movement_multiplier
-		velocity.x = get_attack_direction() * attack_force
-	else:
-		var air_attack_force = character_data.attack_movement_force * character_data.air_attack_force_multiplier
-		velocity.x = get_attack_direction() * air_attack_force
-	
-	if is_on_floor():
-		velocity.x = move_toward(velocity.x, 0, character_data.attack_movement_friction * character_data.ground_friction_multiplier)
-	else:
-		velocity.x = move_toward(velocity.x, 0, character_data.attack_movement_friction * character_data.air_friction_multiplier)
+#func process_attack_movement() -> void:
+	#var overlapping_bodies = areas_handler.attack_area.get_overlapping_bodies()
+	#var has_nearby_enemy = false
+	#
+	#for entity in overlapping_bodies:
+		#if entity != self:
+			#has_nearby_enemy = true
+			#break
+	#
+	#if has_nearby_enemy:
+		#velocity.x = move_toward(velocity.x, 0, character_data.attack_movement_friction * character_data.enemy_nearby_friction_multiplier)
+		#return
+	#
+	#if is_on_floor():
+		#var attack_force = character_data.attack_movement_force * character_data.ground_attack_force_multiplier
+		#if count_of_attack == 3:
+			#attack_force *= character_data.attack_movement_multiplier
+		#velocity.x = get_attack_direction() * attack_force
+	#else:
+		#var air_attack_force = character_data.attack_movement_force * character_data.air_attack_force_multiplier
+		#velocity.x = get_attack_direction() * air_attack_force
+	#
+	#if is_on_floor():
+		#velocity.x = move_toward(velocity.x, 0, character_data.attack_movement_friction * character_data.ground_friction_multiplier)
+	#else:
+		#velocity.x = move_toward(velocity.x, 0, character_data.attack_movement_friction * character_data.air_friction_multiplier)
 
 func perform_attack() -> void:
 	if not character_data.can_attack:
 		return
 	
-	if state_machine.current_state and state_machine.current_state.name == "AttackingState":
-		var attack_state = state_machine.current_state as AttackingState
-		if attack_state and attack_state.queued_attack == false:
-			attack_state.queued_attack = true
-	else:
-		count_of_attack = 0
-		state_machine.transition_to("AttackingState")
+	state_machine.transition_to("AttackingState")
 
 func perform_air_attack() -> void:
 	if not character_data.can_attack or not character_data.can_air_attack:
 		return
-	perform_attack()
+	
+	state_machine.transition_to("AttackingState")
 
 func handle_ground_jump() -> bool:
 	if not character_data.can_jump:

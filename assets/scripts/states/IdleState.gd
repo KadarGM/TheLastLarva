@@ -31,8 +31,8 @@ func process_input() -> void:
 	if Input.is_action_just_pressed("L_attack"):
 		if character.big_jump_charged and Input.is_action_pressed("J_dash"):
 			state_machine.transition_to("DashAttackState")
-		else:
-			character.perform_attack()
+		elif character.character_data.can_attack:
+			state_machine.transition_to("AttackingState")
 		return
 	
 	if Input.is_action_pressed("J_dash") and character.can_big_jump:

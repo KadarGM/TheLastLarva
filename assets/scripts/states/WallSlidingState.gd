@@ -79,10 +79,6 @@ func process_input() -> void:
 		character.start_big_jump_charge()
 	elif Input.is_action_just_released("J_dash"):
 		character.cancel_big_jump_charge()
-	
-	if Input.is_action_just_pressed("L_attack"):
-		if character.character_data.can_air_attack:
-			character.perform_air_attack()
 
 func execute_wall_jump() -> void:
 	var wall_direction = get_wall_direction()

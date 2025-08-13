@@ -3,6 +3,7 @@ class_name WalkingState
 
 func enter() -> void:
 	pass
+	#character.count_of_attack = 0
 
 func physics_process(delta: float) -> void:
 	character.apply_gravity(delta)
@@ -36,7 +37,8 @@ func process_input() -> void:
 			return
 	
 	if Input.is_action_just_pressed("L_attack"):
-		character.perform_attack()
+		if character.character_data.can_attack:
+			state_machine.transition_to("AttackingState")
 		return
 	
 	character.process_big_jump_input()
