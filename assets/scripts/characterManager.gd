@@ -23,6 +23,7 @@ var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
 var dash_count: int = 0
 var jump_count: int = 0
+var attack_count: int = 0
 var has_double_jump: bool = false
 var has_triple_jump: bool = false
 var can_wall_jump: bool = false
@@ -471,6 +472,7 @@ func _on_damage_timer_timeout() -> void:
 
 func _on_hide_weapon_timer_timeout() -> void:
 	set_weapon_visibility("hide")
+	attack_count = 0
 
 func _on_animation_finished(anim_name: String) -> void:
 	if state_machine.current_state and state_machine.current_state.name == "AttackingState":

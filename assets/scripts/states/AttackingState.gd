@@ -4,7 +4,6 @@ class_name AttackingState
 var queued_attack: bool = false
 var attack_finished: bool = false
 var current_animation: String = ""
-var attack_count: int = 0
 var damage_applied: bool = false
 
 func enter() -> void:
@@ -30,9 +29,9 @@ func enter() -> void:
 	character.stamina_current -= character.character_data.attack_stamina_cost
 	character.stamina_regen_timer = character.character_data.stamina_regen_delay
 	
-	attack_count += 1
-	if attack_count > 3:
-		attack_count = 1
+	character.attack_count += 1
+	if character.attack_count > 3:
+		character.attack_count = 1
 	
 	character.velocity_before_attack = character.velocity.x
 	
@@ -52,9 +51,6 @@ func exit() -> void:
 	if character.timers_handler and character.timers_handler.hide_weapon_timer:
 		character.timers_handler.hide_weapon_timer.wait_time = character.character_data.hide_weapon_time
 		character.timers_handler.hide_weapon_timer.start()
-	
-	if not queued_attack:
-		attack_count = 0
 
 func physics_process(delta: float) -> void:
 	if not character.is_on_floor():
@@ -65,9 +61,9 @@ func physics_process(delta: float) -> void:
 	if character.pending_knockback_force != Vector2.ZERO:
 		character.velocity += character.pending_knockback_force
 		character.pending_knockback_force = Vector2.ZERO
-	
+
 	if Input.is_action_just_pressed("L_attack") and not queued_attack:
-		if attack_count < 3:
+		if character.attack_count < 3:
 			queued_attack = true
 	
 	if attack_finished:
@@ -88,7 +84,7 @@ func process_attack_movement() -> void:
 	
 	if character.is_on_floor():
 		var attack_force = character.character_data.attack_movement_force * character.character_data.ground_attack_force_multiplier
-		if attack_count == 3:
+		if character.attack_count == 3:
 			attack_force *= character.character_data.attack_movement_multiplier
 		character.velocity.x = character.get_attack_direction() * attack_force
 	else:
@@ -101,13 +97,11 @@ func process_attack_movement() -> void:
 		character.velocity.x = move_toward(character.velocity.x, 0, character.character_data.attack_movement_friction * character.character_data.air_friction_multiplier)
 
 func handle_attack_end() -> void:
-	if queued_attack and attack_count < 3:
+	if queued_attack and character.attack_count < 3:
 		if character.stamina_current >= character.character_data.attack_stamina_cost:
 			if character.before_attack_timer.is_stopped():
 				enter()
 				return
-	
-	attack_count = 0
 	
 	if character.is_on_floor():
 		state_machine.transition_to("IdleState")
@@ -133,7 +127,7 @@ func execute_damage_to_entities() -> void:
 		return
 	
 	var damage = 0
-	match attack_count:
+	match character.attack_count:
 		1:
 			damage = character.character_data.attack_1_dmg
 		2:
@@ -142,7 +136,7 @@ func execute_damage_to_entities() -> void:
 			damage = character.character_data.attack_3_dmg
 	
 	var base_knockback_force = character.character_data.knockback_force
-	if attack_count == 3:
+	if character.attack_count == 3:
 		base_knockback_force *= character.character_data.knockback_force_multiplier
 	
 	var attack_dir = character.get_attack_direction()
@@ -175,7 +169,7 @@ func execute_damage_to_entities() -> void:
 
 func update_current_animation() -> void:
 	if character.is_on_floor():
-		match attack_count:
+		match character.attack_count:
 			1: 
 				current_animation = "Attack_ground_1"
 				character.set_weapon_visibility("back")
@@ -186,7 +180,7 @@ func update_current_animation() -> void:
 				current_animation = "Attack_ground_3"
 				character.set_weapon_visibility("both")
 	else:
-		match attack_count:
+		match character.attack_count:
 			1: 
 				current_animation = "Attack_air_1"
 				character.set_weapon_visibility("back")
