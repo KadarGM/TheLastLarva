@@ -26,7 +26,6 @@ func process_input() -> void:
 
 func transition_to(state_name: String) -> void:
 	if not states.has(state_name):
-		push_error("State " + state_name + " does not exist")
 		return
 	
 	var new_state = states[state_name]
@@ -38,10 +37,9 @@ func transition_to(state_name: String) -> void:
 	
 	if current_state:
 		current_state.exit()
-	
 	current_state = new_state
 	current_state.enter()
-	
+
 	state_changed.emit(old_state, current_state)
 
 func get_current_state_name() -> String:

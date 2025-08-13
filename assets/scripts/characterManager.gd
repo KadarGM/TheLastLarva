@@ -21,6 +21,7 @@ class_name CharacterManager
 
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
+var dash_count: int = 0
 var jump_count: int = 0
 var has_double_jump: bool = false
 var has_triple_jump: bool = false
@@ -173,6 +174,7 @@ func reset_jump_state() -> void:
 	has_double_jump = false
 	has_triple_jump = false
 	can_wall_jump = false
+	dash_count = 0
 
 func reset_air_time() -> void:
 	air_time = 0
@@ -265,7 +267,9 @@ func start_big_jump_charge() -> void:
 		return
 	
 	can_big_jump = false
+	timers_handler.big_jump_cooldown_timer.wait_time = character_data.big_jump_cooldown
 	timers_handler.big_jump_cooldown_timer.start()
+	timers_handler.big_jump_timer.wait_time = character_data.big_jump_charge_time
 	timers_handler.big_jump_timer.start()
 
 func execute_big_jump(direction: Vector2) -> void:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=73 format=3 uid="uid://df1dloofeb6le"]
+[gd_scene load_steps=68 format=3 uid="uid://df1dloofeb6le"]
 
 [ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://assets/scripts/characterManager.gd" id="1_31cv2"]
 [ext_resource type="Resource" uid="uid://d125kkggxi83n" path="res://assets/resources/Player.tres" id="2_pf23h"]
@@ -17,18 +17,13 @@
 [ext_resource type="Texture2D" uid="uid://b5rk0f08kkqjn" path="res://assets/graphics/player/mandible_b.svg" id="15_2dvfe"]
 [ext_resource type="Texture2D" uid="uid://bygtb821ge70j" path="res://assets/graphics/player/mandible_f.svg" id="16_giy8y"]
 [ext_resource type="PackedScene" uid="uid://bo151bnxrkxp6" path="res://assets/scenes/DebugHelper.tscn" id="17_fdfoy"]
-[ext_resource type="Script" uid="uid://8ladw3wbvgf5" path="res://assets/scripts/states/StateMachine.gd" id="18_ay2jx"]
-[ext_resource type="Script" uid="uid://bn7n06imbkeei" path="res://assets/scripts/controllers/jumpController.gd" id="19_g5jhy"]
+[ext_resource type="Script" uid="uid://8ladw3wbvgf5" path="res://assets/scripts/StateMachine.gd" id="18_ay2jx"]
 [ext_resource type="Script" uid="uid://d05m4hyc2gfjy" path="res://assets/scripts/states/AttackingState.gd" id="19_yitjv"]
-[ext_resource type="Script" uid="uid://di4qt65lho3yt" path="res://assets/scripts/controllers/movementController.gd" id="20_holxr"]
 [ext_resource type="Script" uid="uid://cap2qgwysvbuv" path="res://assets/scripts/states/BigAttackLandingState.gd" id="20_qnek2"]
 [ext_resource type="Script" uid="uid://c5pyq75t2im8l" path="res://assets/scripts/states/BigAttackState.gd" id="21_ike5y"]
-[ext_resource type="Script" uid="uid://0cd78ehdvt30" path="res://assets/scripts/controllers/combatController.gd" id="21_mx1m4"]
 [ext_resource type="Script" uid="uid://cnnuxdvjhvw2j" path="res://assets/scripts/controllers/statsController.gd" id="22_4gjji"]
 [ext_resource type="Script" uid="uid://cj2vanir2okd8" path="res://assets/scripts/states/BigJumpingState.gd" id="22_p0j5o"]
 [ext_resource type="Script" uid="uid://bljggvjayvgmm" path="res://assets/scripts/states/ChargingBigJumpState.gd" id="23_ingmm"]
-[ext_resource type="Script" uid="uid://dpmgvpy6tfsfs" path="res://assets/scripts/controllers/bigJumpController.gd" id="23_u2ulf"]
-[ext_resource type="Script" uid="uid://dwa3hpiumihn" path="res://assets/scripts/controllers/inputController.gd" id="24_6e8lb"]
 [ext_resource type="Script" uid="uid://douevnsa1f2vl" path="res://assets/scripts/states/DashAttackState.gd" id="24_w5a74"]
 [ext_resource type="Script" uid="uid://ciuxhepgisrjw" path="res://assets/scripts/handlers/rayCastsHandler.gd" id="25_2gdjj"]
 [ext_resource type="Script" uid="uid://dm6cs7k55effd" path="res://assets/scripts/states/DashingState.gd" id="25_mpwc7"]
@@ -6123,7 +6118,7 @@ state_machine = NodePath("StateMachine")
 ray_casts_handler = NodePath("Handlers/RayCastsHandler")
 timers_handler = NodePath("Handlers/TimersHandler")
 areas_handler = NodePath("Handlers/AreasHandler")
-stats_controller = NodePath("ControllerManager/StatsController")
+stats_controller = NodePath("Controllers/StatsController")
 stamina_bar = NodePath("GameUI/MarginContainer/StatsHBox/VBoxContainer/StaminaBar")
 health_bar = NodePath("GameUI/MarginContainer/StatsHBox/VBoxContainer/HealthBar")
 metadata/_edit_horizontal_guides_ = [69.6705]
@@ -6532,34 +6527,13 @@ script = ExtResource("35_yh04f")
 character = NodePath("../..")
 metadata/_custom_type_script = "uid://c3bnwicgn7l8p"
 
-[node name="ControllerManager" type="Control" parent="."]
+[node name="Controllers" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="JumpController" type="Control" parent="ControllerManager"]
-physics_interpolation_mode = 0
-anchors_preset = 0
-script = ExtResource("19_g5jhy")
-metadata/_custom_type_script = "uid://bn7n06imbkeei"
-
-[node name="MovementController" type="Control" parent="ControllerManager"]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-script = ExtResource("20_holxr")
-metadata/_custom_type_script = "uid://di4qt65lho3yt"
-
-[node name="CombatController" type="Control" parent="ControllerManager"]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-script = ExtResource("21_mx1m4")
-metadata/_custom_type_script = "uid://0cd78ehdvt30"
-
-[node name="StatsController" type="Control" parent="ControllerManager" node_paths=PackedStringArray("owner_body", "timers_handler", "areas_handler", "debug_helper")]
+[node name="StatsController" type="Control" parent="Controllers" node_paths=PackedStringArray("owner_body", "timers_handler", "areas_handler", "debug_helper")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -6571,20 +6545,6 @@ timers_handler = NodePath("../../Handlers/TimersHandler")
 areas_handler = NodePath("../../Handlers/AreasHandler")
 debug_helper = NodePath("../../DebugHelper")
 metadata/_custom_type_script = "uid://cnnuxdvjhvw2j"
-
-[node name="BigJumpController" type="Control" parent="ControllerManager"]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-script = ExtResource("23_u2ulf")
-metadata/_custom_type_script = "uid://dpmgvpy6tfsfs"
-
-[node name="InputController" type="Control" parent="ControllerManager"]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-script = ExtResource("24_6e8lb")
-metadata/_custom_type_script = "uid://dwa3hpiumihn"
 
 [node name="Handlers" type="Control" parent="."]
 layout_mode = 3
@@ -6611,46 +6571,46 @@ ceiling_ray_3 = NodePath("CeilingRay3")
 metadata/_custom_type_script = "uid://ciuxhepgisrjw"
 
 [node name="GroundCheckRay" type="RayCast2D" parent="Handlers/RayCastsHandler"]
-target_position = Vector2(0, 800)
+target_position = Vector2(0, 300)
 
 [node name="GroundCheckRay2" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(52.1514, 0)
-target_position = Vector2(0, 800)
+target_position = Vector2(0, 300)
 
 [node name="GroundCheckRay3" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(-54.2842, 0)
-target_position = Vector2(0, 800)
+target_position = Vector2(0, 300)
 
 [node name="NearGroundRay" type="RayCast2D" parent="Handlers/RayCastsHandler"]
-target_position = Vector2(0, 800)
+target_position = Vector2(0, 100)
 
 [node name="NearGroundRay2" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(60.404, 0)
-target_position = Vector2(0, 800)
+target_position = Vector2(0, 100)
 
 [node name="NearGroundRay3" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(-60.9337, 0)
-target_position = Vector2(0, 800)
+target_position = Vector2(0, 100)
 
 [node name="LeftWallRay" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(0.513153, -172)
-target_position = Vector2(-100, 0)
+target_position = Vector2(-70, 0)
 
 [node name="RightWallRay" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(0.513153, -172)
-target_position = Vector2(100, 0)
+target_position = Vector2(70, 0)
 
 [node name="CeilingRay" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(0.513153, -77.5973)
-target_position = Vector2(0, 200)
+target_position = Vector2(0, -120)
 
 [node name="CeilingRay2" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(52.1513, -77.5973)
-target_position = Vector2(0, 200)
+target_position = Vector2(0, -120)
 
 [node name="CeilingRay3" type="RayCast2D" parent="Handlers/RayCastsHandler"]
 position = Vector2(-54.0788, -77.5973)
-target_position = Vector2(0, 200)
+target_position = Vector2(0, -120)
 
 [node name="TimersHandler" type="Control" parent="Handlers" node_paths=PackedStringArray("character_manager", "between_states_timer", "emergency_timer", "big_jump_timer", "big_jump_cooldown_timer", "hide_weapon_timer", "dash_timer", "stun_timer", "dash_cooldown_timer", "wall_jump_control_timer", "attack_cooldown_timer", "damage_timer", "before_attack_timer", "invulnerability_timer")]
 layout_mode = 3

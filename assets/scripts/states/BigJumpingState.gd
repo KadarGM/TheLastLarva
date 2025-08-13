@@ -7,6 +7,9 @@ var stamina_drain_timer: float = 0.0
 func enter() -> void:
 	character.big_jump_charged = false
 	character.invulnerability_temp = true
+	character.can_big_jump = false
+	character.timers_handler.big_jump_cooldown_timer.wait_time = character.character_data.big_jump_cooldown_after_use
+	character.timers_handler.big_jump_cooldown_timer.start()
 
 func exit() -> void:
 	direction = Vector2.ZERO
@@ -28,8 +31,6 @@ func physics_process(delta: float) -> void:
 	
 	check_collision()
 	check_input_release()
-	
-	character.play_animation("Dash")
 
 func check_collision() -> void:
 	if direction.y < 0 and character._is_on_ceiling():
@@ -49,3 +50,6 @@ func check_input_release() -> void:
 
 func set_direction(dir: Vector2) -> void:
 	direction = dir
+
+func handle_animation() -> void:
+	character.play_animation("Dash")

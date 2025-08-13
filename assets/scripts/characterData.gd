@@ -24,7 +24,7 @@ enum State {
 
 @export_group("Health & Stamina Options")
 @export var health_max: int = 1000
-@export var stamina_max: float = 1000.0
+@export var stamina_max: float = 10000.0
 @export var stamina_regen_rate: float = 100.0
 @export var stamina_regen_delay: float = 1.0
 
@@ -63,6 +63,8 @@ enum State {
 @export var big_jump_stamina_drain_rate: float = 1000.0
 @export var big_jump_cooldown: float = 2.0
 @export var big_jump_stamina_cost: float = 200.0
+@export var big_jump_cooldown_after_use: float = 1.0
+
 
 # Combat Variables
 @export_group("Combat Options")
@@ -93,6 +95,7 @@ enum State {
 
 @export_subgroup("Dash Attack")
 @export var dash_attack_stamina_drain_rate: float = 2000.0
+@export var dash_attack_cooldown: float = 1.0
 
 @export_subgroup("Damage")
 @export var attack_1_dmg: int = 30
@@ -147,7 +150,7 @@ enum State {
 @export var dash_speed: float = 1200.0
 @export var dash_duration: float = 0.2
 @export var dash_cooldown_time: float = 0.7
-@export var dash_stamina_cost: float = 300.0
+@export var dash_stamina_cost: float = 100.0
 
 @export_group("AI Options")
 @export var can_chase: bool = false

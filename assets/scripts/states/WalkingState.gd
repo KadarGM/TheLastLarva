@@ -25,23 +25,19 @@ func process_input() -> void:
 	if Input.is_action_just_pressed("W_jump"):
 		if character.handle_ground_jump():
 			state_machine.transition_to("JumpingState")
+			return
 	
-	if Input.is_action_just_pressed("J_dash") and character.can_dash:
-		var input_direction = Input.get_axis("A_left", "D_right")
-		if input_direction != 0:
+	if Input.is_action_just_pressed("J_dash"):
+		if character.big_jump_charged and Input.is_action_pressed("L_attack"):
+			state_machine.transition_to("DashAttackState")
+			return
+		elif character.can_dash:
 			state_machine.transition_to("DashingState")
+			return
 	
 	if Input.is_action_just_pressed("L_attack"):
-		if character.big_jump_charged and Input.is_action_pressed("J_dash"):
-			state_machine.transition_to("DashAttackState")
-		else:
-			character.perform_attack()
-	
-	if Input.is_action_pressed("J_dash") and character.can_big_jump:
-		if not Input.is_action_pressed("L_attack"):
-			character.start_big_jump_charge()
-			if character.timers_handler.big_jump_timer.time_left > 0:
-				state_machine.transition_to("ChargingBigJumpState")
+		character.perform_attack()
+		return
 	
 	character.process_big_jump_input()
 

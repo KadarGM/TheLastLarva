@@ -4,14 +4,6 @@ class_name DashAttackState
 var direction: float = 0.0
 
 func enter() -> void:
-	if not character.character_data.can_dash_attack or not character.character_data.can_attack:
-		state_machine.transition_to("IdleState")
-		return
-	
-	if character.stamina_current < character.character_data.dash_stamina_cost:
-		state_machine.transition_to("IdleState")
-		return
-	
 	character.stamina_current -= character.character_data.dash_stamina_cost
 	character.stamina_regen_timer = character.character_data.stamina_regen_delay
 	
@@ -19,6 +11,10 @@ func enter() -> void:
 	character.dash_attack_damaged_entities.clear()
 	character.invulnerability_temp = true
 	character.big_jump_charged = false
+	character.can_big_jump = false
+	character.timers_handler.big_jump_timer.stop()
+	character.timers_handler.big_jump_cooldown_timer.wait_time = character.character_data.dash_attack_cooldown
+	character.timers_handler.big_jump_cooldown_timer.start()
 
 func exit() -> void:
 	direction = 0.0
@@ -35,19 +31,31 @@ func physics_process(delta: float) -> void:
 	
 	if character.stamina_current <= 0:
 		character.stamina_current = 0
-		state_machine.transition_to("JumpingState")
+		if character.is_on_floor():
+			state_machine.transition_to("IdleState")
+		else:
+			state_machine.transition_to("JumpingState")
 		return
 	
 	check_collision()
 	
-	if not Input.is_action_pressed("L_attack"):
-		state_machine.transition_to("JumpingState")
+	if not Input.is_action_pressed("L_attack") or not Input.is_action_pressed("J_dash"):
+		if character.is_on_floor():
+			state_machine.transition_to("IdleState")
+		else:
+			state_machine.transition_to("JumpingState")
 
 func check_collision() -> void:
 	if direction < 0 and character.is_on_wall_left():
-		state_machine.transition_to("JumpingState")
+		if character.is_on_floor():
+			state_machine.transition_to("IdleState")
+		else:
+			state_machine.transition_to("JumpingState")
 	elif direction > 0 and character.is_on_wall_right():
-		state_machine.transition_to("JumpingState")
+		if character.is_on_floor():
+			state_machine.transition_to("IdleState")
+		else:
+			state_machine.transition_to("JumpingState")
 
 func apply_damage_to_entity(body: Node2D) -> void:
 	if body in character.dash_attack_damaged_entities or body == character:

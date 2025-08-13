@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bo151bnxrkxp6"]
 
-[ext_resource type="Script" uid="uid://iby3cr3e0aln" path="res://assets/scripts/handlers/debugHandler.gd" id="1_0bnp6"]
-[ext_resource type="Script" uid="uid://d1wg4wik4njq" path="res://assets/scripts/handlers/debugParts.gd" id="2_xsy1t"]
+[ext_resource type="Script" uid="uid://iby3cr3e0aln" path="res://assets/scripts/ARCHIVE/debugHandler.gd" id="1_0bnp6"]
+[ext_resource type="Script" uid="uid://d1wg4wik4njq" path="res://assets/scripts/ARCHIVE/debugParts.gd" id="2_xsy1t"]
 
 [node name="DebugHelper" type="CanvasLayer"]
 script = ExtResource("1_0bnp6")

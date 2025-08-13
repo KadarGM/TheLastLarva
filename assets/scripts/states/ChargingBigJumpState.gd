@@ -8,8 +8,9 @@ func exit() -> void:
 	pass
 
 func physics_process(delta: float) -> void:
+	character.apply_gravity(delta)
+	
 	if not character.is_on_floor():
-		character.velocity.y += character.gravity * delta
 		state_machine.transition_to("JumpingState")
 		return
 	
@@ -19,7 +20,10 @@ func physics_process(delta: float) -> void:
 		return
 	
 	if character.big_jump_charged:
-		if Input.is_action_just_pressed("W_jump"):
+		if Input.is_action_just_pressed("L_attack"):
+			state_machine.transition_to("DashAttackState")
+			return
+		elif Input.is_action_just_pressed("W_jump"):
 			character.execute_big_jump(Vector2(0, -1))
 			var big_jump_state = state_machine.states.get("BigJumpingState")
 			if big_jump_state:
@@ -47,7 +51,7 @@ func physics_process(delta: float) -> void:
 		character.cancel_big_jump_charge()
 		state_machine.transition_to("WalkingState")
 	else:
-		character.velocity.x = move_toward(character.velocity.x, 0, character.character_data.speed)
+		character.velocity.x = move_toward(character.velocity.x, 0, character.character_data.speed * delta)
 
 func handle_animation() -> void:
 	character.play_animation("Big_jump_charge")

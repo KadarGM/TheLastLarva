@@ -2,7 +2,7 @@ extends CanvasLayer
 class_name DebugHelper
 #
 #@export var character: CharacterManager
-#@export var state_machine: CallableStateMachine
+#@export var state_machine: StateMachine
 #var enabled: bool = true
 #var console_debug: bool = false
 #var ui_debug: bool = true
@@ -39,7 +39,7 @@ class_name DebugHelper
 #@onready var timers_holder = $DebugHolder/HBoxContainer/Line4/VBoxContainer/Timers
 #
 #
-#var previous_state: CallableStateMachine.State
+#var previous_state: StateMachine
 #var previous_animation: String = ""
 #var previous_velocity: Vector2 = Vector2.ZERO
 #var previous_big_jump_charged: bool = false
@@ -427,7 +427,7 @@ class_name DebugHelper
 	#else:
 		#print("[DEBUG] Combat: ", state)
 #
-#func get_state_name(state: CallableStateMachine.State) -> String:
+#func get_state_name(state: StateMachine) -> String:
 	#match state:
 		#state_machine.State.IDLE: return "IDLE"
 		#state_machine.State.WALKING: return "WALKING"
