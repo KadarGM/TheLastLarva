@@ -12,7 +12,7 @@ func enter() -> void:
 	damage_applied = false
 	current_animation = ""
 	
-	if character.before_attack_timer and not character.before_attack_timer.is_stopped():
+	if character.timers_handler.before_attack_timer and not character.timers_handler.before_attack_timer.is_stopped():
 		if character.is_on_floor():
 			state_machine.transition_to("IdleState")
 		else:
@@ -39,8 +39,8 @@ func enter() -> void:
 		character.timers_handler.damage_timer.wait_time = character.character_data.damage_delay
 		character.timers_handler.damage_timer.start()
 	
-	character.before_attack_timer.wait_time = character.character_data.attack_cooldown
-	character.before_attack_timer.start()
+	character.timers_handler.before_attack_timer.wait_time = character.character_data.attack_cooldown
+	character.timers_handler.before_attack_timer.start()
 	
 	update_current_animation()
 	character.animation_player.stop()
@@ -99,7 +99,7 @@ func process_attack_movement() -> void:
 func handle_attack_end() -> void:
 	if queued_attack and character.attack_count < 3:
 		if character.stamina_current >= character.character_data.attack_stamina_cost:
-			if character.before_attack_timer.is_stopped():
+			if character.timers_handler.before_attack_timer.is_stopped():
 				enter()
 				return
 	

@@ -56,52 +56,15 @@ var invulnerability_temp: bool = false
 var stamina_current: float = 0.0
 var stamina_regen_timer: float = 0.0
 
-@onready var damage_timer = timers_handler.damage_timer if timers_handler else null
-@onready var hide_weapon_timer = timers_handler.hide_weapon_timer if timers_handler else null
-@onready var big_jump_timer = timers_handler.big_jump_timer if timers_handler else null
-@onready var big_jump_cooldown_timer = timers_handler.big_jump_cooldown_timer if timers_handler else null
-@onready var dash_cooldown_timer = timers_handler.dash_cooldown_timer if timers_handler else null
-@onready var stun_timer = timers_handler.stun_timer if timers_handler else null
-@onready var dash_timer = timers_handler.dash_timer if timers_handler else null
-@onready var before_attack_timer = timers_handler.before_attack_timer if timers_handler else null
-
-@onready var attack_area = areas_handler.attack_area if areas_handler else null
-@onready var damage_area = areas_handler.damage_area if areas_handler else null
-@onready var big_attack_area = areas_handler.big_attack_area if areas_handler else null
-@onready var big_attack_area_2 = areas_handler.big_attack_area_2 if areas_handler else null
-
 func _ready() -> void:
 	if not character_data:
 		character_data = CharacterData.new()
 	
 	stamina_current = character_data.stamina_max
-	setup_timers()
+	timers_handler.setup_timers()
 	setup_signals()
 	setup_stats_controller()
 	set_weapon_visibility("hide")
-
-func setup_timers() -> void:
-	if not timers_handler:
-		return
-	
-	timers_handler.setup_timers()
-	
-	if timers_handler.big_jump_timer and not timers_handler.big_jump_timer.timeout.is_connected(_on_big_jump_timer_timeout):
-		timers_handler.big_jump_timer.timeout.connect(_on_big_jump_timer_timeout)
-	if timers_handler.big_jump_cooldown_timer and not timers_handler.big_jump_cooldown_timer.timeout.is_connected(_on_big_jump_cooldown_timer_timeout):
-		timers_handler.big_jump_cooldown_timer.timeout.connect(_on_big_jump_cooldown_timer_timeout)
-	if timers_handler.dash_cooldown_timer and not timers_handler.dash_cooldown_timer.timeout.is_connected(_on_dash_cooldown_timer_timeout):
-		timers_handler.dash_cooldown_timer.timeout.connect(_on_dash_cooldown_timer_timeout)
-	if timers_handler.hide_weapon_timer and not timers_handler.hide_weapon_timer.timeout.is_connected(_on_hide_weapon_timer_timeout):
-		timers_handler.hide_weapon_timer.timeout.connect(_on_hide_weapon_timer_timeout)
-	if timers_handler.damage_timer and not timers_handler.damage_timer.timeout.is_connected(_on_damage_timer_timeout):
-		timers_handler.damage_timer.timeout.connect(_on_damage_timer_timeout)
-	if timers_handler.stun_timer and not timers_handler.stun_timer.timeout.is_connected(_on_stun_timer_timeout):
-		timers_handler.stun_timer.timeout.connect(_on_stun_timer_timeout)
-	if timers_handler.invulnerability_timer and not timers_handler.invulnerability_timer.timeout.is_connected(_on_invulnerability_timer_timeout):
-		timers_handler.invulnerability_timer.timeout.connect(_on_invulnerability_timer_timeout)
-	if timers_handler.before_attack_timer and not timers_handler.before_attack_timer.timeout.is_connected(_on_before_attack_timer_timeout):
-		timers_handler.before_attack_timer.timeout.connect(_on_before_attack_timer_timeout)
 
 func setup_signals() -> void:
 	if animation_player and not animation_player.animation_finished.is_connected(_on_animation_finished):
@@ -342,17 +305,6 @@ func execute_damage_to_entities() -> void:
 func on_wall_jump() -> void:
 	can_wall_jump = true
 
-#func on_attack_state_enter() -> void:
-	#velocity_before_attack = velocity.x
-	#damage_applied_this_attack = false
-	#if timers_handler:
-		#timers_handler.damage_timer.start()
-
-#func on_attack_state_exit() -> void:
-	#pending_knockback_force = Vector2.ZERO
-	#if timers_handler:
-		#timers_handler.hide_weapon_timer.start()
-
 func update_attack_animations() -> void:
 	var anim_name = ""
 	if is_on_floor():
@@ -380,33 +332,6 @@ func update_attack_animations() -> void:
 	
 	if animation_player.current_animation != anim_name:
 		play_animation(anim_name)
-
-#func process_attack_movement() -> void:
-	#var overlapping_bodies = areas_handler.attack_area.get_overlapping_bodies()
-	#var has_nearby_enemy = false
-	#
-	#for entity in overlapping_bodies:
-		#if entity != self:
-			#has_nearby_enemy = true
-			#break
-	#
-	#if has_nearby_enemy:
-		#velocity.x = move_toward(velocity.x, 0, character_data.attack_movement_friction * character_data.enemy_nearby_friction_multiplier)
-		#return
-	#
-	#if is_on_floor():
-		#var attack_force = character_data.attack_movement_force * character_data.ground_attack_force_multiplier
-		#if count_of_attack == 3:
-			#attack_force *= character_data.attack_movement_multiplier
-		#velocity.x = get_attack_direction() * attack_force
-	#else:
-		#var air_attack_force = character_data.attack_movement_force * character_data.air_attack_force_multiplier
-		#velocity.x = get_attack_direction() * air_attack_force
-	#
-	#if is_on_floor():
-		#velocity.x = move_toward(velocity.x, 0, character_data.attack_movement_friction * character_data.ground_friction_multiplier)
-	#else:
-		#velocity.x = move_toward(velocity.x, 0, character_data.attack_movement_friction * character_data.air_friction_multiplier)
 
 func perform_attack() -> void:
 	if not character_data.can_attack:

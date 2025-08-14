@@ -1974,7 +1974,7 @@ tracks/12/keys = {
 "times": PackedFloat32Array(0, 0.333333, 1.2, 2.4),
 "transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
-"values": [-2.81216, -2.77106, -2.81216, -2.81216]
+"values": [3.47146, 3.5116, 3.47146, 3.47321]
 }
 tracks/13/type = "value"
 tracks/13/imported = false
@@ -6090,8 +6090,9 @@ _data = {
 &"Walk": SubResource("Animation_naawg")
 }
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_wpu1s"]
-size = Vector2(121.704, 219.043)
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_anufl"]
+radius = 60.0
+height = 219.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mol8u"]
 size = Vector2(400, 141)
@@ -6334,12 +6335,12 @@ libraries = {
 }
 autoplay = "Idle"
 playback_auto_capture = false
-playback_default_blend_time = 0.2
+playback_default_blend_time = 0.3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(-2.2816, -39.5507)
 rotation = 0.00136239
-shape = SubResource("RectangleShape2D_wpu1s")
+shape = SubResource("CapsuleShape2D_anufl")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 scale = Vector2(3.33333, 3.33333)
