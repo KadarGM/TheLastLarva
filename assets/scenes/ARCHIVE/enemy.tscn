@@ -1,9 +1,9 @@
 [gd_scene load_steps=45 format=3 uid="uid://ctqediaidg7t1"]
 
-[ext_resource type="Script" uid="uid://crvart3k0rhxm" path="res://assets/scripts/ARCHIVE/enemyManager.gd" id="1_xan8r"]
+[ext_resource type="Script" uid="uid://crvart3k0rhxm" path="res://assets/scripts/characters/ARCHIVE/enemyManager.gd" id="1_xan8r"]
 [ext_resource type="Resource" uid="uid://cxlupfbjhfrqm" path="res://assets/resources/Enemy.tres" id="2_a6hic"]
 [ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://assets/graphics/player/torso.svg" id="4_3wrfr"]
-[ext_resource type="Script" uid="uid://dcts54drik3ds" path="res://assets/scripts/characterVisualizer.gd" id="4_a03dg"]
+[ext_resource type="Script" uid="uid://dcts54drik3ds" path="res://assets/scripts/characters/characterVisualizer.gd" id="4_a03dg"]
 [ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://assets/graphics/player/sword.svg" id="5_a03dg"]
 [ext_resource type="Texture2D" uid="uid://bmae8nmkwyayq" path="res://assets/graphics/player/leg.svg" id="6_h1pys"]
 [ext_resource type="Texture2D" uid="uid://d3eaaehk4puky" path="res://assets/graphics/player/leg_1.svg" id="7_44ogt"]

@@ -12,16 +12,16 @@
 [ext_resource type="Texture2D" uid="uid://bmae8nmkwyayq" path="res://assets/graphics/player/leg.svg" id="10_g3v1o"]
 [ext_resource type="Texture2D" uid="uid://b5rk0f08kkqjn" path="res://assets/graphics/player/mandible_b.svg" id="11_10k03"]
 [ext_resource type="Texture2D" uid="uid://bygtb821ge70j" path="res://assets/graphics/player/mandible_f.svg" id="12_8vqi2"]
-[ext_resource type="Script" uid="uid://blttbfe55ei7" path="res://assets/scripts/characterData.gd" id="13_vha7q"]
+[ext_resource type="Script" uid="uid://blttbfe55ei7" path="res://assets/scripts/characters/characterData.gd" id="13_jpruu"]
 [ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://assets/graphics/player/sword.svg" id="14_7pd0p"]
 
 [resource]
-script = ExtResource("13_vha7q")
+script = ExtResource("13_jpruu")
 health_max = 100
 stamina_max = 1000.0
 stamina_regen_rate = 100.0
 stamina_regen_delay = 1.0
-can_jump = true
+can_jump = false
 can_double_jump = false
 can_triple_jump = false
 can_wall_jump = false
@@ -121,7 +121,6 @@ ai_patrol_state_min_time = 1.0
 ai_patrol_state_max_time = 4.0
 ai_patrol_distance = 200.0
 ai_patrol_auto_generate = true
-patrol_points = Array[Vector2]([Vector2(0, 0)])
 body = ExtResource("2_jbh3h")
 sword = ExtResource("14_7pd0p")
 leg = ExtResource("10_g3v1o")

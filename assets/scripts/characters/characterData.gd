@@ -152,7 +152,6 @@ class_name CharacterData
 @export var ai_patrol_state_max_time: float = 4.0
 @export var ai_patrol_distance: float = 200.0
 @export var ai_patrol_auto_generate: bool = true
-@export var patrol_points: Array[Vector2] = []
 
 @export_group("Body Options")
 @export_subgroup("Body Sprites")

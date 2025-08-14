@@ -12,12 +12,12 @@
 [ext_resource type="Texture2D" uid="uid://bmae8nmkwyayq" path="res://assets/graphics/player/leg.svg" id="10_cthtt"]
 [ext_resource type="Texture2D" uid="uid://b5rk0f08kkqjn" path="res://assets/graphics/player/mandible_b.svg" id="11_qh521"]
 [ext_resource type="Texture2D" uid="uid://bygtb821ge70j" path="res://assets/graphics/player/mandible_f.svg" id="12_fewm8"]
-[ext_resource type="Script" uid="uid://blttbfe55ei7" path="res://assets/scripts/characterData.gd" id="13_xgw3v"]
+[ext_resource type="Script" uid="uid://blttbfe55ei7" path="res://assets/scripts/characters/characterData.gd" id="13_wu2ci"]
 [ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://assets/graphics/player/sword.svg" id="14_kpt4m"]
 
 [resource]
-script = ExtResource("13_xgw3v")
-health_max = 1000
+script = ExtResource("13_wu2ci")
+health_max = 10
 stamina_max = 1000.0
 stamina_regen_rate = 500.0
 stamina_regen_delay = 1.0
@@ -108,11 +108,19 @@ dash_cooldown_time = 0.7
 dash_stamina_cost = 100.0
 can_chase = true
 can_patrol = true
-patrol_state_min_time = 1.0
-patrol_state_max_time = 4.0
-patrol_idle_chance = 0.3
-detection_range = 600.0
-position_tolerance = 50.0
+ai_enabled = false
+ai_detection_range = 600.0
+ai_attack_range = 50.0
+ai_patrol_speed_multiplier = 0.5
+ai_chase_speed_multiplier = 1.0
+ai_flee_health_threshold = 0.2
+ai_think_time = 0.2
+ai_jump_cooldown = 1.5
+ai_patrol_idle_chance = 0.3
+ai_patrol_state_min_time = 1.0
+ai_patrol_state_max_time = 4.0
+ai_patrol_distance = 200.0
+ai_patrol_auto_generate = true
 body = ExtResource("2_f01hd")
 sword = ExtResource("14_kpt4m")
 leg = ExtResource("10_cthtt")

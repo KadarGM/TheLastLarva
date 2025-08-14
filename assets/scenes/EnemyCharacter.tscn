@@ -1,9 +1,9 @@
 [gd_scene load_steps=73 format=3 uid="uid://buhwxyp8rcj8"]
 
-[ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://assets/scripts/characterManager.gd" id="1_vmfkx"]
+[ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://assets/scripts/characters/characterManager.gd" id="1_vmfkx"]
 [ext_resource type="Resource" uid="uid://d125kkggxi83n" path="res://assets/resources/Player.tres" id="2_femtu"]
 [ext_resource type="Resource" uid="uid://cxlupfbjhfrqm" path="res://assets/resources/Enemy.tres" id="2_ypeyy"]
-[ext_resource type="Script" uid="uid://blvqjroan8kap" path="res://assets/scripts/controllers/bodyController.gd" id="3_ypeyy"]
+[ext_resource type="Script" uid="uid://blvqjroan8kap" path="res://assets/scripts/characters/controllers/bodyController.gd" id="3_ypeyy"]
 [ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://assets/graphics/player/torso.svg" id="4_ohghg"]
 [ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://assets/graphics/player/sword.svg" id="5_kchr6"]
 [ext_resource type="Texture2D" uid="uid://bmae8nmkwyayq" path="res://assets/graphics/player/leg.svg" id="6_u0pul"]
@@ -18,30 +18,30 @@
 [ext_resource type="Texture2D" uid="uid://b5rk0f08kkqjn" path="res://assets/graphics/player/mandible_b.svg" id="15_nlckv"]
 [ext_resource type="Texture2D" uid="uid://bygtb821ge70j" path="res://assets/graphics/player/mandible_f.svg" id="16_4ttff"]
 [ext_resource type="PackedScene" uid="uid://bo151bnxrkxp6" path="res://assets/scenes/DebugHelper.tscn" id="17_e4346"]
-[ext_resource type="Script" uid="uid://8ladw3wbvgf5" path="res://assets/scripts/StateMachine.gd" id="18_tnig7"]
-[ext_resource type="Script" uid="uid://d05m4hyc2gfjy" path="res://assets/scripts/states/AttackingState.gd" id="19_qkr2u"]
-[ext_resource type="Script" uid="uid://cap2qgwysvbuv" path="res://assets/scripts/states/BigAttackLandingState.gd" id="20_jn6dl"]
-[ext_resource type="Script" uid="uid://c5pyq75t2im8l" path="res://assets/scripts/states/BigAttackState.gd" id="21_p4j0a"]
-[ext_resource type="Script" uid="uid://cj2vanir2okd8" path="res://assets/scripts/states/BigJumpingState.gd" id="22_sebu3"]
-[ext_resource type="Script" uid="uid://bljggvjayvgmm" path="res://assets/scripts/states/ChargingBigJumpState.gd" id="23_1hv36"]
-[ext_resource type="Script" uid="uid://douevnsa1f2vl" path="res://assets/scripts/states/DashAttackState.gd" id="24_15f18"]
-[ext_resource type="Script" uid="uid://dm6cs7k55effd" path="res://assets/scripts/states/DashingState.gd" id="25_gc1ai"]
-[ext_resource type="Script" uid="uid://d6ly2y3bvt42" path="res://assets/scripts/states/DeathState.gd" id="26_3c0ts"]
-[ext_resource type="Script" uid="uid://5pek5j5kqqgm" path="res://assets/scripts/states/DoubleJumpingState.gd" id="27_4j0d6"]
-[ext_resource type="Script" uid="uid://cjdfunpgfnms" path="res://assets/scripts/states/IdleState.gd" id="28_kxhpr"]
-[ext_resource type="Script" uid="uid://obfnu6wn2aai" path="res://assets/scripts/states/JumpingState.gd" id="29_lm77u"]
-[ext_resource type="Script" uid="uid://bxk8somi3mohc" path="res://assets/scripts/states/KnockbackState.gd" id="30_o1dx4"]
-[ext_resource type="Script" uid="uid://bkmco042d01vg" path="res://assets/scripts/states/StunnedState.gd" id="31_nrbej"]
-[ext_resource type="Script" uid="uid://dd1i6gg36v6of" path="res://assets/scripts/states/TripleJumpingState.gd" id="32_3dcsc"]
-[ext_resource type="Script" uid="uid://dr8pm6dr6shbb" path="res://assets/scripts/states/WalkingState.gd" id="33_xphae"]
-[ext_resource type="Script" uid="uid://c1u6gs01pwy5i" path="res://assets/scripts/states/WallJumpingState.gd" id="34_lloyc"]
-[ext_resource type="Script" uid="uid://c3bnwicgn7l8p" path="res://assets/scripts/states/WallSlidingState.gd" id="35_5fabh"]
-[ext_resource type="Script" uid="uid://bnfvml6hmbsm1" path="res://assets/scripts/Novy_test/PlayerController.gd" id="36_6eenj"]
-[ext_resource type="Script" uid="uid://cnnuxdvjhvw2j" path="res://assets/scripts/controllers/statsController.gd" id="37_onysn"]
-[ext_resource type="Script" uid="uid://b80qm07nxxcap" path="res://assets/scripts/Novy_test/AiController.gd" id="38_e7fyo"]
-[ext_resource type="Script" uid="uid://ciuxhepgisrjw" path="res://assets/scripts/handlers/rayCastsHandler.gd" id="39_8byg5"]
-[ext_resource type="Script" uid="uid://du76mpiul5ejs" path="res://assets/scripts/handlers/timersHandler.gd" id="40_wq62j"]
-[ext_resource type="Script" uid="uid://d23d04rsyp41w" path="res://assets/scripts/handlers/areasHandler.gd" id="41_o34gv"]
+[ext_resource type="Script" uid="uid://8ladw3wbvgf5" path="res://assets/scripts/characters/states/StateMachine.gd" id="18_tnig7"]
+[ext_resource type="Script" uid="uid://d05m4hyc2gfjy" path="res://assets/scripts/characters/states/AttackingState.gd" id="19_qkr2u"]
+[ext_resource type="Script" uid="uid://cap2qgwysvbuv" path="res://assets/scripts/characters/states/BigAttackLandingState.gd" id="20_jn6dl"]
+[ext_resource type="Script" uid="uid://c5pyq75t2im8l" path="res://assets/scripts/characters/states/BigAttackState.gd" id="21_p4j0a"]
+[ext_resource type="Script" uid="uid://cj2vanir2okd8" path="res://assets/scripts/characters/states/BigJumpingState.gd" id="22_sebu3"]
+[ext_resource type="Script" uid="uid://bljggvjayvgmm" path="res://assets/scripts/characters/states/ChargingBigJumpState.gd" id="23_1hv36"]
+[ext_resource type="Script" uid="uid://douevnsa1f2vl" path="res://assets/scripts/characters/states/DashAttackState.gd" id="24_15f18"]
+[ext_resource type="Script" uid="uid://dm6cs7k55effd" path="res://assets/scripts/characters/states/DashingState.gd" id="25_gc1ai"]
+[ext_resource type="Script" uid="uid://d6ly2y3bvt42" path="res://assets/scripts/characters/states/DeathState.gd" id="26_3c0ts"]
+[ext_resource type="Script" uid="uid://5pek5j5kqqgm" path="res://assets/scripts/characters/states/DoubleJumpingState.gd" id="27_4j0d6"]
+[ext_resource type="Script" uid="uid://cjdfunpgfnms" path="res://assets/scripts/characters/states/IdleState.gd" id="28_kxhpr"]
+[ext_resource type="Script" uid="uid://obfnu6wn2aai" path="res://assets/scripts/characters/states/JumpingState.gd" id="29_lm77u"]
+[ext_resource type="Script" uid="uid://bxk8somi3mohc" path="res://assets/scripts/characters/states/KnockbackState.gd" id="30_o1dx4"]
+[ext_resource type="Script" uid="uid://bkmco042d01vg" path="res://assets/scripts/characters/states/StunnedState.gd" id="31_nrbej"]
+[ext_resource type="Script" uid="uid://dd1i6gg36v6of" path="res://assets/scripts/characters/states/TripleJumpingState.gd" id="32_3dcsc"]
+[ext_resource type="Script" uid="uid://dr8pm6dr6shbb" path="res://assets/scripts/characters/states/WalkingState.gd" id="33_xphae"]
+[ext_resource type="Script" uid="uid://c1u6gs01pwy5i" path="res://assets/scripts/characters/states/WallJumpingState.gd" id="34_lloyc"]
+[ext_resource type="Script" uid="uid://c3bnwicgn7l8p" path="res://assets/scripts/characters/states/WallSlidingState.gd" id="35_5fabh"]
+[ext_resource type="Script" uid="uid://bnfvml6hmbsm1" path="res://assets/scripts/characters/PlayerController.gd" id="36_6eenj"]
+[ext_resource type="Script" uid="uid://cnnuxdvjhvw2j" path="res://assets/scripts/characters/controllers/statsController.gd" id="37_onysn"]
+[ext_resource type="Script" uid="uid://b80qm07nxxcap" path="res://assets/scripts/characters/controllers/AiController.gd" id="38_e7fyo"]
+[ext_resource type="Script" uid="uid://ciuxhepgisrjw" path="res://assets/scripts/characters/handlers/rayCastsHandler.gd" id="39_8byg5"]
+[ext_resource type="Script" uid="uid://du76mpiul5ejs" path="res://assets/scripts/characters/handlers/timersHandler.gd" id="40_wq62j"]
+[ext_resource type="Script" uid="uid://d23d04rsyp41w" path="res://assets/scripts/characters/handlers/areasHandler.gd" id="41_o34gv"]
 
 [sub_resource type="Animation" id="Animation_o5lcw"]
 resource_name = "Attack_air_1"
@@ -6093,9 +6093,8 @@ _data = {
 &"Walk": SubResource("Animation_naawg")
 }
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_anufl"]
-radius = 60.0
-height = 219.0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_femtu"]
+size = Vector2(120, 220)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mol8u"]
 size = Vector2(400, 141)
@@ -6119,7 +6118,7 @@ radius = 1379.84
 
 [node name="Enemy" type="CharacterBody2D" node_paths=PackedStringArray("body_node", "animation_player", "state_machine", "controller", "ray_casts_handler", "timers_handler", "areas_handler", "stats_controller", "stamina_bar", "health_bar") groups=["Enemy"]]
 z_index = -100
-collision_layer = 2
+collision_layer = 4
 script = ExtResource("1_vmfkx")
 character_data = ExtResource("2_ypeyy")
 body_node = NodePath("Body")
@@ -6349,9 +6348,9 @@ playback_auto_capture = false
 playback_default_blend_time = 0.2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(-2.2816, -39.5507)
+position = Vector2(-2.28129, -39.7756)
 rotation = 0.00136239
-shape = SubResource("CapsuleShape2D_anufl")
+shape = SubResource("RectangleShape2D_femtu")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 scale = Vector2(3.33333, 3.33333)
@@ -6716,8 +6715,8 @@ attack_area = NodePath("AttackArea")
 metadata/_custom_type_script = "uid://d23d04rsyp41w"
 
 [node name="BigAttackArea" type="Area2D" parent="Handlers/AreasHandler"]
-collision_layer = 2
-collision_mask = 4
+collision_layer = 4
+collision_mask = 2
 metadata/_edit_lock_ = true
 
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="Handlers/AreasHandler/BigAttackArea"]
@@ -6726,8 +6725,8 @@ shape = SubResource("RectangleShape2D_mol8u")
 metadata/_edit_lock_ = true
 
 [node name="BigAttackArea2" type="Area2D" parent="Handlers/AreasHandler"]
-collision_layer = 2
-collision_mask = 4
+collision_layer = 4
+collision_mask = 2
 metadata/_edit_lock_ = true
 
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="Handlers/AreasHandler/BigAttackArea2"]
@@ -6736,8 +6735,8 @@ shape = SubResource("RectangleShape2D_sa4r2")
 metadata/_edit_lock_ = true
 
 [node name="DamageArea" type="Area2D" parent="Handlers/AreasHandler"]
-collision_layer = 2
-collision_mask = 4
+collision_layer = 4
+collision_mask = 2
 
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="Handlers/AreasHandler/DamageArea"]
 position = Vector2(0, -69.091)
@@ -6745,8 +6744,8 @@ shape = SubResource("CapsuleShape2D_mhwdb")
 
 [node name="AttackArea" type="Area2D" parent="Handlers/AreasHandler"]
 z_index = -100
-collision_layer = 2
-collision_mask = 4
+collision_layer = 4
+collision_mask = 2
 
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="Handlers/AreasHandler/AttackArea"]
 position = Vector2(-152.033, -85.091)

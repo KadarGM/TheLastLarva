@@ -1,8 +1,8 @@
 [gd_scene load_steps=72 format=3 uid="uid://df1dloofeb6le"]
 
-[ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://assets/scripts/characterManager.gd" id="1_31cv2"]
+[ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://assets/scripts/characters/characterManager.gd" id="1_31cv2"]
 [ext_resource type="Resource" uid="uid://d125kkggxi83n" path="res://assets/resources/Player.tres" id="2_pf23h"]
-[ext_resource type="Script" uid="uid://blvqjroan8kap" path="res://assets/scripts/controllers/bodyController.gd" id="3_dt7fs"]
+[ext_resource type="Script" uid="uid://blvqjroan8kap" path="res://assets/scripts/characters/controllers/bodyController.gd" id="3_dt7fs"]
 [ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://assets/graphics/player/torso.svg" id="4_wqfne"]
 [ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://assets/graphics/player/sword.svg" id="5_wnwbv"]
 [ext_resource type="Texture2D" uid="uid://bmae8nmkwyayq" path="res://assets/graphics/player/leg.svg" id="6_gl8cc"]
@@ -17,30 +17,30 @@
 [ext_resource type="Texture2D" uid="uid://b5rk0f08kkqjn" path="res://assets/graphics/player/mandible_b.svg" id="15_2dvfe"]
 [ext_resource type="Texture2D" uid="uid://bygtb821ge70j" path="res://assets/graphics/player/mandible_f.svg" id="16_giy8y"]
 [ext_resource type="PackedScene" uid="uid://bo151bnxrkxp6" path="res://assets/scenes/DebugHelper.tscn" id="17_fdfoy"]
-[ext_resource type="Script" uid="uid://8ladw3wbvgf5" path="res://assets/scripts/StateMachine.gd" id="18_ay2jx"]
-[ext_resource type="Script" uid="uid://d05m4hyc2gfjy" path="res://assets/scripts/states/AttackingState.gd" id="19_yitjv"]
-[ext_resource type="Script" uid="uid://cap2qgwysvbuv" path="res://assets/scripts/states/BigAttackLandingState.gd" id="20_qnek2"]
-[ext_resource type="Script" uid="uid://c5pyq75t2im8l" path="res://assets/scripts/states/BigAttackState.gd" id="21_ike5y"]
-[ext_resource type="Script" uid="uid://cnnuxdvjhvw2j" path="res://assets/scripts/controllers/statsController.gd" id="22_4gjji"]
-[ext_resource type="Script" uid="uid://cj2vanir2okd8" path="res://assets/scripts/states/BigJumpingState.gd" id="22_p0j5o"]
-[ext_resource type="Script" uid="uid://bljggvjayvgmm" path="res://assets/scripts/states/ChargingBigJumpState.gd" id="23_ingmm"]
-[ext_resource type="Script" uid="uid://douevnsa1f2vl" path="res://assets/scripts/states/DashAttackState.gd" id="24_w5a74"]
-[ext_resource type="Script" uid="uid://ciuxhepgisrjw" path="res://assets/scripts/handlers/rayCastsHandler.gd" id="25_2gdjj"]
-[ext_resource type="Script" uid="uid://dm6cs7k55effd" path="res://assets/scripts/states/DashingState.gd" id="25_mpwc7"]
-[ext_resource type="Script" uid="uid://d6ly2y3bvt42" path="res://assets/scripts/states/DeathState.gd" id="26_c0byx"]
-[ext_resource type="Script" uid="uid://du76mpiul5ejs" path="res://assets/scripts/handlers/timersHandler.gd" id="26_sc3ue"]
-[ext_resource type="Script" uid="uid://d23d04rsyp41w" path="res://assets/scripts/handlers/areasHandler.gd" id="27_lxlsd"]
-[ext_resource type="Script" uid="uid://5pek5j5kqqgm" path="res://assets/scripts/states/DoubleJumpingState.gd" id="27_qrijk"]
-[ext_resource type="Script" uid="uid://cjdfunpgfnms" path="res://assets/scripts/states/IdleState.gd" id="28_8k6dn"]
-[ext_resource type="Script" uid="uid://obfnu6wn2aai" path="res://assets/scripts/states/JumpingState.gd" id="29_jpuse"]
-[ext_resource type="Script" uid="uid://bxk8somi3mohc" path="res://assets/scripts/states/KnockbackState.gd" id="30_pmubu"]
-[ext_resource type="Script" uid="uid://bkmco042d01vg" path="res://assets/scripts/states/StunnedState.gd" id="31_ypmlx"]
-[ext_resource type="Script" uid="uid://dd1i6gg36v6of" path="res://assets/scripts/states/TripleJumpingState.gd" id="32_xjbdu"]
-[ext_resource type="Script" uid="uid://dr8pm6dr6shbb" path="res://assets/scripts/states/WalkingState.gd" id="33_6hv0l"]
-[ext_resource type="Script" uid="uid://c1u6gs01pwy5i" path="res://assets/scripts/states/WallJumpingState.gd" id="34_odcgf"]
-[ext_resource type="Script" uid="uid://c3bnwicgn7l8p" path="res://assets/scripts/states/WallSlidingState.gd" id="35_yh04f"]
-[ext_resource type="Script" uid="uid://bnfvml6hmbsm1" path="res://assets/scripts/Novy_test/PlayerController.gd" id="36_u61th"]
-[ext_resource type="Script" uid="uid://b80qm07nxxcap" path="res://assets/scripts/Novy_test/AiController.gd" id="38_elw5e"]
+[ext_resource type="Script" uid="uid://8ladw3wbvgf5" path="res://assets/scripts/characters/states/StateMachine.gd" id="18_ay2jx"]
+[ext_resource type="Script" uid="uid://d05m4hyc2gfjy" path="res://assets/scripts/characters/states/AttackingState.gd" id="19_yitjv"]
+[ext_resource type="Script" uid="uid://cap2qgwysvbuv" path="res://assets/scripts/characters/states/BigAttackLandingState.gd" id="20_qnek2"]
+[ext_resource type="Script" uid="uid://c5pyq75t2im8l" path="res://assets/scripts/characters/states/BigAttackState.gd" id="21_ike5y"]
+[ext_resource type="Script" uid="uid://cnnuxdvjhvw2j" path="res://assets/scripts/characters/controllers/statsController.gd" id="22_4gjji"]
+[ext_resource type="Script" uid="uid://cj2vanir2okd8" path="res://assets/scripts/characters/states/BigJumpingState.gd" id="22_p0j5o"]
+[ext_resource type="Script" uid="uid://bljggvjayvgmm" path="res://assets/scripts/characters/states/ChargingBigJumpState.gd" id="23_ingmm"]
+[ext_resource type="Script" uid="uid://douevnsa1f2vl" path="res://assets/scripts/characters/states/DashAttackState.gd" id="24_w5a74"]
+[ext_resource type="Script" uid="uid://ciuxhepgisrjw" path="res://assets/scripts/characters/handlers/rayCastsHandler.gd" id="25_2gdjj"]
+[ext_resource type="Script" uid="uid://dm6cs7k55effd" path="res://assets/scripts/characters/states/DashingState.gd" id="25_mpwc7"]
+[ext_resource type="Script" uid="uid://d6ly2y3bvt42" path="res://assets/scripts/characters/states/DeathState.gd" id="26_c0byx"]
+[ext_resource type="Script" uid="uid://du76mpiul5ejs" path="res://assets/scripts/characters/handlers/timersHandler.gd" id="26_sc3ue"]
+[ext_resource type="Script" uid="uid://d23d04rsyp41w" path="res://assets/scripts/characters/handlers/areasHandler.gd" id="27_lxlsd"]
+[ext_resource type="Script" uid="uid://5pek5j5kqqgm" path="res://assets/scripts/characters/states/DoubleJumpingState.gd" id="27_qrijk"]
+[ext_resource type="Script" uid="uid://cjdfunpgfnms" path="res://assets/scripts/characters/states/IdleState.gd" id="28_8k6dn"]
+[ext_resource type="Script" uid="uid://obfnu6wn2aai" path="res://assets/scripts/characters/states/JumpingState.gd" id="29_jpuse"]
+[ext_resource type="Script" uid="uid://bxk8somi3mohc" path="res://assets/scripts/characters/states/KnockbackState.gd" id="30_pmubu"]
+[ext_resource type="Script" uid="uid://bkmco042d01vg" path="res://assets/scripts/characters/states/StunnedState.gd" id="31_ypmlx"]
+[ext_resource type="Script" uid="uid://dd1i6gg36v6of" path="res://assets/scripts/characters/states/TripleJumpingState.gd" id="32_xjbdu"]
+[ext_resource type="Script" uid="uid://dr8pm6dr6shbb" path="res://assets/scripts/characters/states/WalkingState.gd" id="33_6hv0l"]
+[ext_resource type="Script" uid="uid://c1u6gs01pwy5i" path="res://assets/scripts/characters/states/WallJumpingState.gd" id="34_odcgf"]
+[ext_resource type="Script" uid="uid://c3bnwicgn7l8p" path="res://assets/scripts/characters/states/WallSlidingState.gd" id="35_yh04f"]
+[ext_resource type="Script" uid="uid://bnfvml6hmbsm1" path="res://assets/scripts/characters/PlayerController.gd" id="36_u61th"]
+[ext_resource type="Script" uid="uid://b80qm07nxxcap" path="res://assets/scripts/characters/controllers/AiController.gd" id="38_elw5e"]
 
 [sub_resource type="Animation" id="Animation_o5lcw"]
 resource_name = "Attack_air_1"
@@ -6092,9 +6092,8 @@ _data = {
 &"Walk": SubResource("Animation_naawg")
 }
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_anufl"]
-radius = 60.0
-height = 219.0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_elw5e"]
+size = Vector2(120, 220)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mol8u"]
 size = Vector2(400, 141)
@@ -6348,9 +6347,9 @@ playback_auto_capture = false
 playback_default_blend_time = 0.2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(-2.2816, -39.5507)
+position = Vector2(-2.28129, -39.7756)
 rotation = 0.00136239
-shape = SubResource("CapsuleShape2D_anufl")
+shape = SubResource("RectangleShape2D_elw5e")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 scale = Vector2(3.33333, 3.33333)
@@ -6743,8 +6742,8 @@ shape = SubResource("CapsuleShape2D_mhwdb")
 
 [node name="AttackArea" type="Area2D" parent="Handlers/AreasHandler"]
 z_index = -100
-collision_layer = 2
-collision_mask = 4
+collision_layer = 4
+collision_mask = 2
 
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="Handlers/AreasHandler/AttackArea"]
 position = Vector2(-152.033, -85.091)
@@ -6753,16 +6752,16 @@ shape = SubResource("CapsuleShape2D_mol8u")
 [node name="SoftCollisionArea" type="Area2D" parent="Handlers/AreasHandler"]
 visible = false
 position = Vector2(0, -36.3636)
-collision_layer = 4
-collision_mask = 4
+collision_layer = 2
+collision_mask = 2
 
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="Handlers/AreasHandler/SoftCollisionArea"]
 shape = SubResource("CircleShape2D_elw5e")
 
 [node name="DetectionArea" type="Area2D" parent="Handlers/AreasHandler"]
 visible = false
-collision_layer = 4
-collision_mask = 2
+collision_layer = 2
+collision_mask = 4
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Handlers/AreasHandler/DetectionArea"]
 polygon = PackedVector2Array(1, -127, 0, -161.558, -1328.13, -629.25, -1329, 391.878, 0, -91.4037)

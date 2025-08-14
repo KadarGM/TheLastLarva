@@ -2,6 +2,7 @@ extends BaseController
 class_name AIController
 
 @export var view_ray: RayCast2D
+@export var patrol_points: Array[Vector2] = []
 
 var target: Node2D = null
 var current_patrol_index: int = 0
@@ -17,11 +18,11 @@ var target_in_attack_range: bool = false
 
 func _ready() -> void:
 	if character and character.character_data:
-		if character.character_data.ai_patrol_auto_generate and character.character_data.patrol_points.is_empty():
+		if character.character_data.ai_patrol_auto_generate and patrol_points.is_empty():
 			await character.ready
 			var patrol_distance = character.character_data.ai_patrol_distance
-			character.character_data.patrol_points.append(character.global_position + Vector2(patrol_distance, 0))
-			character.character_data.patrol_points.append(character.global_position + Vector2(-patrol_distance, 0))
+			patrol_points.append(character.global_position + Vector2(patrol_distance, 0))
+			patrol_points.append(character.global_position + Vector2(-patrol_distance, 0))
 	
 	start_patrol_timer()
 
@@ -56,13 +57,18 @@ func find_target() -> void:
 	target_in_detection = false
 	target_in_attack_range = false
 	
-	var potential_targets = get_tree().get_nodes_in_group("player")
+	var potential_targets = get_tree().get_nodes_in_group("Player")
+	potential_targets.append_array(get_tree().get_nodes_in_group("player"))
+	
 	var nearest_distance = INF
 	var detection_range = character.character_data.ai_detection_range
 	var attack_range = character.character_data.ai_attack_range
 	
 	for potential_target in potential_targets:
 		if potential_target == character:
+			continue
+		
+		if not potential_target.has_method("take_damage"):
 			continue
 		
 		var distance = character.global_position.distance_to(potential_target.global_position)
@@ -82,7 +88,7 @@ func check_target_visibility() -> void:
 	view_ray.target_position = character.to_local(target.global_position)
 	view_ray.force_raycast_update()
 	
-	can_see_target = not view_ray.is_colliding()
+	can_see_target = not view_ray.is_colliding() or view_ray.get_collider() == target
 
 func check_flee_condition() -> void:
 	if not character.stats_controller:
@@ -116,12 +122,12 @@ func execute_patrol() -> void:
 	if patrol_timer > 0 and patrol_timer < character.character_data.ai_patrol_state_max_time * 0.5:
 		return
 	
-	if character.character_data.patrol_points.size() > 1:
-		var target_point = character.character_data.patrol_points[current_patrol_index]
+	if patrol_points.size() > 1:
+		var target_point = patrol_points[current_patrol_index]
 		var distance = character.global_position.distance_to(target_point)
 		
 		if distance < 50:
-			current_patrol_index = (current_patrol_index + 1) % character.character_data.patrol_points.size()
+			current_patrol_index = (current_patrol_index + 1) % patrol_points.size()
 			start_patrol_timer()
 		else:
 			var direction = sign(target_point.x - character.global_position.x)
