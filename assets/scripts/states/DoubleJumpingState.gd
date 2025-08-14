@@ -2,20 +2,23 @@ extends State
 class_name DoubleJumpingState
 
 func enter() -> void:
+	var input = character.get_controller_input()
 	character.velocity.y = character.character_data.jump_velocity * character.character_data.double_jump_multiplier
 	character.has_double_jump = false
 	character.jump_count = 2
 	character.has_triple_jump = true
-	character.is_double_jump_held = Input.is_action_pressed("W_jump")
+	character.is_double_jump_held = input.jump
 	character.play_animation("Double_jump")
 	character.reset_air_time()
 
 func physics_process(delta: float) -> void:
+	var input = character.get_controller_input()
+	
 	if not character.is_on_floor():
 		character.velocity.y += character.gravity * delta
 		
 		if character.is_double_jump_held and character.velocity.y < 0:
-			if Input.is_action_just_released("W_jump") or character._is_on_ceiling():
+			if input.jump_released or character._is_on_ceiling():
 				character.velocity.y *= character.character_data.jump_release_multiplier
 				character.is_double_jump_held = false
 	
@@ -33,7 +36,7 @@ func physics_process(delta: float) -> void:
 		state_machine.transition_to("WallSlidingState")
 		return
 	
-	var input_direction = Input.get_axis("A_left", "D_right")
+	var input_direction = input.move_direction.x
 	process_air_movement(input_direction)
 	process_input()
 
@@ -47,22 +50,24 @@ func process_air_movement(input_direction: float) -> void:
 		character.velocity.x = move_toward(character.velocity.x, 0, character.character_data.speed * character.character_data.air_movement_friction)
 
 func process_input() -> void:
-	if Input.is_action_just_pressed("W_jump"):
+	var input = character.get_controller_input()
+	
+	if input.jump_pressed:
 		if character.jump_count == 2 and character.character_data.can_triple_jump:
 			if character.stamina_current >= character.character_data.triple_jump_stamina_cost:
 				state_machine.transition_to("TripleJumpingState")
 	
-	if Input.is_action_just_pressed("J_dash") and character.character_data.can_dash:
+	if input.dash_pressed and character.character_data.can_dash:
 		if character.can_dash:
 			state_machine.transition_to("DashingState")
 	
-	if Input.is_action_just_pressed("L_attack"):
-		if character.big_jump_charged and Input.is_action_pressed("J_dash"):
+	if input.attack_pressed:
+		if character.big_jump_charged and input.dash:
 			state_machine.transition_to("DashAttackState")
 		else:
 			character.perform_air_attack()
 	
-	if Input.is_action_just_pressed("S_charge_jump"):
+	if input.charge_jump_pressed:
 		if character.character_data.can_big_attack:
 			state_machine.transition_to("BigAttackState")
 

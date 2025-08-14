@@ -20,7 +20,8 @@ func enter() -> void:
 		state_machine.transition_to("JumpingState")
 		return
 	
-	var dash_direction = Input.get_axis("A_left", "D_right")
+	var input = character.get_controller_input()
+	var dash_direction = input.move_direction.x
 	if dash_direction == 0:
 		dash_direction = character.get_facing_direction()
 	
@@ -45,7 +46,9 @@ func exit() -> void:
 	character.invulnerability_temp = false
 
 func physics_process(_delta: float) -> void:
-	if Input.is_action_just_pressed("W_jump") and not character.is_on_floor():
+	var input = character.get_controller_input()
+	
+	if input.jump_pressed and not character.is_on_floor():
 		if character.jump_count == 1 and character.has_double_jump and character.character_data.can_double_jump:
 			state_machine.transition_to("DoubleJumpingState")
 		elif character.jump_count == 2 and character.has_triple_jump and character.character_data.can_triple_jump:
@@ -53,9 +56,7 @@ func physics_process(_delta: float) -> void:
 				state_machine.transition_to("TripleJumpingState")
 	
 	if character.timers_handler.dash_timer.is_stopped():
-		#if character.is_on_floor() and character.velocity.x == 0 :
-			#state_machine.transition_to("IdleState")
-		if character.is_on_floor(): #and character.velocity.x != 0:
+		if character.is_on_floor():
 			state_machine.transition_to("WalkingState")
 		else:
 			state_machine.transition_to("JumpingState")

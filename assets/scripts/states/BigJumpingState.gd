@@ -41,11 +41,12 @@ func check_collision() -> void:
 		state_machine.transition_to("JumpingState")
 
 func check_input_release() -> void:
-	if direction.x < 0 and not Input.is_action_pressed("A_left"):
+	var input = character.get_controller_input()
+	if direction.x < 0 and input.move_direction.x >= 0:
 		state_machine.transition_to("JumpingState")
-	elif direction.x > 0 and not Input.is_action_pressed("D_right"):
+	elif direction.x > 0 and input.move_direction.x <= 0:
 		state_machine.transition_to("JumpingState")
-	elif direction.y < 0 and not Input.is_action_pressed("W_jump"):
+	elif direction.y < 0 and not input.jump:
 		state_machine.transition_to("JumpingState")
 
 func set_direction(dir: Vector2) -> void:

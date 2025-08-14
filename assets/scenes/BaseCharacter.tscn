@@ -1,4 +1,4 @@
-[gd_scene load_steps=68 format=3 uid="uid://df1dloofeb6le"]
+[gd_scene load_steps=70 format=3 uid="uid://df1dloofeb6le"]
 
 [ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://assets/scripts/characterManager.gd" id="1_31cv2"]
 [ext_resource type="Resource" uid="uid://d125kkggxi83n" path="res://assets/resources/Player.tres" id="2_pf23h"]
@@ -39,6 +39,8 @@
 [ext_resource type="Script" uid="uid://dr8pm6dr6shbb" path="res://assets/scripts/states/WalkingState.gd" id="33_6hv0l"]
 [ext_resource type="Script" uid="uid://c1u6gs01pwy5i" path="res://assets/scripts/states/WallJumpingState.gd" id="34_odcgf"]
 [ext_resource type="Script" uid="uid://c3bnwicgn7l8p" path="res://assets/scripts/states/WallSlidingState.gd" id="35_yh04f"]
+[ext_resource type="Script" uid="uid://bnfvml6hmbsm1" path="res://assets/scripts/Novy_test/PlayerController.gd" id="36_u61th"]
+[ext_resource type="Script" uid="uid://b80qm07nxxcap" path="res://assets/scripts/Novy_test/AiController.gd" id="38_elw5e"]
 
 [sub_resource type="Animation" id="Animation_o5lcw"]
 resource_name = "Attack_air_1"
@@ -6108,7 +6110,7 @@ height = 180.182
 radius = 165.967
 height = 483.582
 
-[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("body_node", "animation_player", "state_machine", "ray_casts_handler", "timers_handler", "areas_handler", "stats_controller", "stamina_bar", "health_bar") groups=["Player"]]
+[node name="BaseCharacter" type="CharacterBody2D" node_paths=PackedStringArray("body_node", "animation_player", "state_machine", "controller", "ray_casts_handler", "timers_handler", "areas_handler", "stats_controller", "stamina_bar", "health_bar") groups=["Player"]]
 z_index = -100
 collision_layer = 2
 script = ExtResource("1_31cv2")
@@ -6116,12 +6118,14 @@ character_data = ExtResource("2_pf23h")
 body_node = NodePath("Body")
 animation_player = NodePath("AnimationPlayer")
 state_machine = NodePath("StateMachine")
+controller = NodePath("Controllers/PlayerController")
 ray_casts_handler = NodePath("Handlers/RayCastsHandler")
 timers_handler = NodePath("Handlers/TimersHandler")
 areas_handler = NodePath("Handlers/AreasHandler")
 stats_controller = NodePath("Controllers/StatsController")
 stamina_bar = NodePath("GameUI/MarginContainer/StatsHBox/VBoxContainer/StaminaBar")
 health_bar = NodePath("GameUI/MarginContainer/StatsHBox/VBoxContainer/HealthBar")
+metadata/_custom_type_script = "uid://7a8h46pofh27"
 metadata/_edit_horizontal_guides_ = [69.6705]
 metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
 
@@ -6335,7 +6339,7 @@ libraries = {
 }
 autoplay = "Idle"
 playback_auto_capture = false
-playback_default_blend_time = 0.3
+playback_default_blend_time = 0.2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(-2.2816, -39.5507)
@@ -6391,6 +6395,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("18_ay2jx")
 initial_state = NodePath("IdleState")
+metadata/_custom_type_script = "uid://8ladw3wbvgf5"
 
 [node name="AttackingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
 anchors_preset = 0
@@ -6535,6 +6540,14 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
+[node name="PlayerController" type="Control" parent="Controllers" node_paths=PackedStringArray("character")]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("36_u61th")
+character = NodePath("../..")
+metadata/_custom_type_script = "uid://bnfvml6hmbsm1"
+
 [node name="StatsController" type="Control" parent="Controllers" node_paths=PackedStringArray("owner_body", "timers_handler", "areas_handler", "debug_helper")]
 layout_mode = 3
 anchors_preset = 0
@@ -6547,6 +6560,15 @@ timers_handler = NodePath("../../Handlers/TimersHandler")
 areas_handler = NodePath("../../Handlers/AreasHandler")
 debug_helper = NodePath("../../DebugHelper")
 metadata/_custom_type_script = "uid://cnnuxdvjhvw2j"
+
+[node name="AIController" type="Control" parent="Controllers" node_paths=PackedStringArray("character")]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("38_elw5e")
+patrol_points = Array[Vector2]([Vector2(-20, 0)])
+character = NodePath("../..")
+metadata/_custom_type_script = "uid://b80qm07nxxcap"
 
 [node name="Handlers" type="Control" parent="."]
 layout_mode = 3

@@ -14,8 +14,12 @@ func physics_process(delta: float) -> void:
 		state_machine.transition_to("IdleState")
 		return
 	
-	var left = character.ray_casts_handler.left_wall_ray.is_colliding()
-	var right = character.ray_casts_handler.right_wall_ray.is_colliding()
+	var left = false
+	var right = false
+	
+	if character.ray_casts_handler:
+		left = character.ray_casts_handler.left_wall_ray.is_colliding()
+		right = character.ray_casts_handler.right_wall_ray.is_colliding()
 	
 	if not left and not right:
 		state_machine.transition_to("JumpingState")
@@ -25,7 +29,8 @@ func physics_process(delta: float) -> void:
 	process_input()
 
 func apply_wall_slide_gravity(delta: float) -> void:
-	var input_direction = Input.get_axis("A_left", "D_right")
+	var input = character.get_controller_input()
+	var input_direction = input.move_direction.x
 	var wall_direction = get_wall_direction()
 	
 	if wall_direction != 0 and input_direction != 0:
@@ -33,31 +38,32 @@ func apply_wall_slide_gravity(delta: float) -> void:
 			character.velocity.y = 0
 			return
 	
-	if Input.is_action_pressed("S_charge_jump"):
+	if input.charge_jump:
 		character.velocity.y += gravity * delta * character.character_data.wall_slide_gravity_multiplier
 		character.velocity.y = min(character.velocity.y, 300)
 	else:
 		character.velocity.y = 0
 
 func process_input() -> void:
-	var input_direction = Input.get_axis("A_left", "D_right")
+	var input = character.get_controller_input()
+	var input_direction = input.move_direction.x
 	
-	if character.big_jump_charged and Input.is_action_pressed("J_dash"):
-		if Input.is_action_just_pressed("W_jump"):
+	if character.big_jump_charged and input.dash:
+		if input.jump_pressed:
 			character.execute_big_jump(Vector2(0, -1))
 			var big_jump_state = state_machine.states.get("BigJumpingState")
 			if big_jump_state:
 				big_jump_state.set_direction(Vector2(0, -1))
 			state_machine.transition_to("BigJumpingState")
 			return
-		elif Input.is_action_just_pressed("A_left"):
+		elif input_direction < 0 and input.move_direction.x < -0.5:
 			character.execute_big_jump(Vector2(-1, 0))
 			var big_jump_state = state_machine.states.get("BigJumpingState")
 			if big_jump_state:
 				big_jump_state.set_direction(Vector2(-1, 0))
 			state_machine.transition_to("BigJumpingState")
 			return
-		elif Input.is_action_just_pressed("D_right"):
+		elif input_direction > 0 and input.move_direction.x > 0.5:
 			character.execute_big_jump(Vector2(1, 0))
 			var big_jump_state = state_machine.states.get("BigJumpingState")
 			if big_jump_state:
@@ -65,7 +71,7 @@ func process_input() -> void:
 			state_machine.transition_to("BigJumpingState")
 			return
 	
-	if Input.is_action_just_pressed("W_jump") and character.can_wall_jump:
+	if input.jump_pressed and character.can_wall_jump:
 		execute_wall_jump()
 		return
 	
@@ -75,9 +81,9 @@ func process_input() -> void:
 			execute_wall_jump_away()
 			return
 	
-	if Input.is_action_pressed("J_dash") and character.can_big_jump:
+	if input.dash and character.can_big_jump and character.timers_handler.big_jump_cooldown_timer.is_stopped():
 		character.start_big_jump_charge()
-	elif Input.is_action_just_released("J_dash"):
+	elif not input.dash:
 		character.cancel_big_jump_charge()
 
 func execute_wall_jump() -> void:
@@ -107,16 +113,18 @@ func execute_wall_jump_away() -> void:
 	state_machine.transition_to("WallJumpingState")
 
 func get_wall_direction() -> float:
-	if character.ray_casts_handler.left_wall_ray.is_colliding():
-		return 1.0
-	elif character.ray_casts_handler.right_wall_ray.is_colliding():
-		return -1.0
+	if character.ray_casts_handler:
+		if character.ray_casts_handler.left_wall_ray.is_colliding():
+			return 1.0
+		elif character.ray_casts_handler.right_wall_ray.is_colliding():
+			return -1.0
 	return 0.0
 
 func handle_animation() -> void:
-	if Input.is_action_pressed("J_dash") and character.timers_handler.big_jump_timer.time_left > 0:
+	var input = character.get_controller_input()
+	if input.dash and character.timers_handler.big_jump_timer.time_left > 0:
 		character.play_animation("Big_jump_wall_charge")
-	elif character.big_jump_charged and Input.is_action_pressed("J_dash"):
+	elif character.big_jump_charged and input.dash:
 		character.play_animation("Big_jump_wall_charge")
 	else:
 		character.play_animation("Sliding_wall")

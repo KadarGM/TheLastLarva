@@ -1,31 +1,62 @@
 extends State
 class_name BigAttackLandingState
 
+var damage_applied: bool = false
+var animation_finished: bool = false
+
 func enter() -> void:
-	character.execute_damage_to_entities()
-	character.velocity.x = 0
+	character.velocity = Vector2.ZERO
+	character.big_attack_pending = false
+	damage_applied = false
+	animation_finished = false
 	
-	if character.timers_handler.hide_weapon_timer:
-		character.timers_handler.hide_weapon_timer.stop()
+	character.play_animation("Big_attack_landing")
+	
+	apply_big_attack_damage()
+
+func exit() -> void:
+	character.set_weapon_visibility("hide")
 
 func physics_process(_delta: float) -> void:
-	character.velocity.x = 0
+	character.velocity = Vector2.ZERO
 	
-	if character.animation_player.current_animation == "" or (character.animation_player.current_animation == "Big_attack_landing" and not character.animation_player.is_playing()):
+	if animation_finished:
 		if character.effective_air_time > character.character_data.stun_after_land_treshold:
 			state_machine.transition_to("StunnedState")
 		else:
 			state_machine.transition_to("IdleState")
 
-func exit() -> void:
-	if character.timers_handler.hide_weapon_timer:
-		character.timers_handler.hide_weapon_timer.wait_time = character.character_data.hide_weapon_time
-		character.timers_handler.hide_weapon_timer.start()
+func apply_big_attack_damage() -> void:
+	if damage_applied:
+		return
 	
-	character.big_attack_pending = false
-	character.attack_count = 0
-	character.count_of_attack = 0
+	damage_applied = true
+	
+	var damage_area = null
+	if character.is_high_big_attack:
+		damage_area = character.areas_handler.big_attack_area_2
+	else:
+		damage_area = character.areas_handler.big_attack_area
+	
+	if not damage_area:
+		return
+	
+	var bodies = damage_area.get_overlapping_bodies()
+	for body in bodies:
+		if body == character:
+			continue
+		
+		if body.has_method("take_damage"):
+			body.take_damage(character.character_data.big_attack_dmg)
+		
+		if body.has_method("apply_knockback"):
+			var direction = (body.global_position - character.global_position).normalized()
+			var knockback = direction * character.character_data.knockback_force * 2.0
+			knockback.y = -abs(character.character_data.jump_velocity) * 0.5
+			body.apply_knockback(knockback)
+
+func on_animation_finished() -> void:
+	animation_finished = true
 
 func handle_animation() -> void:
-	if character.animation_player.current_animation != "Big_attack_landing":
-		character.play_animation("Big_attack_landing")
+	pass

@@ -1,18 +1,24 @@
 extends State
 class_name AttackingState
 
-var queued_attack: bool = false
-var attack_finished: bool = false
-var current_animation: String = ""
-var damage_applied: bool = false
+var attack_completed: bool = false
+var knockback_applied: bool = false
+var animation_started: bool = false
+var can_combo: bool = false
 
 func enter() -> void:
-	queued_attack = false
-	attack_finished = false
-	damage_applied = false
-	current_animation = ""
+	if not character.character_data.can_attack:
+		if character.is_on_floor():
+			state_machine.transition_to("IdleState")
+		else:
+			state_machine.transition_to("JumpingState")
+		return
 	
-	if character.timers_handler.before_attack_timer and not character.timers_handler.before_attack_timer.is_stopped():
+	if not character.is_on_floor() and not character.character_data.can_air_attack:
+		state_machine.transition_to("JumpingState")
+		return
+	
+	if character.timers_handler.before_attack_timer.time_left > 0:
 		if character.is_on_floor():
 			state_machine.transition_to("IdleState")
 		else:
@@ -33,176 +39,106 @@ func enter() -> void:
 	if character.attack_count > 3:
 		character.attack_count = 1
 	
-	character.count_of_attack = character.attack_count
-	
+	attack_completed = false
+	knockback_applied = false
+	animation_started = false
+	can_combo = false
+	character.damage_applied_this_attack = false
 	character.velocity_before_attack = character.velocity.x
 	
-	if character.timers_handler.hide_weapon_timer:
-		character.timers_handler.hide_weapon_timer.stop()
-	
-	if character.timers_handler.attack_cooldown_timer:
-		character.timers_handler.attack_cooldown_timer.stop()
-	
-	if character.timers_handler and character.timers_handler.damage_timer:
-		character.timers_handler.damage_timer.wait_time = character.character_data.damage_delay
-		character.timers_handler.damage_timer.start()
+	character.timers_handler.hide_weapon_timer.stop()
+	character.timers_handler.attack_cooldown_timer.stop()
+	character.timers_handler.attack_cooldown_timer.start()
 	
 	character.timers_handler.before_attack_timer.wait_time = character.character_data.attack_cooldown
 	character.timers_handler.before_attack_timer.start()
 	
-	update_current_animation()
-	character.animation_player.stop()
-	character.animation_player.play(current_animation)
+	character.timers_handler.damage_timer.wait_time = character.character_data.damage_delay
+	character.timers_handler.damage_timer.start()
 
 func exit() -> void:
-	character.pending_knockback_force = Vector2.ZERO
-	
-	if character.timers_handler.hide_weapon_timer:
-		character.timers_handler.hide_weapon_timer.wait_time = character.character_data.hide_weapon_time
-		character.timers_handler.hide_weapon_timer.start()
-	
-	if character.timers_handler.attack_cooldown_timer:
-		character.timers_handler.attack_cooldown_timer.wait_time = character.character_data.attack_combo_reset_time
-		character.timers_handler.attack_cooldown_timer.start()
+	character.timers_handler.hide_weapon_timer.start()
+	if character.attack_count >= 3:
+		character.attack_count = 0
 
 func physics_process(delta: float) -> void:
 	if not character.is_on_floor():
 		character.velocity.y += character.gravity * delta
 	
-	process_attack_movement()
+	process_attack_movement(delta)
+	check_combo_input()
 	
-	if character.pending_knockback_force != Vector2.ZERO:
-		character.velocity += character.pending_knockback_force
-		character.pending_knockback_force = Vector2.ZERO
+	if attack_completed and not can_combo:
+		transition_to_next_state()
 
-	if Input.is_action_just_pressed("L_attack") and not queued_attack:
-		if character.attack_count < 3:
-			queued_attack = true
+func process_attack_movement(delta: float) -> void:
+	var input = character.get_controller_input()
+	var _input_direction = input.move_direction.x
+	var attack_direction = character.get_attack_direction()
 	
-	if attack_finished:
-		handle_attack_end()
+	if character.is_on_floor():
+		var movement_multiplier = character.character_data.ground_attack_force_multiplier
+		var friction = character.character_data.attack_movement_friction * character.character_data.ground_friction_multiplier
+		
+		if character.attack_count == 1:
+			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier
+		elif character.attack_count == 2:
+			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier * 1.2
+		elif character.attack_count == 3:
+			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier * 1.5
+		
+		character.velocity.x = move_toward(character.velocity.x, 0, friction * delta)
+	else:
+		var air_multiplier = character.character_data.air_attack_force_multiplier
+		
+		if character.attack_count == 1:
+			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier
+		elif character.attack_count == 2:
+			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier * 1.2
+		elif character.attack_count == 3:
+			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier * 1.5
+		
+		character.velocity.x = clamp(character.velocity.x, -character.character_data.speed * 1.5, character.character_data.speed * 1.5)
 
-func process_attack_movement() -> void:
-	var overlapping_bodies = character.areas_handler.attack_area.get_overlapping_bodies()
-	var has_nearby_enemy = false
-	
-	for entity in overlapping_bodies:
-		if entity != character:
-			has_nearby_enemy = true
-			break
-	
-	if has_nearby_enemy:
-		character.velocity.x = move_toward(character.velocity.x, 0, character.character_data.attack_movement_friction * character.character_data.enemy_nearby_friction_multiplier)
+func check_combo_input() -> void:
+	if attack_completed:
 		return
 	
-	if character.is_on_floor():
-		var attack_force = character.character_data.attack_movement_force * character.character_data.ground_attack_force_multiplier
-		if character.attack_count == 3:
-			attack_force *= character.character_data.attack_movement_multiplier
-		character.velocity.x = character.get_attack_direction() * attack_force
-	else:
-		var air_attack_force = character.character_data.attack_movement_force * character.character_data.air_attack_force_multiplier
-		character.velocity.x = character.get_attack_direction() * air_attack_force
+	var input = character.get_controller_input()
 	
-	if character.is_on_floor():
-		character.velocity.x = move_toward(character.velocity.x, 0, character.character_data.attack_movement_friction * character.character_data.ground_friction_multiplier)
-	else:
-		character.velocity.x = move_toward(character.velocity.x, 0, character.character_data.attack_movement_friction * character.character_data.air_friction_multiplier)
+	if input.attack_pressed and character.timers_handler.before_attack_timer.is_stopped():
+		if character.attack_count < 3:
+			can_combo = true
 
-func handle_attack_end() -> void:
-	if queued_attack and character.attack_count < 3:
-		if character.stamina_current >= character.character_data.attack_stamina_cost:
-			if character.timers_handler.before_attack_timer.is_stopped():
-				enter()
-				return
+func apply_damage() -> void:
+	if character.damage_applied_this_attack:
+		return
 	
+	character.damage_applied_this_attack = true
+	character.execute_damage_to_entities()
+	
+	if character.pending_knockback_force != Vector2.ZERO and not knockback_applied:
+		knockback_applied = true
+		character.velocity = character.pending_knockback_force
+		character.pending_knockback_force = Vector2.ZERO
+
+func on_animation_finished() -> void:
+	attack_completed = true
+	
+	if can_combo:
+		state_machine.transition_to("AttackingState")
+
+func transition_to_next_state() -> void:
 	if character.is_on_floor():
-		state_machine.transition_to("IdleState")
+		var input = character.get_controller_input()
+		if abs(input.move_direction.x) > 0.1:
+			state_machine.transition_to("WalkingState")
+		else:
+			state_machine.transition_to("IdleState")
 	else:
 		state_machine.transition_to("JumpingState")
 
-func on_animation_finished() -> void:
-	attack_finished = true
-
-func apply_damage() -> void:
-	if damage_applied:
-		return
-	
-	damage_applied = true
-	execute_damage_to_entities()
-
-func execute_damage_to_entities() -> void:
-	if not character.character_data.can_take_damage:
-		return
-	
-	var overlapping_bodies = character.areas_handler.attack_area.get_overlapping_bodies()
-	if overlapping_bodies.is_empty():
-		return
-	
-	var damage = 0
-	match character.attack_count:
-		1:
-			damage = character.character_data.attack_1_dmg
-		2:
-			damage = character.character_data.attack_2_dmg
-		3:
-			damage = character.character_data.attack_3_dmg
-	
-	var base_knockback_force = character.character_data.knockback_force
-	if character.attack_count == 3:
-		base_knockback_force *= character.character_data.knockback_force_multiplier
-	
-	var attack_dir = character.get_attack_direction()
-	var hit_count = 0
-	
-	for entity in overlapping_bodies:
-		if entity == character:
-			continue
-		
-		hit_count += 1
-		
-		if entity.has_method("take_damage"):
-			entity.take_damage(damage)
-		
-		if character.character_data.can_take_knockback:
-			var knockback_force = Vector2(
-				attack_dir * base_knockback_force,
-				character.character_data.jump_velocity * character.character_data.knockback_vertical_multiplier
-			)
-			
-			if entity.has_method("apply_knockback"):
-				entity.apply_knockback(knockback_force)
-	
-	if hit_count > 0:
-		var reaction_force = Vector2(
-			-attack_dir * base_knockback_force * character.character_data.knockback_reaction_multiplier * character.character_data.knockback_reaction_force_multiplier,
-			character.character_data.jump_velocity * character.character_data.knockback_reaction_jump_multiplier
-		)
-		character.pending_knockback_force = reaction_force
-
-func update_current_animation() -> void:
-	if character.is_on_floor():
-		match character.attack_count:
-			1: 
-				current_animation = "Attack_ground_1"
-				character.set_weapon_visibility("back")
-			2:  
-				current_animation = "Attack_ground_2"
-				character.set_weapon_visibility("front")
-			3:  
-				current_animation = "Attack_ground_3"
-				character.set_weapon_visibility("both")
-	else:
-		match character.attack_count:
-			1: 
-				current_animation = "Attack_air_1"
-				character.set_weapon_visibility("back")
-			2:  
-				current_animation = "Attack_air_2"
-				character.set_weapon_visibility("front")
-			3:  
-				current_animation = "Attack_air_3"
-				character.set_weapon_visibility("both")
-
 func handle_animation() -> void:
-	pass
+	if not animation_started:
+		animation_started = true
+		character.update_attack_animations()

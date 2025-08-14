@@ -6,13 +6,12 @@ class_name CharacterManager
 @export var body_node: Node2D
 @export var animation_player: AnimationPlayer
 @export var state_machine: StateMachine
+@export var controller: BaseController
 
 @export_category("Handlers")
 @export var ray_casts_handler: RayCastsHandler
 @export var timers_handler: TimersHandler
 @export var areas_handler: AreasHandler
-
-@export_category("Controllers")
 @export var stats_controller: StatsController
 
 @export_category("UI")
@@ -56,15 +55,29 @@ var invulnerability_temp: bool = false
 var stamina_current: float = 0.0
 var stamina_regen_timer: float = 0.0
 
+var current_input: ControllerInput = ControllerInput.new()
+
 func _ready() -> void:
 	if not character_data:
 		character_data = CharacterData.new()
 	
 	stamina_current = character_data.stamina_max
-	timers_handler.setup_timers()
+	
+	if timers_handler:
+		timers_handler.setup_timers()
+	
 	setup_signals()
 	setup_stats_controller()
 	set_weapon_visibility("hide")
+	
+	if not controller:
+		for child in get_children():
+			if child is BaseController:
+				controller = child
+				break
+	
+	if controller:
+		controller.setup(self)
 
 func setup_signals() -> void:
 	if animation_player and not animation_player.animation_finished.is_connected(_on_animation_finished):
@@ -73,6 +86,8 @@ func setup_signals() -> void:
 		state_machine.state_changed.connect(_on_state_changed)
 	if areas_handler and areas_handler.attack_area and not areas_handler.attack_area.body_entered.is_connected(_on_attack_area_body_entered):
 		areas_handler.attack_area.body_entered.connect(_on_attack_area_body_entered)
+	if timers_handler and timers_handler.damage_timer and not timers_handler.damage_timer.timeout.is_connected(_on_damage_timer_timeout):
+		timers_handler.damage_timer.timeout.connect(_on_damage_timer_timeout)
 
 func setup_stats_controller() -> void:
 	if stats_controller:
@@ -85,6 +100,12 @@ func setup_stats_controller() -> void:
 			stats_controller.died.connect(_on_death)
 
 func _physics_process(delta: float) -> void:
+	if controller:
+		current_input = controller.get_input()
+	else:
+		if not current_input:
+			current_input = ControllerInput.new()
+	
 	if state_machine and state_machine.current_state:
 		state_machine.current_state.physics_process(delta)
 		state_machine.current_state.handle_animation()
@@ -96,6 +117,9 @@ func _physics_process(delta: float) -> void:
 
 func _process(delta: float) -> void:
 	update_stamina_regeneration(delta)
+
+func get_controller_input() -> ControllerInput:
+	return current_input
 
 func update_air_time(delta: float) -> void:
 	if not is_on_floor():
@@ -125,12 +149,12 @@ func update_character_direction() -> void:
 	if state_machine.current_state and state_machine.current_state.name == "DeathState":
 		return
 	
-	var input_direction = Input.get_axis("A_left", "D_right")
+	var input_direction = current_input.move_direction.x
 	
 	if state_machine.current_state and state_machine.current_state.name == "WallSlidingState":
-		if ray_casts_handler.left_wall_ray.is_colliding():
+		if ray_casts_handler and ray_casts_handler.left_wall_ray.is_colliding():
 			body_node.scale.x = 1
-		elif ray_casts_handler.right_wall_ray.is_colliding():
+		elif ray_casts_handler and ray_casts_handler.right_wall_ray.is_colliding():
 			body_node.scale.x = -1
 	elif state_machine.current_state and state_machine.current_state.name == "AttackingState":
 		pass
@@ -184,49 +208,66 @@ func get_facing_direction() -> float:
 	return -body_node.scale.x
 
 func get_wall_direction() -> float:
-	if ray_casts_handler.left_wall_ray.is_colliding():
-		return 1.0
-	elif ray_casts_handler.right_wall_ray.is_colliding():
-		return -1.0
+	if ray_casts_handler:
+		if ray_casts_handler.left_wall_ray.is_colliding():
+			return 1.0
+		elif ray_casts_handler.right_wall_ray.is_colliding():
+			return -1.0
 	return 0.0
 
 func _is_on_wall() -> bool:
+	if not ray_casts_handler:
+		return false
 	return ray_casts_handler.left_wall_ray.is_colliding() or ray_casts_handler.right_wall_ray.is_colliding()
 
 func is_on_wall_left() -> bool:
+	if not ray_casts_handler:
+		return false
 	return ray_casts_handler.left_wall_ray.is_colliding()
 
 func is_on_wall_right() -> bool:
+	if not ray_casts_handler:
+		return false
 	return ray_casts_handler.right_wall_ray.is_colliding()
 
 func _is_on_ceiling() -> bool:
+	if not ray_casts_handler:
+		return false
 	return ray_casts_handler.ceiling_ray.is_colliding() or ray_casts_handler.ceiling_ray_2.is_colliding() or ray_casts_handler.ceiling_ray_3.is_colliding()
 
 func set_weapon_visibility(mode: String) -> void:
 	if not body_node:
 		return
 	
+	var sword_f = body_node.get_node_or_null("body/armF_1/handF_1/swordF")
+	var sword_b = body_node.get_node_or_null("body/armB_1/handB_1/swordB")
+	var sword_body = body_node.get_node_or_null("body/swordBody")
+	var sword_body_2 = body_node.get_node_or_null("body/swordBody2")
+	
+	if not sword_f or not sword_b or not sword_body or not sword_body_2:
+		return
+	
 	match mode:
 		"hide":
-			body_node.sword_f.visible = false
-			body_node.sword_b.visible = false
-			body_node.sword_body_2.visible = true
-			body_node.sword_body.visible = true
+			sword_f.visible = false
+			sword_b.visible = false
+			sword_body_2.visible = true
+			sword_body.visible = true
 		"front":
-			body_node.sword_f.visible = true
-			body_node.sword_b.visible = false
-			body_node.sword_body_2.visible = true
-			body_node.sword_body.visible = false
+			sword_f.visible = true
+			sword_b.visible = false
+			sword_body_2.visible = true
+			sword_body.visible = false
 		"back":
-			body_node.sword_f.visible = false
-			body_node.sword_b.visible = true
-			body_node.sword_body_2.visible = false
-			body_node.sword_body.visible = true
+			sword_f.visible = false
+			sword_b.visible = true
+			sword_body_2.visible = false
+			sword_body.visible = true
 		"both":
-			body_node.sword_f.visible = true
-			body_node.sword_b.visible = true
-			body_node.sword_body_2.visible = false
-			body_node.sword_body.visible = false
+			sword_f.visible = true
+			sword_b.visible = true
+			sword_body_2.visible = false
+			sword_body.visible = false
 
 func cancel_big_jump_charge() -> void:
 	big_jump_charged = false
@@ -267,12 +308,15 @@ func execute_damage_to_entities() -> void:
 	if not character_data.can_take_damage:
 		return
 	
+	if not areas_handler or not areas_handler.attack_area:
+		return
+	
 	var overlapping_bodies = areas_handler.attack_area.get_overlapping_bodies()
 	if overlapping_bodies.is_empty():
 		return
 	
 	var damage = 0
-	match count_of_attack:
+	match attack_count:
 		1:
 			damage = character_data.attack_1_dmg
 		2:
@@ -281,7 +325,7 @@ func execute_damage_to_entities() -> void:
 			damage = character_data.attack_3_dmg
 	
 	var base_knockback_force = character_data.knockback_force
-	if count_of_attack == 3:
+	if attack_count == 3:
 		base_knockback_force *= character_data.knockback_force_multiplier
 	
 	var attack_dir = get_attack_direction()
@@ -318,7 +362,7 @@ func on_wall_jump() -> void:
 func update_attack_animations() -> void:
 	var anim_name = ""
 	if is_on_floor():
-		match count_of_attack:
+		match attack_count:
 			1: 
 				anim_name = "Attack_ground_1"
 				set_weapon_visibility("back")
@@ -329,7 +373,7 @@ func update_attack_animations() -> void:
 				anim_name = "Attack_ground_3"
 				set_weapon_visibility("both")
 	else:
-		match count_of_attack:
+		match attack_count:
 			1: 
 				anim_name = "Attack_air_1"
 				set_weapon_visibility("back")
@@ -367,18 +411,18 @@ func process_big_jump_input() -> bool:
 	if not character_data.can_big_jump:
 		return false
 	
-	if big_jump_charged and Input.is_action_pressed("J_dash"):
-		if Input.is_action_just_pressed("A_left"):
+	if big_jump_charged and current_input.dash:
+		if current_input.move_direction.x < 0:
 			execute_big_jump(Vector2(-1, 0))
 			return true
-		elif Input.is_action_just_pressed("D_right"):
+		elif current_input.move_direction.x > 0:
 			execute_big_jump(Vector2(1, 0))
 			return true
-		elif Input.is_action_just_pressed("W_jump"):
+		elif current_input.jump:
 			execute_big_jump(Vector2(0, -1))
 			return true
 	
-	if big_jump_charged and Input.is_action_just_released("J_dash"):
+	if big_jump_charged and not current_input.dash:
 		cancel_big_jump_charge()
 	
 	return false
@@ -399,6 +443,12 @@ func _on_attack_area_body_entered(body: Node2D) -> void:
 		if dash_state:
 			dash_state.apply_damage_to_entity(body)
 
+func _on_damage_timer_timeout() -> void:
+	if state_machine.current_state and state_machine.current_state.name == "AttackingState":
+		var attack_state = state_machine.current_state as AttackingState
+		if attack_state:
+			attack_state.apply_damage()
+
 func _on_animation_finished(anim_name: String) -> void:
 	if state_machine.current_state and state_machine.current_state.name == "AttackingState":
 		var attack_state = state_machine.current_state as AttackingState
@@ -407,10 +457,12 @@ func _on_animation_finished(anim_name: String) -> void:
 	elif anim_name == "Big_attack_prepare":
 		play_animation("Big_attack")
 	elif anim_name == "Big_attack_landing":
-		if effective_air_time > character_data.stun_after_land_treshold:
-			state_machine.transition_to("StunnedState")
-		else:
-			state_machine.transition_to("IdleState")
+		if state_machine.current_state and state_machine.current_state.name == "BigAttackLandingState":
+			var landing_state = state_machine.current_state as BigAttackLandingState
+			if landing_state:
+				landing_state.on_animation_finished()
+	elif anim_name == "Death":
+		pass
 
 func _on_health_changed(_new_health: int) -> void:
 	pass

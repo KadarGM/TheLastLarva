@@ -16,5 +16,9 @@ func physics_process(delta: float) -> void:
 	else:
 		state_machine.transition_to("IdleState")
 
+func set_knockback(force: Vector2) -> void:
+	character.knockback_velocity = force
+	character.knockback_timer = character.character_data.knockback_duration
+
 func handle_animation() -> void:
 	character.play_animation("Jump")
