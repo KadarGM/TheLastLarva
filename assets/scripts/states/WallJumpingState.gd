@@ -1,12 +1,20 @@
 extends State
 class_name WallJumpingState
 
+var is_wall_jump_held: bool = false
+
 func enter() -> void:
 	character.timers_handler.wall_jump_control_timer.start()
+	is_wall_jump_held = Input.is_action_pressed("W_jump")
 
 func physics_process(delta: float) -> void:
 	if not character.is_on_floor():
 		character.velocity.y += character.gravity * delta
+		
+		if character.velocity.y < 0:
+			if Input.is_action_just_released("W_jump") or character._is_on_ceiling():
+				character.velocity.y *= character.character_data.jump_release_multiplier
+				is_wall_jump_held = false
 	
 	if character.is_on_floor():
 		if abs(character.velocity.x) > 10:

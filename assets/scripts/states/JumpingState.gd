@@ -1,11 +1,14 @@
 extends State
 class_name JumpingState
 
+var is_jump_held: bool = false
+
 func enter() -> void:
 	if character.previous_state == "IdleState" or character.previous_state == "WalkingState":
 		character.has_double_jump = true
 		character.has_triple_jump = false
 		character.jump_count = 1
+		is_jump_held = Input.is_action_pressed("W_jump")
 	elif character.previous_state == "DashingState":
 		if character.jump_count == 1:
 			character.has_double_jump = true
@@ -13,10 +16,16 @@ func enter() -> void:
 		elif character.jump_count == 2:
 			character.has_double_jump = false
 			character.has_triple_jump = true
+		is_jump_held = false
 
 func physics_process(delta: float) -> void:
 	if not character.is_on_floor():
 		character.velocity.y += character.gravity * delta
+		
+		if character.velocity.y < 0:
+			if Input.is_action_just_released("W_jump") or character._is_on_ceiling():
+				character.velocity.y *= character.character_data.jump_release_multiplier
+				is_jump_held = false
 	
 	if character.is_on_floor():
 		if abs(character.velocity.x) > 10:

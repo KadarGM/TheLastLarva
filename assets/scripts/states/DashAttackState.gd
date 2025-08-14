@@ -12,6 +12,10 @@ func enter() -> void:
 	character.invulnerability_temp = true
 	character.big_jump_charged = false
 	character.can_big_jump = false
+	
+	if character.timers_handler.hide_weapon_timer:
+		character.timers_handler.hide_weapon_timer.stop()
+	
 	character.timers_handler.big_jump_timer.stop()
 	character.timers_handler.big_jump_cooldown_timer.wait_time = character.character_data.dash_attack_cooldown
 	character.timers_handler.big_jump_cooldown_timer.start()
@@ -20,7 +24,10 @@ func exit() -> void:
 	direction = 0.0
 	character.dash_attack_damaged_entities.clear()
 	character.invulnerability_temp = false
-	character.timers_handler.hide_weapon_timer.start()
+	
+	if character.timers_handler.hide_weapon_timer:
+		character.timers_handler.hide_weapon_timer.wait_time = character.character_data.hide_weapon_time
+		character.timers_handler.hide_weapon_timer.start()
 
 func physics_process(delta: float) -> void:
 	character.velocity.x = direction * character.character_data.big_jump_horizontal_speed

@@ -87,6 +87,7 @@ enum State {
 @export var ground_attack_force_multiplier: float = 0.25
 @export var air_attack_force_multiplier: float = 0.08
 @export var attack_stamina_cost: float = 150.0
+@export var attack_combo_reset_time: float = 1.3
 
 @export_subgroup("Big Attack")
 @export var big_attack_air_friction: float = 0.1

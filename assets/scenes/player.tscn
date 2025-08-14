@@ -2534,7 +2534,7 @@ tracks/12/keys = {
 "times": PackedFloat32Array(0, 0.166667, 0.4),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [-0.854277, -0.985038, -2.81216]
+"values": [5.42972, 5.29882, 3.47146]
 }
 tracks/13/type = "value"
 tracks/13/imported = false
@@ -6345,9 +6345,10 @@ shape = SubResource("CapsuleShape2D_anufl")
 [node name="Camera2D" type="Camera2D" parent="."]
 scale = Vector2(3.33333, 3.33333)
 
-[node name="DebugHelper" parent="." instance=ExtResource("17_fdfoy")]
+[node name="DebugHelper" parent="." node_paths=PackedStringArray("character", "state_machine") instance=ExtResource("17_fdfoy")]
 layer = 100
-visible = false
+character = NodePath("..")
+state_machine = NodePath("../StateMachine")
 
 [node name="GameUI" type="CanvasLayer" parent="."]
 

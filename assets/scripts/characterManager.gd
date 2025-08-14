@@ -89,12 +89,22 @@ func _physics_process(delta: float) -> void:
 		state_machine.current_state.physics_process(delta)
 		state_machine.current_state.handle_animation()
 	
+	update_air_time(delta)
 	update_character_direction()
 	move_and_slide()
 	update_ui()
 
 func _process(delta: float) -> void:
 	update_stamina_regeneration(delta)
+
+func update_air_time(delta: float) -> void:
+	if not is_on_floor():
+		air_time += delta
+		if velocity.y > 0:
+			effective_air_time += delta
+	else:
+		air_time = 0.0
+		effective_air_time = 0.0
 
 func apply_gravity(delta: float) -> void:
 	if not is_on_floor():
@@ -389,16 +399,6 @@ func _on_attack_area_body_entered(body: Node2D) -> void:
 		if dash_state:
 			dash_state.apply_damage_to_entity(body)
 
-func _on_damage_timer_timeout() -> void:
-	if state_machine.current_state and state_machine.current_state.name == "AttackingState":
-		var attack_state = state_machine.current_state as AttackingState
-		if attack_state:
-			attack_state.apply_damage()
-
-func _on_hide_weapon_timer_timeout() -> void:
-	set_weapon_visibility("hide")
-	attack_count = 0
-
 func _on_animation_finished(anim_name: String) -> void:
 	if state_machine.current_state and state_machine.current_state.name == "AttackingState":
 		var attack_state = state_machine.current_state as AttackingState
@@ -420,22 +420,3 @@ func _on_stamina_changed(_new_stamina: float) -> void:
 
 func _on_death() -> void:
 	state_machine.transition_to("DeathState")
-
-func _on_big_jump_timer_timeout() -> void:
-	big_jump_charged = true
-
-func _on_stun_timer_timeout() -> void:
-	if state_machine.current_state and state_machine.current_state.name == "StunnedState":
-		state_machine.transition_to("IdleState")
-
-func _on_dash_cooldown_timer_timeout() -> void:
-	can_dash = true
-
-func _on_invulnerability_timer_timeout() -> void:
-	invulnerability_temp = false
-
-func _on_big_jump_cooldown_timer_timeout() -> void:
-	can_big_jump = true
-
-func _on_before_attack_timer_timeout() -> void:
-	pass

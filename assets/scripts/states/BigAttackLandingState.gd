@@ -4,6 +4,9 @@ class_name BigAttackLandingState
 func enter() -> void:
 	character.execute_damage_to_entities()
 	character.velocity.x = 0
+	
+	if character.timers_handler.hide_weapon_timer:
+		character.timers_handler.hide_weapon_timer.stop()
 
 func physics_process(_delta: float) -> void:
 	character.velocity.x = 0
@@ -15,9 +18,13 @@ func physics_process(_delta: float) -> void:
 			state_machine.transition_to("IdleState")
 
 func exit() -> void:
-	character.timers_handler.hide_weapon_timer.stop()
-	character.timers_handler.hide_weapon_timer.start()
+	if character.timers_handler.hide_weapon_timer:
+		character.timers_handler.hide_weapon_timer.wait_time = character.character_data.hide_weapon_time
+		character.timers_handler.hide_weapon_timer.start()
+	
 	character.big_attack_pending = false
+	character.attack_count = 0
+	character.count_of_attack = 0
 
 func handle_animation() -> void:
 	if character.animation_player.current_animation != "Big_attack_landing":

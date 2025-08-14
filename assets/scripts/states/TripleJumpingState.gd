@@ -11,13 +11,18 @@ func enter() -> void:
 	character.stamina_regen_timer = character.character_data.stamina_regen_delay
 	character.has_triple_jump = false
 	character.jump_count = 3
-	character.is_triple_jump_held = true
+	character.is_triple_jump_held = Input.is_action_pressed("W_jump")
 	character.play_animation("Triple_jump")
 	character.reset_air_time()
 
 func physics_process(delta: float) -> void:
 	if not character.is_on_floor():
 		character.velocity.y += character.gravity * delta
+		
+		if character.is_triple_jump_held and character.velocity.y < 0:
+			if Input.is_action_just_released("W_jump") or character._is_on_ceiling():
+				character.velocity.y *= character.character_data.jump_release_multiplier
+				character.is_triple_jump_held = false
 	
 	if character.is_on_floor():
 		if abs(character.velocity.x) > 10:

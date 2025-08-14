@@ -33,7 +33,15 @@ func enter() -> void:
 	if character.attack_count > 3:
 		character.attack_count = 1
 	
+	character.count_of_attack = character.attack_count
+	
 	character.velocity_before_attack = character.velocity.x
+	
+	if character.timers_handler.hide_weapon_timer:
+		character.timers_handler.hide_weapon_timer.stop()
+	
+	if character.timers_handler.attack_cooldown_timer:
+		character.timers_handler.attack_cooldown_timer.stop()
 	
 	if character.timers_handler and character.timers_handler.damage_timer:
 		character.timers_handler.damage_timer.wait_time = character.character_data.damage_delay
@@ -48,9 +56,14 @@ func enter() -> void:
 
 func exit() -> void:
 	character.pending_knockback_force = Vector2.ZERO
-	if character.timers_handler and character.timers_handler.hide_weapon_timer:
+	
+	if character.timers_handler.hide_weapon_timer:
 		character.timers_handler.hide_weapon_timer.wait_time = character.character_data.hide_weapon_time
 		character.timers_handler.hide_weapon_timer.start()
+	
+	if character.timers_handler.attack_cooldown_timer:
+		character.timers_handler.attack_cooldown_timer.wait_time = character.character_data.attack_combo_reset_time
+		character.timers_handler.attack_cooldown_timer.start()
 
 func physics_process(delta: float) -> void:
 	if not character.is_on_floor():
