@@ -1,7 +1,8 @@
-[gd_scene load_steps=72 format=3 uid="uid://buhwxyp8rcj8"]
+[gd_scene load_steps=73 format=3 uid="uid://buhwxyp8rcj8"]
 
 [ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://assets/scripts/characterManager.gd" id="1_vmfkx"]
 [ext_resource type="Resource" uid="uid://d125kkggxi83n" path="res://assets/resources/Player.tres" id="2_femtu"]
+[ext_resource type="Resource" uid="uid://cxlupfbjhfrqm" path="res://assets/resources/Enemy.tres" id="2_ypeyy"]
 [ext_resource type="Script" uid="uid://blvqjroan8kap" path="res://assets/scripts/controllers/bodyController.gd" id="3_ypeyy"]
 [ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://assets/graphics/player/torso.svg" id="4_ohghg"]
 [ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://assets/graphics/player/sword.svg" id="5_kchr6"]
@@ -6120,7 +6121,7 @@ radius = 1379.84
 z_index = -100
 collision_layer = 2
 script = ExtResource("1_vmfkx")
-character_data = ExtResource("2_femtu")
+character_data = ExtResource("2_ypeyy")
 body_node = NodePath("Body")
 animation_player = NodePath("AnimationPlayer")
 state_machine = NodePath("StateMachine")
@@ -6575,7 +6576,6 @@ offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("38_e7fyo")
 view_ray = NodePath("../../Handlers/RayCastsHandler/ViewRay")
-patrol_points = Array[Vector2]([Vector2(0, 0)])
 character = NodePath("../..")
 metadata/_custom_type_script = "uid://b80qm07nxxcap"
 
@@ -6650,7 +6650,7 @@ self_modulate = Color(1, 0, 0.380392, 1)
 position = Vector2(-75.8828, -135.988)
 target_position = Vector2(-1274.23, -29.1481)
 
-[node name="TimersHandler" type="Control" parent="Handlers" node_paths=PackedStringArray("character_manager", "between_states_timer", "emergency_timer", "big_jump_timer", "big_jump_cooldown_timer", "hide_weapon_timer", "dash_timer", "stun_timer", "dash_cooldown_timer", "wall_jump_control_timer", "attack_cooldown_timer", "damage_timer", "before_attack_timer", "invulnerability_timer")]
+[node name="TimersHandler" type="Control" parent="Handlers" node_paths=PackedStringArray("character_manager", "between_states_timer", "emergency_timer", "big_jump_timer", "big_jump_cooldown_timer", "hide_weapon_timer", "dash_timer", "stun_timer", "dash_cooldown_timer", "dash_attack_cooldown_timer", "wall_jump_control_timer", "attack_cooldown_timer", "damage_timer", "before_attack_timer", "invulnerability_timer")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -6665,6 +6665,7 @@ hide_weapon_timer = NodePath("HideWeaponTimer")
 dash_timer = NodePath("DashTimer")
 stun_timer = NodePath("StunTimer")
 dash_cooldown_timer = NodePath("DashCooldownTimer")
+dash_attack_cooldown_timer = NodePath("DashAttackCooldownTimer")
 wall_jump_control_timer = NodePath("WallJumpControlTimer")
 attack_cooldown_timer = NodePath("AttackCooldownTimer")
 damage_timer = NodePath("DamageTimer")
@@ -6687,6 +6688,8 @@ metadata/_custom_type_script = "uid://du76mpiul5ejs"
 [node name="StunTimer" type="Timer" parent="Handlers/TimersHandler"]
 
 [node name="DashCooldownTimer" type="Timer" parent="Handlers/TimersHandler"]
+
+[node name="DashAttackCooldownTimer" type="Timer" parent="Handlers/TimersHandler"]
 
 [node name="WallJumpControlTimer" type="Timer" parent="Handlers/TimersHandler"]
 

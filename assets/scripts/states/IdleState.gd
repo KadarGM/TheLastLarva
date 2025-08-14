@@ -32,7 +32,7 @@ func process_input() -> void:
 			return
 	
 	if input.attack_pressed:
-		if character.big_jump_charged and input.dash and character.timers_handler.dash_cooldown_timer.is_stopped():
+		if character.big_jump_charged and input.dash and character.timers_handler.dash_attack_cooldown_timer.is_stopped():
 			state_machine.transition_to("DashAttackState")
 		elif character.character_data.can_attack and character.timers_handler.before_attack_timer.is_stopped():
 			state_machine.transition_to("AttackingState")
@@ -44,7 +44,7 @@ func process_input() -> void:
 			if character.timers_handler.big_jump_timer.time_left > 0:
 				state_machine.transition_to("ChargingBigJumpState")
 				return
-		elif character.big_jump_charged and character.timers_handler.dash_cooldown_timer.is_stopped():
+		elif character.big_jump_charged and character.timers_handler.dash_attack_cooldown_timer.is_stopped():
 			state_machine.transition_to("DashAttackState")
 			return
 	

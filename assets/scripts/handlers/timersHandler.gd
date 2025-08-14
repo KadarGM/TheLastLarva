@@ -11,6 +11,7 @@ class_name TimersHandler
 @export var dash_timer: Timer
 @export var stun_timer: Timer
 @export var dash_cooldown_timer: Timer
+@export var dash_attack_cooldown_timer: Timer
 @export var wall_jump_control_timer: Timer
 @export var attack_cooldown_timer: Timer
 @export var damage_timer: Timer
@@ -42,6 +43,11 @@ func setup_timers() -> void:
 		dash_cooldown_timer.wait_time = character_manager.character_data.dash_cooldown_time
 		dash_cooldown_timer.one_shot = true
 		dash_cooldown_timer.timeout.connect(_on_dash_cooldown_timer_timeout)
+	
+	if dash_attack_cooldown_timer:
+		dash_attack_cooldown_timer.wait_time = character_manager.character_data.dash_attack_cooldown
+		dash_attack_cooldown_timer.one_shot = true
+		dash_attack_cooldown_timer.timeout.connect(_on_dash_attack_cooldown_timer_timeout)
 	
 	if damage_timer:
 		damage_timer.wait_time = character_manager.character_data.damage_delay
@@ -89,6 +95,9 @@ func _on_stun_timer_timeout() -> void:
 
 func _on_dash_cooldown_timer_timeout() -> void:
 	character_manager.can_dash = true
+
+func _on_dash_attack_cooldown_timer_timeout() -> void:
+	pass
 
 func _on_damage_timer_timeout() -> void:
 	if character_manager.state_machine.current_state and character_manager.state_machine.current_state.name == "AttackingState":

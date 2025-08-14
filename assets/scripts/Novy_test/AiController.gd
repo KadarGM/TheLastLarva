@@ -1,24 +1,7 @@
 extends BaseController
 class_name AIController
 
-@export_category("Detection")
-@export var detection_range: float = 600.0
-@export var attack_range: float = 50.0
 @export var view_ray: RayCast2D
-
-@export_category("Behavior")
-@export var patrol_speed_multiplier: float = 0.5
-@export var chase_speed_multiplier: float = 1.0
-@export var flee_health_threshold: float = 0.2
-@export var think_time: float = 0.2
-@export var patrol_idle_chance: float = 0.3
-@export var patrol_state_min_time: float = 1.0
-@export var patrol_state_max_time: float = 4.0
-
-@export_category("Patrol")
-@export var patrol_points: Array[Vector2] = []
-@export var auto_generate_patrol_points: bool = true
-@export var patrol_distance: float = 200.0
 
 var target: Node2D = null
 var current_patrol_index: int = 0
@@ -26,7 +9,6 @@ var think_timer: float = 0.0
 var patrol_timer: float = 0.0
 var patrol_direction: float = 1.0
 var last_jump_time: float = 0.0
-var jump_cooldown: float = 1.5
 var attack_combo_timer: float = 0.0
 var can_see_target: bool = false
 var is_fleeing: bool = false
@@ -34,20 +16,26 @@ var target_in_detection: bool = false
 var target_in_attack_range: bool = false
 
 func _ready() -> void:
-	if auto_generate_patrol_points and patrol_points.is_empty() and character:
-		await character.ready
-		patrol_points.append(character.global_position + Vector2(patrol_distance, 0))
-		patrol_points.append(character.global_position + Vector2(-patrol_distance, 0))
+	if character and character.character_data:
+		if character.character_data.ai_patrol_auto_generate and character.character_data.patrol_points.is_empty():
+			await character.ready
+			var patrol_distance = character.character_data.ai_patrol_distance
+			character.character_data.patrol_points.append(character.global_position + Vector2(patrol_distance, 0))
+			character.character_data.patrol_points.append(character.global_position + Vector2(-patrol_distance, 0))
 	
 	start_patrol_timer()
 
 func update_input() -> void:
+	if not character or not character.character_data or not character.character_data.ai_enabled:
+		input.reset()
+		return
+	
 	think_timer -= get_physics_process_delta_time()
 	patrol_timer -= get_physics_process_delta_time()
 	attack_combo_timer -= get_physics_process_delta_time()
 	
 	if think_timer <= 0:
-		think_timer = think_time
+		think_timer = character.character_data.ai_think_time
 		update_ai_decision()
 	
 	execute_behavior()
@@ -70,6 +58,8 @@ func find_target() -> void:
 	
 	var potential_targets = get_tree().get_nodes_in_group("player")
 	var nearest_distance = INF
+	var detection_range = character.character_data.ai_detection_range
+	var attack_range = character.character_data.ai_attack_range
 	
 	for potential_target in potential_targets:
 		if potential_target == character:
@@ -100,7 +90,7 @@ func check_flee_condition() -> void:
 		return
 	
 	var health_percentage = float(character.stats_controller.get_health()) / float(character.stats_controller.get_max_health())
-	is_fleeing = health_percentage <= flee_health_threshold
+	is_fleeing = health_percentage <= character.character_data.ai_flee_health_threshold
 
 func execute_behavior() -> void:
 	input.reset()
@@ -121,21 +111,23 @@ func execute_patrol() -> void:
 	if not character.character_data.can_patrol:
 		return
 	
-	if patrol_timer > 0 and patrol_timer < patrol_state_max_time * 0.5:
+	var patrol_speed = character.character_data.ai_patrol_speed_multiplier
+	
+	if patrol_timer > 0 and patrol_timer < character.character_data.ai_patrol_state_max_time * 0.5:
 		return
 	
-	if patrol_points.size() > 1:
-		var target_point = patrol_points[current_patrol_index]
+	if character.character_data.patrol_points.size() > 1:
+		var target_point = character.character_data.patrol_points[current_patrol_index]
 		var distance = character.global_position.distance_to(target_point)
 		
 		if distance < 50:
-			current_patrol_index = (current_patrol_index + 1) % patrol_points.size()
+			current_patrol_index = (current_patrol_index + 1) % character.character_data.patrol_points.size()
 			start_patrol_timer()
 		else:
 			var direction = sign(target_point.x - character.global_position.x)
-			input.move_direction.x = direction * patrol_speed_multiplier
+			input.move_direction.x = direction * patrol_speed
 	else:
-		input.move_direction.x = patrol_direction * patrol_speed_multiplier
+		input.move_direction.x = patrol_direction * patrol_speed
 	
 	handle_obstacle_detection()
 
@@ -143,8 +135,9 @@ func execute_chase() -> void:
 	if not target or not character.character_data.can_chase:
 		return
 	
+	var chase_speed = character.character_data.ai_chase_speed_multiplier
 	var direction = sign(target.global_position.x - character.global_position.x)
-	input.move_direction.x = direction * chase_speed_multiplier
+	input.move_direction.x = direction * chase_speed
 	
 	var y_difference = character.global_position.y - target.global_position.y
 	if y_difference > 50 and y_difference < 200 and character.is_on_floor():
@@ -170,14 +163,16 @@ func execute_attack() -> void:
 		attack_combo_timer = 0.5
 
 func execute_flee() -> void:
+	var chase_speed = character.character_data.ai_chase_speed_multiplier
+	
 	if target:
 		var direction = sign(character.global_position.x - target.global_position.x)
-		input.move_direction.x = direction * chase_speed_multiplier
+		input.move_direction.x = direction * chase_speed
 		
 		if randf() < 0.1 and character.can_dash:
 			input.dash_pressed = true
 	else:
-		input.move_direction.x = patrol_direction * chase_speed_multiplier
+		input.move_direction.x = patrol_direction * chase_speed
 	
 	handle_obstacle_detection()
 
@@ -219,6 +214,7 @@ func handle_edge() -> void:
 
 func handle_jump() -> void:
 	var current_time = Time.get_ticks_msec() / 1000.0
+	var jump_cooldown = character.character_data.ai_jump_cooldown
 	
 	if current_time - last_jump_time < jump_cooldown:
 		return
@@ -228,13 +224,17 @@ func handle_jump() -> void:
 		last_jump_time = current_time
 
 func start_patrol_timer() -> void:
-	patrol_timer = randf_range(patrol_state_min_time, patrol_state_max_time)
+	var min_time = character.character_data.ai_patrol_state_min_time
+	var max_time = character.character_data.ai_patrol_state_max_time
+	patrol_timer = randf_range(min_time, max_time)
 
 func change_patrol_state() -> void:
 	if target_in_detection:
 		return
 	
-	if randf() < patrol_idle_chance:
+	var idle_chance = character.character_data.ai_patrol_idle_chance
+	
+	if randf() < idle_chance:
 		input.move_direction.x = 0
 	else:
 		if randf() < 0.5:

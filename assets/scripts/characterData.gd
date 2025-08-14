@@ -1,27 +1,6 @@
 extends Resource
 class_name CharacterData
 
-enum State {
-	IDLE,
-	WALKING,
-	JUMPING,
-	DOUBLE_JUMPING,
-	TRIPLE_JUMPING,
-	WALL_SLIDING,
-	WALL_JUMPING,
-	DASHING,
-	CHARGING_JUMP,
-	BIG_JUMPING,
-	STUNNED,
-	ATTACKING,
-	BIG_ATTACK,
-	BIG_ATTACK_LANDING,
-	DASH_ATTACK,
-	KNOCKBACK,
-	DEATH,
-	CHASING
-}
-
 @export_group("Health & Stamina Options")
 @export var health_max: int = 1000
 @export var stamina_max: float = 10000.0
@@ -65,8 +44,6 @@ enum State {
 @export var big_jump_stamina_cost: float = 200.0
 @export var big_jump_cooldown_after_use: float = 1.0
 
-
-# Combat Variables
 @export_group("Combat Options")
 @export var invulnerability: bool = false
 @export var can_attack: bool = true
@@ -156,13 +133,26 @@ enum State {
 @export_group("AI Options")
 @export var can_chase: bool = false
 @export var can_patrol: bool = false
+@export var ai_enabled: bool = false
 
-@export_subgroup("Patrol Behavior")
-@export var patrol_state_min_time: float = 1.0
-@export var patrol_state_max_time: float = 4.0
-@export var patrol_idle_chance: float = 0.3
-@export var detection_range: float = 600.0
-@export var position_tolerance: float = 50.0
+@export_subgroup("AI Detection")
+@export var ai_detection_range: float = 600.0
+@export var ai_attack_range: float = 50.0
+
+@export_subgroup("AI Behavior")
+@export var ai_patrol_speed_multiplier: float = 0.5
+@export var ai_chase_speed_multiplier: float = 1.0
+@export var ai_flee_health_threshold: float = 0.2
+@export var ai_think_time: float = 0.2
+@export var ai_jump_cooldown: float = 1.5
+
+@export_subgroup("AI Patrol")
+@export var ai_patrol_idle_chance: float = 0.3
+@export var ai_patrol_state_min_time: float = 1.0
+@export var ai_patrol_state_max_time: float = 4.0
+@export var ai_patrol_distance: float = 200.0
+@export var ai_patrol_auto_generate: bool = true
+@export var patrol_points: Array[Vector2] = []
 
 @export_group("Body Options")
 @export_subgroup("Body Sprites")

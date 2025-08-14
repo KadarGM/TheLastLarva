@@ -12,7 +12,7 @@ func enter() -> void:
 		state_machine.transition_to("IdleState")
 		return
 	
-	if character.timers_handler.dash_cooldown_timer.time_left > 0:
+	if character.timers_handler.dash_attack_cooldown_timer.time_left > 0:
 		state_machine.transition_to("IdleState")
 		return
 	
@@ -30,13 +30,16 @@ func enter() -> void:
 	
 	character.set_weapon_visibility("both")
 	
-	character.timers_handler.dash_cooldown_timer.wait_time = character.character_data.dash_attack_cooldown
-	character.timers_handler.dash_cooldown_timer.start()
+	character.timers_handler.dash_attack_cooldown_timer.wait_time = character.character_data.dash_attack_cooldown
+	character.timers_handler.dash_attack_cooldown_timer.start()
 
 func exit() -> void:
 	character.invulnerability_temp = false
 	character.dash_attack_damaged_entities.clear()
 	character.set_weapon_visibility("hide")
+	character.can_big_jump = false
+	character.timers_handler.big_jump_cooldown_timer.wait_time = character.character_data.big_jump_cooldown
+	character.timers_handler.big_jump_cooldown_timer.start()
 
 func physics_process(delta: float) -> void:
 	character.stamina_current -= character.character_data.dash_attack_stamina_drain_rate * delta
@@ -47,7 +50,7 @@ func physics_process(delta: float) -> void:
 		return
 	
 	var input = character.get_controller_input()
-	if not input.attack and not input.dash:
+	if not input.attack:
 		end_dash_attack()
 		return
 	

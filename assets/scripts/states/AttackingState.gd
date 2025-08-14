@@ -81,24 +81,24 @@ func process_attack_movement(delta: float) -> void:
 		var friction = character.character_data.attack_movement_friction * character.character_data.ground_friction_multiplier
 		
 		if character.attack_count == 1:
-			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier
+			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier * 0.8
 		elif character.attack_count == 2:
-			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier * 1.2
+			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier * 0.8
 		elif character.attack_count == 3:
-			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier * 1.5
+			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier
 		
 		character.velocity.x = move_toward(character.velocity.x, 0, friction * delta)
 	else:
 		var air_multiplier = character.character_data.air_attack_force_multiplier
 		
 		if character.attack_count == 1:
-			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier
+			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier * 0.8
 		elif character.attack_count == 2:
-			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier * 1.2
+			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier * 0.8
 		elif character.attack_count == 3:
-			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier * 1.5
+			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier
 		
-		character.velocity.x = clamp(character.velocity.x, -character.character_data.speed * 1.5, character.character_data.speed * 1.5)
+		character.velocity.x = clamp(character.velocity.x, -character.character_data.speed, character.character_data.speed)
 
 func check_combo_input() -> void:
 	if attack_completed:

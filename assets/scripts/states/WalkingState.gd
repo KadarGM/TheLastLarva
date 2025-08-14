@@ -31,7 +31,7 @@ func process_input() -> void:
 			return
 	
 	if input.dash_pressed:
-		if character.big_jump_charged and input.attack and character.timers_handler.dash_cooldown_timer.is_stopped():
+		if character.big_jump_charged and input.attack and character.timers_handler.dash_attack_cooldown_timer.is_stopped():
 			state_machine.transition_to("DashAttackState")
 			return
 		elif character.can_dash:

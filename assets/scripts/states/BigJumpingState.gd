@@ -14,6 +14,9 @@ func enter() -> void:
 func exit() -> void:
 	direction = Vector2.ZERO
 	character.invulnerability_temp = false
+	character.jump_count = 0
+	character.has_double_jump = true
+	character.has_triple_jump = false
 
 func physics_process(delta: float) -> void:
 	if direction.y < 0:

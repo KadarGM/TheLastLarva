@@ -18,6 +18,11 @@ func enter() -> void:
 			character.has_double_jump = false
 			character.has_triple_jump = true
 		is_jump_held = false
+	elif character.previous_state == "BigJumpingState":
+		character.jump_count = 0
+		character.has_double_jump = true
+		character.has_triple_jump = false
+		is_jump_held = false
 
 func physics_process(delta: float) -> void:
 	var input = character.get_controller_input()
@@ -61,7 +66,12 @@ func process_input() -> void:
 	var input = character.get_controller_input()
 	
 	if input.jump_pressed:
-		if character.jump_count == 1 and character.has_double_jump and character.character_data.can_double_jump:
+		if character.jump_count == 0 and character.character_data.can_jump:
+			character.velocity.y = character.character_data.jump_velocity
+			character.jump_count = 1
+			character.has_double_jump = true
+			is_jump_held = true
+		elif character.jump_count == 1 and character.has_double_jump and character.character_data.can_double_jump:
 			state_machine.transition_to("DoubleJumpingState")
 		elif character.jump_count == 2 and character.has_triple_jump and character.character_data.can_triple_jump:
 			if character.stamina_current >= character.character_data.triple_jump_stamina_cost:
