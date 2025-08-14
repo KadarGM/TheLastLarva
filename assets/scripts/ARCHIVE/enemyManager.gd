@@ -3,7 +3,7 @@ extends CharacterBody2D
 @export var character_data: CharacterData
 @export var invulnerability: bool = false
 
-@onready var char_global = CharacterGlobalManager
+#@onready var char_global = CharacterGlobalManager
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var BODY: Node2D = $Body

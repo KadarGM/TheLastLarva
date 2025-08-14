@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://ey8sm6xs8cp3"]
+[gd_scene load_steps=7 format=3 uid="uid://ey8sm6xs8cp3"]
 
 [ext_resource type="PackedScene" uid="uid://df1dloofeb6le" path="res://assets/scenes/BaseCharacter.tscn" id="1_dis88"]
+[ext_resource type="PackedScene" uid="uid://buhwxyp8rcj8" path="res://assets/scenes/EnemyCharacter.tscn" id="2_5gf0t"]
 [ext_resource type="Script" uid="uid://e35h32y3laer" path="res://assets/scripts/ARCHIVE/Enemies.gd" id="3_t7i2e"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ihnug"]
@@ -19,6 +20,9 @@ scale = Vector2(0.4, 0.4)
 
 [node name="Character" parent="Players" instance=ExtResource("1_dis88")]
 position = Vector2(5837.5, 6195)
+
+[node name="BaseCharacter" parent="Players" instance=ExtResource("2_5gf0t")]
+position = Vector2(4247.5, 6257.5)
 
 [node name="Enemies" type="Node2D" parent="."]
 script = ExtResource("3_t7i2e")
