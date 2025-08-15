@@ -7,15 +7,13 @@ enum AIState {
 	CHASE,
 	ATTACK,
 	SEARCH,
-	WAIT,
-	FLEE
+	WAIT
 }
 
 @export var detection_area: Area2D
 @export var attack_area: Area2D
 @export var view_ray: RayCast2D
 @export var shape_detection: CollisionShape2D
-@export var soft_collision_area: Area2D
 
 var target_player: Node2D = null
 var player_in_detection_zone: bool = false
@@ -33,7 +31,6 @@ var combo_count: int = 0
 var combo_window: float = 0.0
 var emergency_timer: float = 0.0
 var search_direction: int = 1
-var position_tolerance: float = 10.0
 
 func _ready() -> void:
 	setup_signals()
@@ -71,7 +68,6 @@ func update_input() -> void:
 	update_detection()
 	update_ai_state()
 	generate_input_from_ai_state()
-	apply_soft_collisions()
 
 func update_timers(delta: float) -> void:
 	if state_timer > 0:
@@ -97,6 +93,7 @@ func update_detection() -> void:
 	if target_player and is_instance_valid(target_player):
 		update_view_ray()
 		update_chase_direction()
+		check_attack_range()
 	else:
 		can_see_player = false
 		chase_direction = 0
@@ -116,16 +113,30 @@ func update_chase_direction() -> void:
 		return
 	
 	var x_difference = target_player.global_position.x - character.global_position.x
+	var tolerance = character.character_data.ai_attack_range * 0.5
 	
-	if player_in_attack_range:
-		position_tolerance = character.character_data.ai_attack_range * 0.8
-	else:
-		position_tolerance = 10.0
-	
-	if abs(x_difference) < position_tolerance:
+	if abs(x_difference) < tolerance:
 		chase_direction = 0
 	else:
 		chase_direction = sign(x_difference)
+
+func check_attack_range() -> void:
+	if not attack_area or not target_player:
+		return
+	
+	var bodies = attack_area.get_overlapping_bodies()
+	var was_in_range = player_in_attack_range
+	player_in_attack_range = false
+	
+	for body in bodies:
+		if body == target_player or (body.is_in_group("Player")):
+			player_in_attack_range = true
+			break
+	
+	if player_in_attack_range and not was_in_range and abs(chase_direction) <= 0:
+		movement_direction = sign(target_player.global_position.x - character.global_position.x)
+		if movement_direction != 0:
+			chase_direction = movement_direction
 
 func update_ai_state() -> void:
 	match current_ai_state:
@@ -146,13 +157,13 @@ func update_ai_state() -> void:
 				change_ai_state(AIState.PATROL)
 		
 		AIState.CHASE:
-			if not player_in_detection_zone:
+			if player_in_attack_range:
+				change_ai_state(AIState.ATTACK)
+			elif not player_in_detection_zone:
 				last_known_player_position = target_player.global_position if target_player else character.global_position
 				change_ai_state(AIState.SEARCH)
 			elif not can_see_player:
 				change_ai_state(AIState.WAIT)
-			elif player_in_attack_range:
-				change_ai_state(AIState.ATTACK)
 			elif chase_direction == 0 and not player_in_attack_range:
 				var y_diff = abs(character.global_position.y - target_player.global_position.y) if target_player else 0
 				if y_diff > abs(character.character_data.jump_velocity) * 0.8:
@@ -160,8 +171,11 @@ func update_ai_state() -> void:
 		
 		AIState.ATTACK:
 			if not player_in_attack_range:
-				if player_in_detection_zone and can_see_player:
-					change_ai_state(AIState.CHASE)
+				if player_in_detection_zone:
+					if can_see_player:
+						change_ai_state(AIState.CHASE)
+					else:
+						change_ai_state(AIState.WAIT)
 				else:
 					change_ai_state(AIState.SEARCH)
 		
@@ -172,11 +186,10 @@ func update_ai_state() -> void:
 				change_ai_state(AIState.PATROL)
 		
 		AIState.WAIT:
-			if can_see_player:
-				if player_in_attack_range:
-					change_ai_state(AIState.ATTACK)
-				elif abs(chase_direction) > 0:
-					change_ai_state(AIState.CHASE)
+			if player_in_attack_range:
+				change_ai_state(AIState.ATTACK)
+			elif can_see_player and abs(chase_direction) > 0:
+				change_ai_state(AIState.CHASE)
 			elif state_timer <= 0:
 				if player_in_detection_zone:
 					change_ai_state(AIState.SEARCH)
@@ -250,6 +263,11 @@ func handle_chase_input() -> void:
 func handle_attack_input() -> void:
 	var character_state = character.state_machine.get_current_state_name() if character.state_machine else ""
 	
+	if target_player:
+		var dir_to_player = sign(target_player.global_position.x - character.global_position.x)
+		if dir_to_player != 0:
+			movement_direction = dir_to_player
+	
 	if character_state != "AttackingState":
 		if attack_cooldown <= 0 and character.timers_handler.before_attack_timer.is_stopped():
 			input.attack_pressed = true
@@ -265,11 +283,6 @@ func handle_attack_input() -> void:
 			if character.timers_handler.before_attack_timer.is_stopped():
 				input.attack_pressed = true
 				combo_window = 0.8
-	
-	if abs(chase_direction) > 0 and not player_in_attack_range:
-		input.move_direction.x = chase_direction * 0.5
-	else:
-		input.move_direction.x = 0
 
 func handle_search_input() -> void:
 	if check_edge_or_wall():
@@ -323,41 +336,12 @@ func check_edge_or_wall() -> bool:
 	
 	return false
 
-func apply_soft_collisions() -> void:
-	if not soft_collision_area:
-		return
-	
-	var character_state = character.state_machine.get_current_state_name() if character.state_machine else ""
-	if character_state == "DeathState" or character_state == "AttackingState":
-		return
-	
-	var push_vector = Vector2.ZERO
-	var overlapping_bodies = soft_collision_area.get_overlapping_bodies()
-	
-	for body in overlapping_bodies:
-		if body == character:
-			continue
-		if not body.is_in_group("Enemy"):
-			continue
-		
-		var distance_vector = character.global_position - body.global_position
-		var distance = distance_vector.length()
-		
-		if distance < 1.0:
-			distance = 1.0
-		
-		var push_strength = 100.0 / distance
-		push_vector += distance_vector.normalized() * push_strength
-	
-	if push_vector.length() > 0:
-		character.velocity += push_vector
-
 func set_shape_detection_enabled(enabled: bool) -> void:
 	if shape_detection:
 		shape_detection.disabled = not enabled
 
 func _on_detection_area_body_entered(body: Node2D) -> void:
-	if body.is_in_group("Player") or body.is_in_group("player"):
+	if body.is_in_group("Player"):
 		target_player = body
 		player_in_detection_zone = true
 		emergency_timer = 0
@@ -371,9 +355,12 @@ func _on_detection_area_body_exited(body: Node2D) -> void:
 
 func _on_attack_area_body_entered(body: Node2D) -> void:
 	if body != character and body.has_method("take_damage"):
-		if body == target_player:
+		if body == target_player or body.is_in_group("Player"):
 			player_in_attack_range = true
+			if not target_player:
+				target_player = body
+				player_in_detection_zone = true
 
 func _on_attack_area_body_exited(body: Node2D) -> void:
-	if body == target_player:
+	if body == target_player or body.is_in_group("Player"):
 		player_in_attack_range = false

@@ -101,6 +101,10 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 	
 	activate_temporary_invulnerability()
 	
+	if health_current <= 0:
+		died.emit()
+		return
+	
 	if character_data.can_get_knockback:
 		if owner_body.state_machine.current_state and owner_body.state_machine.current_state.name != "KnockbackState":
 			var knockback_direction: Vector2
@@ -113,8 +117,8 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 				knockback_direction.x = randf_range(-0.5, 0.5)
 			
 			var damage_knockback = Vector2(
-				knockback_direction.x * character_data.damage_knockback_force * 2.0,
-				-abs(character_data.damage_knockback_force * 0.8)
+				knockback_direction.x * character_data.damage_knockback_force,
+				-abs(character_data.damage_knockback_force * 0.5)
 			)
 			owner_body.apply_knockback(damage_knockback)
 

@@ -57,6 +57,8 @@ var stamina_regen_timer: float = 0.0
 
 var current_input: ControllerInput = ControllerInput.new()
 
+var was_hit_by_damage: bool = false
+
 
 func _ready() -> void:
 	if not character_data:
@@ -107,12 +109,16 @@ func _physics_process(delta: float) -> void:
 		if not current_input:
 			current_input = ControllerInput.new()
 	
+	if stats_controller:
+		stats_controller.process_stats(delta)
+	
 	if state_machine and state_machine.current_state:
 		state_machine.current_state.physics_process(delta)
 		state_machine.current_state.handle_animation()
 	
 	update_air_time(delta)
 	update_character_direction()
+	apply_soft_collisions()
 	move_and_slide()
 	update_ui()
 
@@ -145,6 +151,37 @@ func update_stamina_regeneration(delta: float) -> void:
 	
 	stamina_current += delta * character_data.stamina_regen_rate
 	stamina_current = min(stamina_current, character_data.stamina_max)
+
+func apply_soft_collisions() -> void:
+	if not areas_handler or not areas_handler.soft_collision_area:
+		return
+	
+	var current_state_name = state_machine.get_current_state_name() if state_machine else ""
+	if current_state_name == "DeathState" or current_state_name == "AttackingState":
+		return
+	
+	var push_vector = Vector2.ZERO
+	var overlapping_bodies = areas_handler.soft_collision_area.get_overlapping_bodies()
+	
+	for body in overlapping_bodies:
+		if body == self:
+			continue
+		if not body.is_in_group("Enemy"):
+			continue
+		
+		var distance_vector = global_position - body.global_position
+		var distance = distance_vector.length()
+		
+		if distance < 1.0:
+			distance = 1.0
+		
+		var push_strength = character_data.ai_soft_collision_strength / distance
+		push_vector += distance_vector.normalized() * push_strength
+	
+	if push_vector.length() > 0:
+		push_vector = push_vector.limit_length(character_data.ai_soft_collision_max_force)
+		velocity.x += push_vector.x
+		velocity.y += push_vector.y * 0.1
 
 func update_character_direction() -> void:
 	if state_machine.current_state and state_machine.current_state.name == "DeathState":
@@ -191,8 +228,11 @@ func apply_knockback(force: Vector2) -> void:
 	state_machine.transition_to("KnockbackState")
 
 func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void:
+	was_hit_by_damage = true
 	if stats_controller:
 		stats_controller.take_damage(amount, attacker_position)
+		if stats_controller.health_current <= 0:
+			state_machine.transition_to("DeathState")
 
 func update_ui() -> void:
 	if stamina_bar:

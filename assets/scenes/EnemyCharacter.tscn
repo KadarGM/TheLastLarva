@@ -6569,7 +6569,7 @@ areas_handler = NodePath("../../Handlers/AreasHandler")
 debug_helper = NodePath("../../DebugHelper")
 metadata/_custom_type_script = "uid://cnnuxdvjhvw2j"
 
-[node name="AIController" type="Control" parent="Controllers" node_paths=PackedStringArray("detection_area", "attack_area", "view_ray", "shape_detection", "soft_collision_area", "character")]
+[node name="AIController" type="Control" parent="Controllers" node_paths=PackedStringArray("detection_area", "attack_area", "view_ray", "shape_detection", "character")]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6578,7 +6578,6 @@ detection_area = NodePath("../../Handlers/AreasHandler/DetectionArea")
 attack_area = NodePath("../../Handlers/AreasHandler/AttackArea")
 view_ray = NodePath("../../Handlers/RayCastsHandler/ViewRay")
 shape_detection = NodePath("../../Handlers/AreasHandler/DetectionArea/shape_detection")
-soft_collision_area = NodePath("../../Handlers/AreasHandler/SoftCollisionArea")
 character = NodePath("../..")
 metadata/_custom_type_script = "uid://b80qm07nxxcap"
 

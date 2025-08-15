@@ -80,22 +80,22 @@ func process_attack_movement(delta: float) -> void:
 		var friction = character.character_data.attack_movement_friction * character.character_data.ground_friction_multiplier
 		
 		if character.attack_count == 1:
-			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier * 0.8
+			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier * 0.1
 		elif character.attack_count == 2:
-			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier * 0.8
+			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier * 0.1
 		elif character.attack_count == 3:
-			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier
+			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier * 0.15
 		
 		character.velocity.x = move_toward(character.velocity.x, 0, friction * delta)
 	else:
 		var air_multiplier = character.character_data.air_attack_force_multiplier
 		
 		if character.attack_count == 1:
-			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier * 0.8
+			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier * 0.1
 		elif character.attack_count == 2:
-			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier * 0.8
+			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier * 0.1
 		elif character.attack_count == 3:
-			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier
+			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier * 0.15
 		
 		character.velocity.x = clamp(character.velocity.x, -character.character_data.speed, character.character_data.speed)
 
@@ -147,27 +147,34 @@ func apply_damage() -> void:
 		
 		hit_count += 1
 		
-		var knockback_force = Vector2(
-			attack_dir * base_knockback_force * character.character_data.knockback_force_horizontal_multiplier,
-			-abs(character.character_data.jump_velocity * character.character_data.knockback_vertical_multiplier)
-		)
-		
 		entity.take_damage(damage, character.global_position)
 		
-		if entity.has_method("apply_knockback") and entity.character_data.can_get_knockback:
-			entity.apply_knockback(knockback_force)
+		if entity.has_method("apply_knockback"):
+			var can_apply_knockback = true
+			
+			if entity.has_method("stats_controller") and entity.stats_controller:
+				if entity.stats_controller.is_invulnerable():
+					can_apply_knockback = false
+			elif entity.has_method("character_data") and entity.character_data:
+				if not entity.character_data.can_get_knockback:
+					can_apply_knockback = false
+			
+			if can_apply_knockback:
+				var knockback_force = Vector2(
+					attack_dir * base_knockback_force * character.character_data.knockback_force_horizontal_multiplier,
+					-abs(character.character_data.jump_velocity * character.character_data.knockback_vertical_multiplier)
+				)
+				entity.apply_knockback(knockback_force)
 	
 	if hit_count > 0 and character.character_data.can_take_knockback:
 		var reaction_force = Vector2(
 			-attack_dir * base_knockback_force * character.character_data.knockback_reaction_multiplier * character.character_data.knockback_reaction_force_multiplier,
 			-abs(character.character_data.jump_velocity * character.character_data.knockback_reaction_jump_multiplier)
 		)
-		character.pending_knockback_force = reaction_force
 		
 		if not knockback_applied:
 			knockback_applied = true
-			character.velocity = character.pending_knockback_force
-			character.pending_knockback_force = Vector2.ZERO
+			character.velocity += reaction_force
 
 func on_animation_finished() -> void:
 	attack_completed = true

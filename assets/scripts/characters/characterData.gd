@@ -105,10 +105,18 @@ class_name CharacterData
 @export var knockback_force_horizontal_multiplier: float = 3.0
 @export var damage_knockback_force: float = 300.0
 
+@export_group("Death Options")
+@export var death_disappear: bool = true
+@export var death_disappear_delay: float = 2.0
+@export var death_fade_duration: float = 1.0
+@export var death_sink_into_ground: bool = false
+@export var death_sink_speed: float = 50.0
+
 @export_group("Movement Options")
 @export var can_walk: bool = true
 @export var can_wall_slide: bool = false
 @export var can_dash: bool = false
+@export var can_be_stunned: bool = true
 
 @export_subgroup("Basic Movement")
 @export var speed: float = 600.0
