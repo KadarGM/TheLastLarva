@@ -57,6 +57,7 @@ var stamina_regen_timer: float = 0.0
 
 var current_input: ControllerInput = ControllerInput.new()
 
+
 func _ready() -> void:
 	if not character_data:
 		character_data = CharacterData.new()

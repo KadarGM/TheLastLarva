@@ -17,7 +17,7 @@
 
 [resource]
 script = ExtResource("13_wu2ci")
-health_max = 10
+health_max = 1000
 stamina_max = 1000.0
 stamina_regen_rate = 500.0
 stamina_regen_delay = 1.0

@@ -17,7 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://b5rk0f08kkqjn" path="res://assets/graphics/player/mandible_b.svg" id="15_2dvfe"]
 [ext_resource type="Texture2D" uid="uid://bygtb821ge70j" path="res://assets/graphics/player/mandible_f.svg" id="16_giy8y"]
 [ext_resource type="PackedScene" uid="uid://bo151bnxrkxp6" path="res://assets/scenes/DebugHelper.tscn" id="17_fdfoy"]
-[ext_resource type="Script" uid="uid://8ladw3wbvgf5" path="res://assets/scripts/characters/states/StateMachine.gd" id="18_ay2jx"]
+[ext_resource type="Script" uid="uid://8ladw3wbvgf5" path="res://assets/scripts/characters/states/base/StateMachine.gd" id="18_ay2jx"]
 [ext_resource type="Script" uid="uid://d05m4hyc2gfjy" path="res://assets/scripts/characters/states/AttackingState.gd" id="19_yitjv"]
 [ext_resource type="Script" uid="uid://cap2qgwysvbuv" path="res://assets/scripts/characters/states/BigAttackLandingState.gd" id="20_qnek2"]
 [ext_resource type="Script" uid="uid://c5pyq75t2im8l" path="res://assets/scripts/characters/states/BigAttackState.gd" id="21_ike5y"]
@@ -39,7 +39,7 @@
 [ext_resource type="Script" uid="uid://dr8pm6dr6shbb" path="res://assets/scripts/characters/states/WalkingState.gd" id="33_6hv0l"]
 [ext_resource type="Script" uid="uid://c1u6gs01pwy5i" path="res://assets/scripts/characters/states/WallJumpingState.gd" id="34_odcgf"]
 [ext_resource type="Script" uid="uid://c3bnwicgn7l8p" path="res://assets/scripts/characters/states/WallSlidingState.gd" id="35_yh04f"]
-[ext_resource type="Script" uid="uid://bnfvml6hmbsm1" path="res://assets/scripts/characters/PlayerController.gd" id="36_u61th"]
+[ext_resource type="Script" uid="uid://bnfvml6hmbsm1" path="res://assets/scripts/characters/controllers/PlayerController.gd" id="36_u61th"]
 [ext_resource type="Script" uid="uid://b80qm07nxxcap" path="res://assets/scripts/characters/controllers/AiController.gd" id="38_elw5e"]
 
 [sub_resource type="Animation" id="Animation_o5lcw"]
@@ -6401,8 +6401,10 @@ offset_bottom = 40.0
 script = ExtResource("18_ay2jx")
 initial_state = NodePath("IdleState")
 metadata/_custom_type_script = "uid://8ladw3wbvgf5"
+metadata/_edit_lock_ = true
 
 [node name="AttackingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6411,6 +6413,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://d05m4hyc2gfjy"
 
 [node name="BigAttackLandingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6419,6 +6422,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://cap2qgwysvbuv"
 
 [node name="BigAttackState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6427,6 +6431,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://c5pyq75t2im8l"
 
 [node name="BigJumpingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6435,6 +6440,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://cj2vanir2okd8"
 
 [node name="ChargingBigJumpState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6443,6 +6449,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://bljggvjayvgmm"
 
 [node name="DashAttackState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6451,6 +6458,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://douevnsa1f2vl"
 
 [node name="DashingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6459,6 +6467,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://dm6cs7k55effd"
 
 [node name="DeathState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6467,6 +6476,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://d6ly2y3bvt42"
 
 [node name="DoubleJumpingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6475,6 +6485,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://5pek5j5kqqgm"
 
 [node name="IdleState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6483,6 +6494,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://cjdfunpgfnms"
 
 [node name="JumpingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6491,6 +6503,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://obfnu6wn2aai"
 
 [node name="KnockbackState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6499,6 +6512,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://bxk8somi3mohc"
 
 [node name="StunnedState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6507,6 +6521,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://bkmco042d01vg"
 
 [node name="TripleJumpingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -6516,6 +6531,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://dd1i6gg36v6of"
 
 [node name="WalkingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6524,6 +6540,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://dr8pm6dr6shbb"
 
 [node name="WallJumpingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6532,6 +6549,7 @@ character = NodePath("../..")
 metadata/_custom_type_script = "uid://c1u6gs01pwy5i"
 
 [node name="WallSlidingState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -6544,6 +6562,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+metadata/_edit_lock_ = true
 
 [node name="PlayerController" type="Control" parent="Controllers" node_paths=PackedStringArray("character")]
 anchors_preset = 0
@@ -6566,12 +6585,15 @@ areas_handler = NodePath("../../Handlers/AreasHandler")
 debug_helper = NodePath("../../DebugHelper")
 metadata/_custom_type_script = "uid://cnnuxdvjhvw2j"
 
-[node name="AIController" type="Control" parent="Controllers" node_paths=PackedStringArray("view_ray", "character")]
+[node name="AIController" type="Control" parent="Controllers" node_paths=PackedStringArray("detection_area", "attack_area", "view_ray", "shape_detection", "character")]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("38_elw5e")
+detection_area = NodePath("../../Handlers/AreasHandler/DetectionArea")
+attack_area = NodePath("../../Handlers/AreasHandler/AttackArea")
 view_ray = NodePath("../../Handlers/RayCastsHandler/ViewRay")
+shape_detection = NodePath("../../Handlers/AreasHandler/DetectionArea/shape_detection")
 character = NodePath("../..")
 metadata/_custom_type_script = "uid://b80qm07nxxcap"
 
@@ -6580,6 +6602,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+metadata/_edit_lock_ = true
 
 [node name="RayCastsHandler" type="Control" parent="Handlers" node_paths=PackedStringArray("ground_check_ray", "ground_check_ray_2", "ground_check_ray_3", "near_ground_ray", "near_ground_ray_2", "near_ground_ray_3", "left_wall_ray", "right_wall_ray", "ceiling_ray", "ceiling_ray_2", "ceiling_ray_3")]
 anchors_preset = 0

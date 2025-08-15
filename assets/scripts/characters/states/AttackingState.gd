@@ -73,7 +73,6 @@ func physics_process(delta: float) -> void:
 
 func process_attack_movement(delta: float) -> void:
 	var input = character.get_controller_input()
-	var _input_direction = input.move_direction.x
 	var attack_direction = character.get_attack_direction()
 	
 	if character.is_on_floor():
@@ -115,12 +114,60 @@ func apply_damage() -> void:
 		return
 	
 	character.damage_applied_this_attack = true
-	character.execute_damage_to_entities()
 	
-	if character.pending_knockback_force != Vector2.ZERO and not knockback_applied:
-		knockback_applied = true
-		character.velocity = character.pending_knockback_force
-		character.pending_knockback_force = Vector2.ZERO
+	if not character.areas_handler or not character.areas_handler.attack_area:
+		return
+	
+	var overlapping_bodies = character.areas_handler.attack_area.get_overlapping_bodies()
+	if overlapping_bodies.is_empty():
+		return
+	
+	var damage = 0
+	match character.attack_count:
+		1:
+			damage = character.character_data.attack_1_dmg
+		2:
+			damage = character.character_data.attack_2_dmg
+		3:
+			damage = character.character_data.attack_3_dmg
+	
+	var base_knockback_force = character.character_data.knockback_force
+	if character.attack_count == 3:
+		base_knockback_force *= character.character_data.knockback_force_multiplier
+	
+	var attack_dir = character.get_attack_direction()
+	var hit_count = 0
+	
+	for entity in overlapping_bodies:
+		if entity == character:
+			continue
+		
+		if not entity.has_method("take_damage"):
+			continue
+		
+		hit_count += 1
+		
+		var knockback_force = Vector2(
+			attack_dir * base_knockback_force * character.character_data.knockback_force_horizontal_multiplier,
+			-abs(character.character_data.jump_velocity * character.character_data.knockback_vertical_multiplier)
+		)
+		
+		entity.take_damage(damage, character.global_position)
+		
+		if entity.has_method("apply_knockback") and entity.character_data.can_get_knockback:
+			entity.apply_knockback(knockback_force)
+	
+	if hit_count > 0 and character.character_data.can_take_knockback:
+		var reaction_force = Vector2(
+			-attack_dir * base_knockback_force * character.character_data.knockback_reaction_multiplier * character.character_data.knockback_reaction_force_multiplier,
+			-abs(character.character_data.jump_velocity * character.character_data.knockback_reaction_jump_multiplier)
+		)
+		character.pending_knockback_force = reaction_force
+		
+		if not knockback_applied:
+			knockback_applied = true
+			character.velocity = character.pending_knockback_force
+			character.pending_knockback_force = Vector2.ZERO
 
 func on_animation_finished() -> void:
 	attack_completed = true

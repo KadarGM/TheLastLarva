@@ -139,6 +139,11 @@ class_name CharacterData
 @export var ai_detection_range: float = 600.0
 @export var ai_attack_range: float = 50.0
 
+@export_subgroup("AI Combat")
+@export var ai_attack_distance_multiplier: float = 0.7
+@export var ai_soft_collision_strength: float = 100.0
+@export var ai_soft_collision_max_force: float = 50.0
+
 @export_subgroup("AI Behavior")
 @export var ai_patrol_speed_multiplier: float = 0.5
 @export var ai_chase_speed_multiplier: float = 1.0

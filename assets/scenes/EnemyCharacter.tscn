@@ -18,7 +18,7 @@
 [ext_resource type="Texture2D" uid="uid://b5rk0f08kkqjn" path="res://assets/graphics/player/mandible_b.svg" id="15_nlckv"]
 [ext_resource type="Texture2D" uid="uid://bygtb821ge70j" path="res://assets/graphics/player/mandible_f.svg" id="16_4ttff"]
 [ext_resource type="PackedScene" uid="uid://bo151bnxrkxp6" path="res://assets/scenes/DebugHelper.tscn" id="17_e4346"]
-[ext_resource type="Script" uid="uid://8ladw3wbvgf5" path="res://assets/scripts/characters/states/StateMachine.gd" id="18_tnig7"]
+[ext_resource type="Script" uid="uid://8ladw3wbvgf5" path="res://assets/scripts/characters/states/base/StateMachine.gd" id="18_tnig7"]
 [ext_resource type="Script" uid="uid://d05m4hyc2gfjy" path="res://assets/scripts/characters/states/AttackingState.gd" id="19_qkr2u"]
 [ext_resource type="Script" uid="uid://cap2qgwysvbuv" path="res://assets/scripts/characters/states/BigAttackLandingState.gd" id="20_jn6dl"]
 [ext_resource type="Script" uid="uid://c5pyq75t2im8l" path="res://assets/scripts/characters/states/BigAttackState.gd" id="21_p4j0a"]
@@ -36,7 +36,7 @@
 [ext_resource type="Script" uid="uid://dr8pm6dr6shbb" path="res://assets/scripts/characters/states/WalkingState.gd" id="33_xphae"]
 [ext_resource type="Script" uid="uid://c1u6gs01pwy5i" path="res://assets/scripts/characters/states/WallJumpingState.gd" id="34_lloyc"]
 [ext_resource type="Script" uid="uid://c3bnwicgn7l8p" path="res://assets/scripts/characters/states/WallSlidingState.gd" id="35_5fabh"]
-[ext_resource type="Script" uid="uid://bnfvml6hmbsm1" path="res://assets/scripts/characters/PlayerController.gd" id="36_6eenj"]
+[ext_resource type="Script" uid="uid://bnfvml6hmbsm1" path="res://assets/scripts/characters/controllers/PlayerController.gd" id="36_6eenj"]
 [ext_resource type="Script" uid="uid://cnnuxdvjhvw2j" path="res://assets/scripts/characters/controllers/statsController.gd" id="37_onysn"]
 [ext_resource type="Script" uid="uid://b80qm07nxxcap" path="res://assets/scripts/characters/controllers/AiController.gd" id="38_e7fyo"]
 [ext_resource type="Script" uid="uid://ciuxhepgisrjw" path="res://assets/scripts/characters/handlers/rayCastsHandler.gd" id="39_8byg5"]
@@ -6569,12 +6569,16 @@ areas_handler = NodePath("../../Handlers/AreasHandler")
 debug_helper = NodePath("../../DebugHelper")
 metadata/_custom_type_script = "uid://cnnuxdvjhvw2j"
 
-[node name="AIController" type="Control" parent="Controllers" node_paths=PackedStringArray("view_ray", "character")]
+[node name="AIController" type="Control" parent="Controllers" node_paths=PackedStringArray("detection_area", "attack_area", "view_ray", "shape_detection", "soft_collision_area", "character")]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("38_e7fyo")
+detection_area = NodePath("../../Handlers/AreasHandler/DetectionArea")
+attack_area = NodePath("../../Handlers/AreasHandler/AttackArea")
 view_ray = NodePath("../../Handlers/RayCastsHandler/ViewRay")
+shape_detection = NodePath("../../Handlers/AreasHandler/DetectionArea/shape_detection")
+soft_collision_area = NodePath("../../Handlers/AreasHandler/SoftCollisionArea")
 character = NodePath("../..")
 metadata/_custom_type_script = "uid://b80qm07nxxcap"
 
@@ -6606,11 +6610,11 @@ metadata/_custom_type_script = "uid://ciuxhepgisrjw"
 target_position = Vector2(0, 300)
 
 [node name="GroundCheckRay2" type="RayCast2D" parent="Handlers/RayCastsHandler"]
-position = Vector2(52.1514, 0)
+position = Vector2(81, 0)
 target_position = Vector2(0, 300)
 
 [node name="GroundCheckRay3" type="RayCast2D" parent="Handlers/RayCastsHandler"]
-position = Vector2(-54.2842, 0)
+position = Vector2(-85, 0)
 target_position = Vector2(0, 300)
 
 [node name="NearGroundRay" type="RayCast2D" parent="Handlers/RayCastsHandler"]
@@ -6700,7 +6704,7 @@ metadata/_custom_type_script = "uid://du76mpiul5ejs"
 
 [node name="InvulnerabilityTimer" type="Timer" parent="Handlers/TimersHandler"]
 
-[node name="AreasHandler" type="Control" parent="Handlers" node_paths=PackedStringArray("character_manager", "big_attack_area", "big_attack_area_2", "damage_area", "detection_area", "attack_area")]
+[node name="AreasHandler" type="Control" parent="Handlers" node_paths=PackedStringArray("character_manager", "big_attack_area", "big_attack_area_2", "damage_area", "detection_area", "attack_area", "soft_collision_area")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -6712,6 +6716,7 @@ big_attack_area_2 = NodePath("BigAttackArea2")
 damage_area = NodePath("DamageArea")
 detection_area = NodePath("DetectionArea")
 attack_area = NodePath("AttackArea")
+soft_collision_area = NodePath("SoftCollisionArea")
 metadata/_custom_type_script = "uid://d23d04rsyp41w"
 
 [node name="BigAttackArea" type="Area2D" parent="Handlers/AreasHandler"]

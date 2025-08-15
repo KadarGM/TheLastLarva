@@ -12,9 +12,6 @@ var stamina_current: float
 var stamina_regen_timer: float = 0.0
 var invulnerability_temp: bool = false
 
-var damage_check_timer: float = 0.0
-var damage_check_interval: float = 0.5
-
 signal health_changed(new_health: int)
 signal stamina_changed(new_stamina: float)
 signal died()
@@ -32,15 +29,12 @@ func setup(body: CharacterManager, data: CharacterData, th: TimersHandler, ah: A
 	setup_signals()
 
 func setup_signals():
-	if areas_handler and areas_handler.damage_area:
-		areas_handler.damage_area.body_entered.connect(_on_damage_area_body_entered)
 	if timers_handler and timers_handler.invulnerability_timer:
 		timers_handler.invulnerability_timer.timeout.connect(_on_invulnerability_timer_timeout)
 
 func process_stats(delta: float) -> void:
 	if owner_body.state_machine.current_state and owner_body.state_machine.current_state.name != "DeathState":
 		update_stamina_regeneration(delta)
-		check_continuous_damage(delta)
 	check_death()
 
 func update_stamina_regeneration(delta: float) -> void:
@@ -54,26 +48,6 @@ func update_stamina_regeneration(delta: float) -> void:
 	stamina_current += delta * character_data.stamina_regen_rate
 	stamina_current = min(stamina_current, character_data.stamina_max)
 	stamina_changed.emit(stamina_current)
-
-func check_continuous_damage(delta: float) -> void:
-	if not character_data.can_get_damage:
-		return
-	
-	if character_data.invulnerability or invulnerability_temp:
-		return
-	
-	damage_check_timer -= delta
-	if damage_check_timer > 0:
-		return
-	
-	damage_check_timer = damage_check_interval
-	
-	var bodies_in_area = areas_handler.damage_area.get_overlapping_bodies()
-	for body in bodies_in_area:
-		if body.has_method("get_damage") and body != owner_body:
-			var damage = body.get_damage()
-			take_damage(damage, body.global_position)
-			break
 
 func consume_stamina(amount: float, apply_regen_delay: bool = true) -> bool:
 	if stamina_current < amount:
@@ -139,7 +113,7 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 				knockback_direction.x = randf_range(-0.5, 0.5)
 			
 			var damage_knockback = Vector2(
-				knockback_direction.x * character_data.damage_knockback_force * 10.0,
+				knockback_direction.x * character_data.damage_knockback_force * 2.0,
 				-abs(character_data.damage_knockback_force * 0.8)
 			)
 			owner_body.apply_knockback(damage_knockback)
@@ -183,7 +157,6 @@ func reset_stats() -> void:
 	stamina_current = character_data.stamina_max
 	stamina_regen_timer = 0.0
 	invulnerability_temp = false
-	damage_check_timer = 0.0
 	health_changed.emit(health_current)
 	stamina_changed.emit(stamina_current)
 
@@ -199,20 +172,6 @@ func on_state_exit(state_name: String) -> void:
 	match state_name:
 		"DashingState", "BigAttackState", "DashAttackState", "BigJumpingState":
 			invulnerability_temp = false
-
-func _on_damage_area_body_entered(body: Node2D) -> void:
-	if not character_data.can_get_damage:
-		return
-	
-	if character_data.invulnerability:
-		return
-	
-	if invulnerability_temp:
-		return
-	
-	if body.has_method("get_damage") and body != owner_body:
-		var damage = body.get_damage()
-		take_damage(damage, body.global_position)
 
 func _on_invulnerability_timer_timeout() -> void:
 	invulnerability_temp = false

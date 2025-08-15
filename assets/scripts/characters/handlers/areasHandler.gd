@@ -8,6 +8,7 @@ class_name AreasHandler
 @export var damage_area: Area2D
 @export var detection_area: Area2D
 @export var attack_area: Area2D
+@export var soft_collision_area: Area2D
 
 func _physics_process(_delta: float) -> void:
 	areas_flip()
