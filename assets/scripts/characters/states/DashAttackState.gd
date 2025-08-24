@@ -73,6 +73,13 @@ func apply_damage_to_entity(body: Node2D) -> void:
 	if body == character:
 		return
 	
+	if body.is_in_group("dead"):
+		return
+	
+	if body.has_method("state_machine") and body.state_machine:
+		if body.state_machine.current_state and body.state_machine.current_state.name == "DeathState":
+			return
+	
 	if body in character.dash_attack_damaged_entities:
 		return
 	

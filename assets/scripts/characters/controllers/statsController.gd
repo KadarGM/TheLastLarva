@@ -78,10 +78,14 @@ func restore_stamina(amount: float) -> void:
 	stamina_changed.emit(stamina_current)
 
 func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void:
-	if not character_data.can_get_damage:
+	if owner_body.is_in_group("dead"):
 		return
 	
-	if owner_body.state_machine.current_state and owner_body.state_machine.current_state.name == "DeathState":
+	if owner_body.state_machine and owner_body.state_machine.current_state:
+		if owner_body.state_machine.current_state.name == "DeathState":
+			return
+	
+	if not character_data.can_get_damage:
 		return
 	
 	if character_data.invulnerability:
@@ -105,8 +109,8 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 		died.emit()
 		return
 	
-	if character_data.can_get_knockback:
-		if owner_body.state_machine.current_state and owner_body.state_machine.current_state.name != "KnockbackState":
+	if character_data.can_get_knockback and owner_body.state_machine and owner_body.state_machine.current_state:
+		if owner_body.state_machine.current_state.name != "KnockbackState" and owner_body.state_machine.current_state.name != "DeathState":
 			var knockback_direction: Vector2
 			if attacker_position != Vector2.ZERO:
 				knockback_direction = (owner_body.global_position - attacker_position).normalized()
@@ -155,6 +159,11 @@ func is_stamina_available(amount: float) -> bool:
 
 func is_alive() -> bool:
 	return health_current > 0
+
+func _on_death() -> void:
+	if owner_body and owner_body.state_machine:
+		if owner_body.state_machine.current_state and owner_body.state_machine.current_state.name != "DeathState":
+			owner_body.state_machine.transition_to("DeathState")
 
 func reset_stats() -> void:
 	health_current = character_data.health_max

@@ -217,8 +217,15 @@ func reset_air_time() -> void:
 	effective_air_time = 0
 
 func apply_knockback(force: Vector2) -> void:
+	if is_in_group("dead"):
+		return
+	
+	if state_machine.current_state and state_machine.current_state.name == "DeathState":
+		return
+	
 	if not character_data.can_get_knockback:
 		return
+	
 	knockback_velocity = force
 	knockback_timer = character_data.knockback_duration
 	if state_machine.current_state:
@@ -228,11 +235,19 @@ func apply_knockback(force: Vector2) -> void:
 	state_machine.transition_to("KnockbackState")
 
 func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void:
+	if is_in_group("dead"):
+		return
+	
+	if state_machine and state_machine.current_state:
+		if state_machine.current_state.name == "DeathState":
+			return
+	
 	was_hit_by_damage = true
+	
 	if stats_controller:
 		stats_controller.take_damage(amount, attacker_position)
-		if stats_controller.health_current <= 0:
-			state_machine.transition_to("DeathState")
+	else:
+		print("Warning: No stats_controller on ", name)
 
 func update_ui() -> void:
 	if stamina_bar:
@@ -374,6 +389,9 @@ func execute_damage_to_entities() -> void:
 	
 	for entity in overlapping_bodies:
 		if entity == self:
+			continue
+		
+		if entity.is_in_group("dead"):
 			continue
 		
 		hit_count += 1

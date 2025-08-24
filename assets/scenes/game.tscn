@@ -29,7 +29,7 @@ position = Vector2(1699, 2503)
 scale = Vector2(0.4, 0.4)
 
 [node name="Enemy2" parent="Enemies" instance=ExtResource("2_5gf0t")]
-position = Vector2(2666, 2520)
+position = Vector2(2904, 1260)
 scale = Vector2(0.4, 0.4)
 
 [node name="Obstacles" type="Node2D" parent="."]

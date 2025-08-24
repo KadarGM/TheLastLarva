@@ -72,7 +72,7 @@ func physics_process(delta: float) -> void:
 		transition_to_next_state()
 
 func process_attack_movement(delta: float) -> void:
-	var input = character.get_controller_input()
+	var _input = character.get_controller_input()
 	var attack_direction = character.get_attack_direction()
 	
 	if character.is_on_floor():
@@ -142,6 +142,13 @@ func apply_damage() -> void:
 		if entity == character:
 			continue
 		
+		if entity.is_in_group("dead"):
+			continue
+		
+		if entity.has_method("state_machine") and entity.state_machine:
+			if entity.state_machine.current_state and entity.state_machine.current_state.name == "DeathState":
+				continue
+		
 		if not entity.has_method("take_damage"):
 			continue
 		
@@ -149,13 +156,18 @@ func apply_damage() -> void:
 		
 		entity.take_damage(damage, character.global_position)
 		
-		if entity.has_method("apply_knockback"):
+		if not entity.is_in_group("dead") and entity.has_method("apply_knockback"):
 			var can_apply_knockback = true
 			
-			if entity.has_method("stats_controller") and entity.stats_controller:
+			if entity.has_method("state_machine") and entity.state_machine:
+				if entity.state_machine.current_state and entity.state_machine.current_state.name == "DeathState":
+					can_apply_knockback = false
+			
+			if can_apply_knockback and entity.has_method("stats_controller") and entity.stats_controller:
 				if entity.stats_controller.is_invulnerable():
 					can_apply_knockback = false
-			elif entity.has_method("character_data") and entity.character_data:
+			
+			if can_apply_knockback and entity.has_method("character_data") and entity.character_data:
 				if not entity.character_data.can_get_knockback:
 					can_apply_knockback = false
 			

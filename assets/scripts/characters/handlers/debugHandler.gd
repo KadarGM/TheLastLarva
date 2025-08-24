@@ -262,20 +262,32 @@ func update_ui_debug() -> void:
 	
 	if character.areas_handler:
 		if character.areas_handler.attack_area and debug_holder.attack_area_bodies_text:
-			debug_holder.attack_area_bodies_text.text = str(character.areas_handler.attack_area.get_overlapping_bodies().size())
+			if character.areas_handler.attack_area.monitoring:
+				debug_holder.attack_area_bodies_text.text = str(character.areas_handler.attack_area.get_overlapping_bodies().size())
+			else:
+				debug_holder.attack_area_bodies_text.text = "Off"
 		
 		if character.areas_handler.damage_area:
 			if debug_holder.damage_area_bodies_text:
-				debug_holder.damage_area_bodies_text.text = str(character.areas_handler.damage_area.get_overlapping_bodies().size())
+				if character.areas_handler.damage_area.monitoring:
+					debug_holder.damage_area_bodies_text.text = str(character.areas_handler.damage_area.get_overlapping_bodies().size())
+				else:
+					debug_holder.damage_area_bodies_text.text = "Off"
 			
 			if debug_holder.damage_area_monitorable_text:
 				debug_holder.damage_area_monitorable_text.text = str(character.areas_handler.damage_area.monitorable)
 		
 		if character.areas_handler.big_attack_area and debug_holder.big_attack_area_bodies_text:
-			debug_holder.big_attack_area_bodies_text.text = str(character.areas_handler.big_attack_area.get_overlapping_bodies().size())
+			if character.areas_handler.big_attack_area.monitoring:
+				debug_holder.big_attack_area_bodies_text.text = str(character.areas_handler.big_attack_area.get_overlapping_bodies().size())
+			else:
+				debug_holder.big_attack_area_bodies_text.text = "Off"
 		
 		if character.areas_handler.big_attack_area_2 and debug_holder.big_attack_area_2_bodies_text:
-			debug_holder.big_attack_area_2_bodies_text.text = str(character.areas_handler.big_attack_area_2.get_overlapping_bodies().size())
+			if character.areas_handler.big_attack_area_2.monitoring:
+				debug_holder.big_attack_area_2_bodies_text.text = str(character.areas_handler.big_attack_area_2.get_overlapping_bodies().size())
+			else:
+				debug_holder.big_attack_area_2_bodies_text.text = "Off"
 
 func check_changes() -> void:
 	var current_state = state_machine.get_current_state_name() if state_machine else ""
@@ -325,8 +337,8 @@ func check_changes() -> void:
 
 func _on_state_changed(old_state: State, new_state: State) -> void:
 	if console_debug:
-		var old_name = old_state.name if old_state else "None"
-		var new_name = new_state.name if new_state else "None"
+		var old_name: String = str(old_state.name) if old_state else "None"
+		var new_name: String = str(new_state.name) if new_state else "None"
 		print("[DEBUG] State changed: ", old_name, " -> ", new_name)
 
 func log_state_change(old_state: String, new_state: String) -> void:

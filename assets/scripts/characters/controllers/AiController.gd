@@ -52,6 +52,12 @@ func setup_signals() -> void:
 func setup_detection() -> void:
 	if shape_detection:
 		shape_detection.call_deferred("set_disabled", true)
+	
+	if attack_area:
+		attack_area.monitoring = true
+	
+	if detection_area:
+		detection_area.monitoring = true
 
 func update_input() -> void:
 	input.reset()
@@ -122,6 +128,10 @@ func update_chase_direction() -> void:
 
 func check_attack_range() -> void:
 	if not attack_area or not target_player:
+		return
+	
+	if not attack_area.monitoring:
+		attack_area.monitoring = true
 		return
 	
 	var bodies = attack_area.get_overlapping_bodies()
@@ -355,6 +365,8 @@ func _on_detection_area_body_exited(body: Node2D) -> void:
 
 func _on_attack_area_body_entered(body: Node2D) -> void:
 	if body != character and body.has_method("take_damage"):
+		if body.is_in_group("dead"):
+			return
 		if body == target_player or body.is_in_group("Player"):
 			player_in_attack_range = true
 			if not target_player:

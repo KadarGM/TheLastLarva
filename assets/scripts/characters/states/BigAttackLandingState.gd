@@ -46,13 +46,26 @@ func apply_big_attack_damage() -> void:
 		if body == character:
 			continue
 		
+		if body.is_in_group("dead"):
+			continue
+		
+		if body.has_method("state_machine") and body.state_machine:
+			if body.state_machine.current_state and body.state_machine.current_state.name == "DeathState":
+				continue
+		
 		if body.has_method("take_damage"):
-			body.take_damage(character.character_data.big_attack_dmg)
+			body.take_damage(character.character_data.big_attack_dmg, character.global_position)
 		
 		if body.has_method("apply_knockback"):
+			if body.has_method("state_machine") and body.state_machine:
+				if body.state_machine.current_state and body.state_machine.current_state.name == "DeathState":
+					continue
+			
 			var direction = (body.global_position - character.global_position).normalized()
-			var knockback = direction * character.character_data.knockback_force * 2.0
-			knockback.y = -abs(character.character_data.jump_velocity) * 0.5
+			var knockback = Vector2(
+				direction.x * character.character_data.knockback_force * 2.0,
+				-abs(character.character_data.jump_velocity) * 0.5
+			)
 			body.apply_knockback(knockback)
 
 func on_animation_finished() -> void:

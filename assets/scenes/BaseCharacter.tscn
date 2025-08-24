@@ -6356,7 +6356,6 @@ scale = Vector2(3.33333, 3.33333)
 
 [node name="DebugHelper" parent="." node_paths=PackedStringArray("character", "state_machine") instance=ExtResource("17_fdfoy")]
 layer = 100
-visible = false
 character = NodePath("..")
 state_machine = NodePath("../StateMachine")
 
