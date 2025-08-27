@@ -7,6 +7,9 @@ class_name CharacterData
 @export var stamina_regen_rate: float = 100.0
 @export var stamina_regen_delay: float = 1.0
 
+@export_group("Physics Options")
+@export var weight: float = 100.0
+
 @export_group("Jumps Options")
 @export var can_jump: bool = true
 @export var can_double_jump: bool = false
@@ -50,19 +53,14 @@ class_name CharacterData
 @export var can_air_attack: bool = false
 @export var can_big_attack: bool = false
 @export var can_dash_attack: bool = false
-@export var can_take_knockback: bool = true
-@export var can_get_knockback: bool = true
+@export var can_apply_knockback: bool = true
+@export var can_receive_knockback: bool = true
 @export var can_take_damage: bool = true
 @export var can_get_damage: bool = true
 
 @export_subgroup("Normal Attack")
 @export var attack_cooldown: float = 0.35
 @export var attack_area_radius: float = 150.0
-@export var attack_movement_force: float = 1800.0
-@export var attack_movement_friction: float = 180.0
-@export var attack_movement_multiplier: float = 1.3
-@export var ground_attack_force_multiplier: float = 0.25
-@export var air_attack_force_multiplier: float = 0.08
 @export var attack_stamina_cost: float = 150.0
 @export var attack_combo_reset_time: float = 1.3
 
@@ -93,17 +91,20 @@ class_name CharacterData
 @export var damage_delay: float = 0.2
 @export var invulnerability_after_damage: float = 1.2
 
-@export_subgroup("Knockback")
-@export var knockback_reaction_jump_multiplier: float = 0.5
-@export var knockback_force: float = 150.0
-@export var knockback_force_multiplier: float = 1.1
-@export var knockback_reaction_multiplier: float = 0.3
-@export var knockback_duration: float = 0.1
-@export var knockback_friction: float = 30.0
-@export var knockback_vertical_multiplier: float = 0.3
-@export var knockback_reaction_force_multiplier: float = 2.0
-@export var knockback_force_horizontal_multiplier: float = 3.0
-@export var damage_knockback_force: float = 300.0
+@export_group("Knockback Given (Outgoing)")
+@export var outgoing_knockback_force: float = 150.0
+@export var outgoing_knockback_horizontal_multiplier: float = 3.0
+@export var outgoing_knockback_vertical_multiplier: float = 0.3
+@export var outgoing_knockback_multiplier_combo3: float = 1.1
+
+@export_group("Knockback Self Reaction")
+@export var self_knockback_multiplier: float = 0.3
+@export var self_knockback_vertical_multiplier: float = 0.5
+
+@export_group("Knockback Received (Incoming)")
+@export var incoming_knockback_duration: float = 0.1
+@export var incoming_knockback_friction: float = 30.0
+@export var incoming_damage_knockback_force: float = 300.0
 
 @export_group("Death Options")
 @export var death_disappear: bool = true

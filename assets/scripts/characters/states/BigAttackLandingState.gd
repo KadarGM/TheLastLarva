@@ -10,12 +10,15 @@ func enter() -> void:
 	damage_applied = false
 	animation_finished = false
 	
+	character.timers_handler.hide_weapon_timer.stop()
+	
 	character.play_animation("Big_attack_landing")
 	
 	apply_big_attack_damage()
 
 func exit() -> void:
-	character.set_weapon_visibility("hide")
+	character.timers_handler.hide_weapon_timer.wait_time = character.character_data.hide_weapon_time
+	character.timers_handler.hide_weapon_timer.start()
 
 func physics_process(_delta: float) -> void:
 	character.velocity = Vector2.ZERO
@@ -61,10 +64,15 @@ func apply_big_attack_damage() -> void:
 				if body.state_machine.current_state and body.state_machine.current_state.name == "DeathState":
 					continue
 			
+			var target_weight_multiplier = 1.0
+			if body.has_method("character_data") and body.character_data:
+				if body.character_data.has("weight"):
+					target_weight_multiplier = 100.0 / body.character_data.weight
+			
 			var direction = (body.global_position - character.global_position).normalized()
 			var knockback = Vector2(
-				direction.x * character.character_data.knockback_force * 2.0,
-				-abs(character.character_data.jump_velocity) * 0.5
+				direction.x * character.character_data.outgoing_knockback_force * 2.0 * target_weight_multiplier,
+				-abs(character.character_data.jump_velocity) * 0.5 * target_weight_multiplier
 			)
 			body.apply_knockback(knockback)
 

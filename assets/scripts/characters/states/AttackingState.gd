@@ -65,39 +65,15 @@ func physics_process(delta: float) -> void:
 	if not character.is_on_floor():
 		character.velocity.y += character.gravity * delta
 	
-	process_attack_movement(delta)
+	if character.is_on_floor():
+		character.velocity.x = 0
+	else:
+		character.velocity.x = move_toward(character.velocity.x, 0, character.character_data.speed * delta * 0.5)
+	
 	check_combo_input()
 	
 	if attack_completed and not can_combo:
 		transition_to_next_state()
-
-func process_attack_movement(delta: float) -> void:
-	var _input = character.get_controller_input()
-	var attack_direction = character.get_attack_direction()
-	
-	if character.is_on_floor():
-		var movement_multiplier = character.character_data.ground_attack_force_multiplier
-		var friction = character.character_data.attack_movement_friction * character.character_data.ground_friction_multiplier
-		
-		if character.attack_count == 1:
-			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier * 0.1
-		elif character.attack_count == 2:
-			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier * 0.1
-		elif character.attack_count == 3:
-			character.velocity.x = attack_direction * character.character_data.attack_movement_force * movement_multiplier * 0.15
-		
-		character.velocity.x = move_toward(character.velocity.x, 0, friction * delta)
-	else:
-		var air_multiplier = character.character_data.air_attack_force_multiplier
-		
-		if character.attack_count == 1:
-			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier * 0.1
-		elif character.attack_count == 2:
-			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier * 0.1
-		elif character.attack_count == 3:
-			character.velocity.x += attack_direction * character.character_data.attack_movement_force * air_multiplier * 0.15
-		
-		character.velocity.x = clamp(character.velocity.x, -character.character_data.speed, character.character_data.speed)
 
 func check_combo_input() -> void:
 	if attack_completed:
@@ -131,9 +107,9 @@ func apply_damage() -> void:
 		3:
 			damage = character.character_data.attack_3_dmg
 	
-	var base_knockback_force = character.character_data.knockback_force
+	var base_knockback_force = character.character_data.outgoing_knockback_force
 	if character.attack_count == 3:
-		base_knockback_force *= character.character_data.knockback_force_multiplier
+		base_knockback_force *= character.character_data.outgoing_knockback_multiplier_combo3
 	
 	var attack_dir = character.get_attack_direction()
 	var hit_count = 0
@@ -168,20 +144,25 @@ func apply_damage() -> void:
 					can_apply_knockback = false
 			
 			if can_apply_knockback and entity.has_method("character_data") and entity.character_data:
-				if not entity.character_data.can_get_knockback:
+				if not entity.character_data.can_receive_knockback:
 					can_apply_knockback = false
 			
 			if can_apply_knockback:
+				var target_weight_multiplier = 1.0
+				if entity.has_method("character_data") and entity.character_data:
+					if entity.character_data.has("weight"):
+						target_weight_multiplier = 100.0 / entity.character_data.weight
+				
 				var knockback_force = Vector2(
-					attack_dir * base_knockback_force * character.character_data.knockback_force_horizontal_multiplier,
-					-abs(character.character_data.jump_velocity * character.character_data.knockback_vertical_multiplier)
+					attack_dir * base_knockback_force * character.character_data.outgoing_knockback_horizontal_multiplier * target_weight_multiplier,
+					-abs(character.character_data.jump_velocity * character.character_data.outgoing_knockback_vertical_multiplier * target_weight_multiplier)
 				)
 				entity.apply_knockback(knockback_force)
 	
-	if hit_count > 0 and character.character_data.can_take_knockback:
+	if hit_count > 0 and character.character_data.can_apply_knockback:
 		var reaction_force = Vector2(
-			-attack_dir * base_knockback_force * character.character_data.knockback_reaction_multiplier * character.character_data.knockback_reaction_force_multiplier,
-			-abs(character.character_data.jump_velocity * character.character_data.knockback_reaction_jump_multiplier)
+			-attack_dir * base_knockback_force * character.character_data.self_knockback_multiplier,
+			-abs(character.character_data.jump_velocity * character.character_data.self_knockback_vertical_multiplier)
 		)
 		
 		if not knockback_applied:

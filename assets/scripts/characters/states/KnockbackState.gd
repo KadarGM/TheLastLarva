@@ -11,7 +11,7 @@ func physics_process(delta: float) -> void:
 	if character.knockback_timer > 0:
 		character.knockback_timer -= delta
 		character.velocity = character.knockback_velocity
-		character.knockback_velocity = character.knockback_velocity.move_toward(Vector2.ZERO, character.character_data.knockback_friction * delta)
+		character.knockback_velocity = character.knockback_velocity.move_toward(Vector2.ZERO, character.character_data.incoming_knockback_friction * delta)
 		
 		if character.knockback_timer <= 0 or character.knockback_velocity.length() < 10:
 			character.knockback_velocity = Vector2.ZERO
@@ -31,7 +31,7 @@ func physics_process(delta: float) -> void:
 
 func set_knockback(force: Vector2) -> void:
 	character.knockback_velocity = force
-	character.knockback_timer = character.character_data.knockback_duration
+	character.knockback_timer = character.character_data.incoming_knockback_duration
 
 func handle_animation() -> void:
 	character.play_animation("Jump")

@@ -59,7 +59,6 @@ var current_input: ControllerInput = ControllerInput.new()
 
 var was_hit_by_damage: bool = false
 
-
 func _ready() -> void:
 	if not character_data:
 		character_data = CharacterData.new()
@@ -223,15 +222,17 @@ func apply_knockback(force: Vector2) -> void:
 	if state_machine.current_state and state_machine.current_state.name == "DeathState":
 		return
 	
-	if not character_data.can_get_knockback:
+	if not character_data.can_receive_knockback:
 		return
 	
-	knockback_velocity = force
-	knockback_timer = character_data.knockback_duration
+	var weight_multiplier = 100.0 / character_data.weight
+	knockback_velocity = force * weight_multiplier
+	knockback_timer = character_data.incoming_knockback_duration
+	
 	if state_machine.current_state:
 		var knockback_state = state_machine.states.get("KnockbackState")
 		if knockback_state:
-			knockback_state.set_knockback(force)
+			knockback_state.set_knockback(knockback_velocity)
 	state_machine.transition_to("KnockbackState")
 
 func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void:
@@ -380,9 +381,9 @@ func execute_damage_to_entities() -> void:
 		3:
 			damage = character_data.attack_3_dmg
 	
-	var base_knockback_force = character_data.knockback_force
+	var base_knockback_force = character_data.outgoing_knockback_force
 	if attack_count == 3:
-		base_knockback_force *= character_data.knockback_force_multiplier
+		base_knockback_force *= character_data.outgoing_knockback_multiplier_combo3
 	
 	var attack_dir = get_attack_direction()
 	var hit_count = 0
@@ -399,10 +400,15 @@ func execute_damage_to_entities() -> void:
 		if entity.has_method("take_damage"):
 			entity.take_damage(damage)
 		
-		if character_data.can_take_knockback:
+		if character_data.can_apply_knockback:
+			var target_weight_multiplier = 1.0
+			if entity.has_method("character_data") and entity.character_data:
+				if entity.character_data.has("weight"):
+					target_weight_multiplier = 100.0 / entity.character_data.weight
+			
 			var knockback_force = Vector2(
-				attack_dir * base_knockback_force,
-				character_data.jump_velocity * character_data.knockback_vertical_multiplier
+				attack_dir * base_knockback_force * character_data.outgoing_knockback_horizontal_multiplier * target_weight_multiplier,
+				-abs(character_data.jump_velocity * character_data.outgoing_knockback_vertical_multiplier * target_weight_multiplier)
 			)
 			
 			if entity.has_method("apply_knockback"):
@@ -410,8 +416,8 @@ func execute_damage_to_entities() -> void:
 	
 	if hit_count > 0:
 		var reaction_force = Vector2(
-			-attack_dir * base_knockback_force * character_data.knockback_reaction_multiplier * character_data.knockback_reaction_force_multiplier,
-			character_data.jump_velocity * character_data.knockback_reaction_jump_multiplier
+			-attack_dir * base_knockback_force * character_data.self_knockback_multiplier,
+			-abs(character_data.jump_velocity * character_data.self_knockback_vertical_multiplier)
 		)
 		pending_knockback_force = reaction_force
 

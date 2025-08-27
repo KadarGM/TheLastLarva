@@ -109,7 +109,7 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 		died.emit()
 		return
 	
-	if character_data.can_get_knockback and owner_body.state_machine and owner_body.state_machine.current_state:
+	if character_data.can_receive_knockback and owner_body.state_machine and owner_body.state_machine.current_state:
 		if owner_body.state_machine.current_state.name != "KnockbackState" and owner_body.state_machine.current_state.name != "DeathState":
 			var knockback_direction: Vector2
 			if attacker_position != Vector2.ZERO:
@@ -120,9 +120,10 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 			if knockback_direction.x == 0:
 				knockback_direction.x = randf_range(-0.5, 0.5)
 			
+			var weight_multiplier = 100.0 / character_data.weight
 			var damage_knockback = Vector2(
-				knockback_direction.x * character_data.damage_knockback_force,
-				-abs(character_data.damage_knockback_force * 0.5)
+				knockback_direction.x * character_data.incoming_damage_knockback_force * weight_multiplier,
+				-abs(character_data.incoming_damage_knockback_force * 0.5 * weight_multiplier)
 			)
 			owner_body.apply_knockback(damage_knockback)
 
