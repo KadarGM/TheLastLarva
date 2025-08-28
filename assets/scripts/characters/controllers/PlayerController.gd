@@ -26,7 +26,7 @@ func update_input() -> void:
 	input.dash_pressed = current_dash and not previous_dash_state
 	previous_dash_state = current_dash
 	
-	var current_charge_jump = Input.is_action_pressed("S_charge_jump")
+	var current_charge_jump = Input.is_action_pressed("S_charge_jump") and Input.is_action_pressed("J_dash")
 	input.charge_jump = current_charge_jump
 	input.charge_jump_pressed = current_charge_jump and not previous_charge_jump_state
 	previous_charge_jump_state = current_charge_jump

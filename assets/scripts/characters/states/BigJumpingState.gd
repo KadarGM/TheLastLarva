@@ -45,6 +45,11 @@ func check_collision() -> void:
 
 func check_input_release() -> void:
 	var input = character.get_controller_input()
+	
+	if not input.dash:
+		state_machine.transition_to("JumpingState")
+		return
+	
 	if direction.x < 0 and input.move_direction.x >= 0:
 		state_machine.transition_to("JumpingState")
 	elif direction.x > 0 and input.move_direction.x <= 0:

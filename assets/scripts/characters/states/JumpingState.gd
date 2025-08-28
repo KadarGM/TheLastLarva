@@ -78,7 +78,8 @@ func process_input() -> void:
 				state_machine.transition_to("TripleJumpingState")
 	
 	if input.dash_pressed and character.can_dash:
-		state_machine.transition_to("DashingState")
+		if input.move_direction.x != 0:
+			state_machine.transition_to("DashingState")
 	
 	if input.attack_pressed:
 		if character.big_jump_charged and input.dash:

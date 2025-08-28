@@ -30,6 +30,10 @@ func process_input() -> void:
 			state_machine.transition_to("JumpingState")
 			return
 	
+	if input.charge_jump_pressed and character.character_data.can_big_attack:
+		state_machine.transition_to("BigAttackState")
+		return
+	
 	if input.dash_pressed:
 		if character.big_jump_charged and input.attack and character.timers_handler.dash_attack_cooldown_timer.is_stopped():
 			state_machine.transition_to("DashAttackState")

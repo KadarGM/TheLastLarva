@@ -170,7 +170,7 @@ func update_ui_debug() -> void:
 	if debug_holder.dash_attack_direction_text:
 		var dash_state = state_machine.states.get("DashAttackState") if state_machine else null
 		if dash_state and state_machine.current_state == dash_state:
-			debug_holder.dash_attack_direction_text.text = str(dash_state.direction)
+			debug_holder.dash_attack_direction_text.text = str(dash_state.dash_direction)
 		else:
 			debug_holder.dash_attack_direction_text.text = "0"
 	

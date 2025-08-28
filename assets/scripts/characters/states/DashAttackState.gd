@@ -1,14 +1,11 @@
 extends State
 class_name DashAttackState
 
-var direction: float = 0.0
+var dash_direction: float = 0.0
+var damage_applied: bool = false
 
 func enter() -> void:
 	if not character.character_data.can_dash_attack:
-		state_machine.transition_to("IdleState")
-		return
-	
-	if not character.big_jump_charged:
 		state_machine.transition_to("IdleState")
 		return
 	
@@ -16,85 +13,83 @@ func enter() -> void:
 		state_machine.transition_to("IdleState")
 		return
 	
-	character.cancel_big_jump_charge()
+	character.timers_handler.hide_weapon_timer.stop()
+	
+	damage_applied = false
 	character.dash_attack_damaged_entities.clear()
-	character.invulnerability_temp = true
+	dash_direction = character.get_facing_direction()
 	
-	var input = character.get_controller_input()
-	direction = input.move_direction.x
-	if direction == 0:
-		direction = character.get_facing_direction()
-	
-	character.velocity.x = direction * character.character_data.dash_speed * 1.5
-	character.velocity.y = 0
-	
-	character.set_weapon_visibility("both")
+	character.big_jump_charged = false
+	character.timers_handler.big_jump_timer.stop()
 	
 	character.timers_handler.dash_attack_cooldown_timer.wait_time = character.character_data.dash_attack_cooldown
 	character.timers_handler.dash_attack_cooldown_timer.start()
+	
+	character.set_weapon_visibility("both")
+	character.play_animation("Dash_attack")
 
 func exit() -> void:
-	character.invulnerability_temp = false
-	character.dash_attack_damaged_entities.clear()
-	character.set_weapon_visibility("hide")
-	character.can_big_jump = false
-	character.timers_handler.big_jump_cooldown_timer.wait_time = character.character_data.big_jump_cooldown
-	character.timers_handler.big_jump_cooldown_timer.start()
+	character.timers_handler.hide_weapon_timer.wait_time = character.character_data.hide_weapon_time
+	character.timers_handler.hide_weapon_timer.start()
 
 func physics_process(delta: float) -> void:
+	if not character.is_on_floor():
+		character.velocity.y += character.gravity * delta
+	
 	character.stamina_current -= character.character_data.dash_attack_stamina_drain_rate * delta
+	character.stamina_current = max(0, character.stamina_current)
 	
 	if character.stamina_current <= 0:
-		character.stamina_current = 0
-		end_dash_attack()
-		return
-	
-	var input = character.get_controller_input()
-	if not input.attack:
-		end_dash_attack()
-		return
-	
-	if character.is_on_wall_left() or character.is_on_wall_right():
-		end_dash_attack()
-		return
-	
-	character.velocity.x = direction * character.character_data.dash_speed * 1.5
-	
-	if not character.is_on_floor():
-		character.velocity.y += character.gravity * delta * 0.5
-
-func end_dash_attack() -> void:
-	if character.is_on_floor():
 		state_machine.transition_to("IdleState")
-	else:
-		state_machine.transition_to("JumpingState")
+		return
+	
+	character.velocity.x = dash_direction * character.character_data.dash_speed * 1.5
+	
+	if character._is_on_wall():
+		state_machine.transition_to("IdleState")
+		return
+	
+	process_input()
 
-func apply_damage_to_entity(body: Node2D) -> void:
-	if body == character:
+func process_input() -> void:
+	var input = character.get_controller_input()
+	
+	if not input.dash:
+		state_machine.transition_to("IdleState")
+
+func apply_damage_to_entity(entity: Node2D) -> void:
+	if damage_applied:
 		return
 	
-	if body.is_in_group("dead"):
+	if entity == character:
 		return
 	
-	if body.has_method("state_machine") and body.state_machine:
-		if body.state_machine.current_state and body.state_machine.current_state.name == "DeathState":
+	if entity in character.dash_attack_damaged_entities:
+		return
+	
+	if entity.is_in_group("dead"):
+		return
+	
+	if entity.has_method("state_machine") and entity.state_machine:
+		if entity.state_machine.current_state and entity.state_machine.current_state.name == "DeathState":
 			return
 	
-	if body in character.dash_attack_damaged_entities:
-		return
+	character.dash_attack_damaged_entities.append(entity)
 	
-	character.dash_attack_damaged_entities.append(body)
+	if entity.has_method("take_damage"):
+		entity.take_damage(character.character_data.dash_attack_dmg, character.global_position)
 	
-	if body.has_method("take_damage"):
-		body.take_damage(character.character_data.dash_attack_dmg)
-	
-	if body.has_method("apply_knockback"):
-		var knockback_dir = direction
+	if entity.has_method("apply_knockback") and character.character_data.can_apply_knockback:
+		var target_weight_multiplier = 1.0
+		if entity.has_method("character_data") and entity.character_data:
+			if entity.character_data.has("weight"):
+				target_weight_multiplier = 100.0 / entity.character_data.weight
+		
 		var knockback = Vector2(
-			knockback_dir * character.character_data.knockback_force * 1.5,
-			-abs(character.character_data.jump_velocity) * 0.3
+			dash_direction * character.character_data.outgoing_knockback_force * 2.0 * target_weight_multiplier,
+			-abs(character.character_data.jump_velocity * 0.3 * target_weight_multiplier)
 		)
-		body.apply_knockback(knockback)
+		entity.apply_knockback(knockback)
 
 func handle_animation() -> void:
-	character.play_animation("Dash_attack")
+	pass

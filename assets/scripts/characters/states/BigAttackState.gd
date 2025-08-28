@@ -12,6 +12,14 @@ func enter() -> void:
 		state_machine.transition_to("JumpingState")
 		return
 	
+	var ground_check_1 = character.ray_casts_handler.ground_check_ray.is_colliding()
+	var ground_check_2 = character.ray_casts_handler.ground_check_ray_2.is_colliding()
+	var ground_check_3 = character.ray_casts_handler.ground_check_ray_3.is_colliding()
+	
+	if ground_check_1 or ground_check_2 or ground_check_3:
+		state_machine.transition_to("JumpingState")
+		return
+	
 	character.stamina_current -= character.character_data.big_attack_stamina_cost
 	character.stamina_regen_timer = character.character_data.stamina_regen_delay
 	

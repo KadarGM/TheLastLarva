@@ -113,6 +113,8 @@ func apply_damage() -> void:
 	
 	var attack_dir = character.get_attack_direction()
 	var hit_count = 0
+	var input = character.get_controller_input()
+	var is_downward_attack = not character.is_on_floor() and input.charge_jump
 	
 	for entity in overlapping_bodies:
 		if entity == character:
@@ -153,21 +155,35 @@ func apply_damage() -> void:
 					if entity.character_data.has("weight"):
 						target_weight_multiplier = 100.0 / entity.character_data.weight
 				
-				var knockback_force = Vector2(
-					attack_dir * base_knockback_force * character.character_data.outgoing_knockback_horizontal_multiplier * target_weight_multiplier,
-					-abs(character.character_data.jump_velocity * character.character_data.outgoing_knockback_vertical_multiplier * target_weight_multiplier)
-				)
+				var knockback_force = Vector2.ZERO
+				if is_downward_attack:
+					knockback_force = Vector2(
+						0,
+						abs(base_knockback_force * character.character_data.outgoing_knockback_vertical_multiplier * target_weight_multiplier * 2.0)
+					)
+				else:
+					knockback_force = Vector2(
+						attack_dir * base_knockback_force * character.character_data.outgoing_knockback_horizontal_multiplier * target_weight_multiplier,
+						-abs(character.character_data.jump_velocity * character.character_data.outgoing_knockback_vertical_multiplier * target_weight_multiplier)
+					)
 				entity.apply_knockback(knockback_force)
 	
 	if hit_count > 0 and character.character_data.can_apply_knockback:
-		var reaction_force = Vector2(
-			-attack_dir * base_knockback_force * character.character_data.self_knockback_multiplier,
-			-abs(character.character_data.jump_velocity * character.character_data.self_knockback_vertical_multiplier)
-		)
+		var reaction_force = Vector2.ZERO
 		
-		if not knockback_applied:
-			knockback_applied = true
-			character.velocity += reaction_force
+		if is_downward_attack:
+			reaction_force = Vector2(
+				0,
+				-abs(character.character_data.jump_velocity * character.character_data.self_knockback_vertical_multiplier * 2.0)
+			)
+		else:
+			reaction_force = Vector2(
+				-attack_dir * base_knockback_force * character.character_data.self_knockback_multiplier,
+				-abs(character.character_data.jump_velocity * character.character_data.self_knockback_vertical_multiplier)
+			)
+		
+		character.velocity = reaction_force
+		knockback_applied = true
 
 func on_animation_finished() -> void:
 	attack_completed = true
@@ -186,6 +202,7 @@ func transition_to_next_state() -> void:
 		state_machine.transition_to("JumpingState")
 
 func handle_animation() -> void:
-	if not animation_started:
-		animation_started = true
-		character.update_attack_animations()
+	if animation_started:
+		return
+	animation_started = true
+	character.update_attack_animations()
