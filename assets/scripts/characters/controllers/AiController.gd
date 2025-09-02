@@ -27,10 +27,12 @@ var current_ai_state: AIState = AIState.PATROL
 var state_timer: float = 0.0
 var attack_cooldown: float = 0.0
 var jump_cooldown: float = 0.0
+var dash_cooldown: float = 0.0
 var combo_count: int = 0
 var combo_window: float = 0.0
 var emergency_timer: float = 0.0
 var search_direction: int = 1
+var last_player_height_diff: float = 0.0
 
 func _ready() -> void:
 	setup_signals()
@@ -85,6 +87,9 @@ func update_timers(delta: float) -> void:
 	if jump_cooldown > 0:
 		jump_cooldown -= delta
 	
+	if dash_cooldown > 0:
+		dash_cooldown -= delta
+	
 	if combo_window > 0:
 		combo_window -= delta
 		if combo_window <= 0:
@@ -112,6 +117,9 @@ func update_view_ray() -> void:
 	view_ray.force_raycast_update()
 	
 	can_see_player = not view_ray.is_colliding() or view_ray.get_collider() == target_player
+	
+	if can_see_player:
+		last_known_player_position = target_player.global_position
 
 func update_chase_direction() -> void:
 	if not target_player or not is_instance_valid(target_player):
@@ -125,28 +133,23 @@ func update_chase_direction() -> void:
 		chase_direction = 0
 	else:
 		chase_direction = sign(x_difference)
+	
+	last_player_height_diff = target_player.global_position.y - character.global_position.y
 
 func check_attack_range() -> void:
 	if not attack_area or not target_player:
 		return
 	
 	if not attack_area.monitoring:
-		attack_area.monitoring = true
 		return
 	
 	var bodies = attack_area.get_overlapping_bodies()
-	var was_in_range = player_in_attack_range
 	player_in_attack_range = false
 	
 	for body in bodies:
-		if body == target_player or (body.is_in_group("Player")):
+		if body == target_player or body.is_in_group("Player"):
 			player_in_attack_range = true
 			break
-	
-	if player_in_attack_range and not was_in_range and abs(chase_direction) <= 0:
-		movement_direction = sign(target_player.global_position.x - character.global_position.x)
-		if movement_direction != 0:
-			chase_direction = movement_direction
 
 func update_ai_state() -> void:
 	match current_ai_state:
@@ -174,18 +177,11 @@ func update_ai_state() -> void:
 				change_ai_state(AIState.SEARCH)
 			elif not can_see_player:
 				change_ai_state(AIState.WAIT)
-			elif chase_direction == 0 and not player_in_attack_range:
-				var y_diff = abs(character.global_position.y - target_player.global_position.y) if target_player else 0
-				if y_diff > abs(character.character_data.jump_velocity) * 0.8:
-					change_ai_state(AIState.WAIT)
 		
 		AIState.ATTACK:
 			if not player_in_attack_range:
-				if player_in_detection_zone:
-					if can_see_player:
-						change_ai_state(AIState.CHASE)
-					else:
-						change_ai_state(AIState.WAIT)
+				if player_in_detection_zone and can_see_player:
+					change_ai_state(AIState.CHASE)
 				else:
 					change_ai_state(AIState.SEARCH)
 		
@@ -201,10 +197,7 @@ func update_ai_state() -> void:
 			elif can_see_player and abs(chase_direction) > 0:
 				change_ai_state(AIState.CHASE)
 			elif state_timer <= 0:
-				if player_in_detection_zone:
-					change_ai_state(AIState.SEARCH)
-				else:
-					change_ai_state(AIState.PATROL)
+				change_ai_state(AIState.SEARCH)
 
 func change_ai_state(new_state: AIState) -> void:
 	current_ai_state = new_state
@@ -213,23 +206,19 @@ func change_ai_state(new_state: AIState) -> void:
 		AIState.PATROL:
 			start_patrol()
 		AIState.IDLE:
-			var min_time = character.character_data.ai_patrol_state_min_time
-			var max_time = character.character_data.ai_patrol_state_max_time
-			state_timer = randf_range(min_time, max_time)
+			state_timer = randf_range(character.character_data.ai_patrol_state_min_time, character.character_data.ai_patrol_state_max_time)
 		AIState.SEARCH:
-			state_timer = 3.0
+			state_timer = character.character_data.ai_patience_time
 			search_direction = sign(last_known_player_position.x - character.global_position.x)
 			if search_direction == 0:
 				search_direction = movement_direction
 		AIState.WAIT:
-			state_timer = 2.0
+			state_timer = character.character_data.ai_lose_sight_time
 		AIState.ATTACK:
-			attack_cooldown = 0.1
+			attack_cooldown = character.character_data.ai_reaction_time
 
 func start_patrol() -> void:
-	var min_time = character.character_data.ai_patrol_state_min_time
-	var max_time = character.character_data.ai_patrol_state_max_time
-	state_timer = randf_range(min_time, max_time)
+	state_timer = randf_range(character.character_data.ai_patrol_state_min_time, character.character_data.ai_patrol_state_max_time)
 	
 	if randf() < 0.5:
 		movement_direction *= -1
@@ -252,7 +241,7 @@ func generate_input_from_ai_state() -> void:
 		AIState.SEARCH:
 			handle_search_input()
 		AIState.WAIT:
-			input.move_direction.x = 0
+			handle_wait_input()
 
 func handle_patrol_input() -> void:
 	if check_edge_or_wall():
@@ -263,8 +252,12 @@ func handle_patrol_input() -> void:
 
 func handle_chase_input() -> void:
 	if chase_direction != 0:
-		input.move_direction.x = chase_direction
+		input.move_direction.x = chase_direction * character.character_data.ai_chase_speed_multiplier
 		movement_direction = chase_direction
+		
+		if should_dash():
+			input.dash_pressed = true
+			dash_cooldown = character.character_data.ai_dash_cooldown
 		
 		if should_jump():
 			input.jump_pressed = true
@@ -283,22 +276,30 @@ func handle_attack_input() -> void:
 			input.attack_pressed = true
 			attack_cooldown = character.character_data.attack_cooldown
 			combo_count += 1
-			combo_window = 0.8
+			combo_window = character.character_data.ai_combo_window
 			
-			if combo_count > 3:
+			if combo_count > 2:
 				combo_count = 1
-				attack_cooldown = character.character_data.attack_cooldown * 2.0
+				attack_cooldown = character.character_data.attack_cooldown * character.character_data.ai_combo_cooldown_multiplier
 	else:
-		if combo_window > 0 and combo_count < 3 and randf() < 0.6:
+		if combo_window > 0 and combo_count < 2 and randf() < character.character_data.ai_combo_chance:
 			if character.timers_handler.before_attack_timer.is_stopped():
 				input.attack_pressed = true
-				combo_window = 0.8
+				combo_window = character.character_data.ai_combo_window
 
 func handle_search_input() -> void:
 	if check_edge_or_wall():
 		search_direction *= -1
 	
-	input.move_direction.x = search_direction * character.character_data.ai_patrol_speed_multiplier * 1.2
+	input.move_direction.x = search_direction * character.character_data.ai_search_speed_multiplier
+
+func handle_wait_input() -> void:
+	input.move_direction.x = 0
+	
+	if character.character_data.ai_jump_when_player_above and last_player_height_diff < -character.character_data.ai_jump_height_threshold:
+		if jump_cooldown <= 0:
+			input.jump_pressed = true
+			jump_cooldown = character.character_data.ai_jump_cooldown
 
 func should_jump() -> bool:
 	if jump_cooldown > 0 or not character.is_on_floor():
@@ -307,42 +308,63 @@ func should_jump() -> bool:
 	if not target_player:
 		return false
 	
-	var y_difference = character.global_position.y - target_player.global_position.y
+	if character.character_data.ai_jump_when_player_above and last_player_height_diff < -character.character_data.ai_jump_height_threshold:
+		if last_player_height_diff > -character.character_data.ai_jump_height_max:
+			return true
 	
-	if y_difference > 50 and y_difference < abs(character.character_data.jump_velocity) * 0.8:
+	if character.character_data.ai_wall_climb_when_needed:
+		if chase_direction > 0 and character.ray_casts_handler.right_wall_ray.is_colliding():
+			return true
+		elif chase_direction < 0 and character.ray_casts_handler.left_wall_ray.is_colliding():
+			return true
+	
+	if check_edge_ahead() and can_see_player:
 		return true
 	
-	if chase_direction > 0:
-		if character.ray_casts_handler.right_wall_ray.is_colliding():
-			return true
-		if character.ray_casts_handler.ground_check_ray.is_colliding():
-			if not character.ray_casts_handler.ground_check_ray_2.is_colliding():
-				return can_see_player
-	elif chase_direction < 0:
-		if character.ray_casts_handler.left_wall_ray.is_colliding():
-			return true
-		if character.ray_casts_handler.ground_check_ray.is_colliding():
-			if not character.ray_casts_handler.ground_check_ray_3.is_colliding():
-				return can_see_player
+	return false
+
+func should_dash() -> bool:
+	if not character.character_data.ai_can_dash:
+		return false
+	
+	if dash_cooldown > 0:
+		return false
+	
+	if not character.can_dash:
+		return false
+	
+	if not target_player or not can_see_player:
+		return false
+	
+	var distance = abs(target_player.global_position.x - character.global_position.x)
+	
+	if distance > character.character_data.ai_dash_distance_threshold:
+		return true
 	
 	return false
 
 func check_edge_or_wall() -> bool:
+	return check_wall_ahead() or check_edge_ahead()
+
+func check_wall_ahead() -> bool:
+	if not character.ray_casts_handler:
+		return false
+	
+	if movement_direction > 0:
+		return character.ray_casts_handler.right_wall_ray.is_colliding()
+	else:
+		return character.ray_casts_handler.left_wall_ray.is_colliding()
+
+func check_edge_ahead() -> bool:
 	if not character.ray_casts_handler or not character.is_on_floor():
 		return false
 	
 	if movement_direction > 0:
-		if character.ray_casts_handler.right_wall_ray.is_colliding():
-			return true
 		if character.ray_casts_handler.ground_check_ray.is_colliding():
-			if not character.ray_casts_handler.ground_check_ray_2.is_colliding():
-				return true
-	elif movement_direction < 0:
-		if character.ray_casts_handler.left_wall_ray.is_colliding():
-			return true
+			return not character.ray_casts_handler.ground_check_ray_2.is_colliding()
+	else:
 		if character.ray_casts_handler.ground_check_ray.is_colliding():
-			if not character.ray_casts_handler.ground_check_ray_3.is_colliding():
-				return true
+			return not character.ray_casts_handler.ground_check_ray_3.is_colliding()
 	
 	return false
 
@@ -361,7 +383,7 @@ func _on_detection_area_body_exited(body: Node2D) -> void:
 	if body == target_player:
 		player_in_detection_zone = false
 		player_in_attack_range = false
-		emergency_timer = 4.0
+		emergency_timer = character.character_data.ai_lose_sight_time * 2
 
 func _on_attack_area_body_entered(body: Node2D) -> void:
 	if body != character and body.has_method("take_damage"):

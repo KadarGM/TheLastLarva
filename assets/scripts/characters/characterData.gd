@@ -57,6 +57,9 @@ class_name CharacterData
 @export var can_receive_knockback: bool = true
 @export var can_take_damage: bool = true
 @export var can_get_damage: bool = true
+@export var poise: float = 0.0
+@export var stun_on_hit_base: float = 0.3
+@export var stun_on_hit_min: float = 0.1
 
 @export_subgroup("Normal Attack")
 @export var attack_cooldown: float = 0.35
@@ -100,11 +103,22 @@ class_name CharacterData
 @export_group("Knockback Self Reaction")
 @export var self_knockback_multiplier: float = 0.3
 @export var self_knockback_vertical_multiplier: float = 0.5
+@export var self_knockback_down_horizontal: float = 0.5
+@export var self_knockback_down_vertical: float = 2.0
+@export var self_knockback_up_horizontal: float = 0.5
+@export var self_knockback_up_vertical: float = 0.5
+@export var self_knockback_forward_horizontal: float = 1.0
+@export var self_knockback_forward_vertical: float = 0.3
+@export var self_knockback_ground_horizontal: float = 1.0
+@export var self_knockback_ground_vertical: float = 0.3
+@export var self_knockback_hit_multiplier: float = 0.2
+@export var self_knockback_max_force: float = 5000.0
 
 @export_group("Knockback Received (Incoming)")
 @export var incoming_knockback_duration: float = 0.1
 @export var incoming_knockback_friction: float = 30.0
 @export var incoming_damage_knockback_force: float = 300.0
+@export var incoming_knockback_immunity_time: float = 0.2
 
 @export_group("Death Options")
 @export var death_disappear: bool = true
@@ -132,6 +146,10 @@ class_name CharacterData
 @export_subgroup("Wall Movement")
 @export var wall_slide_gravity_multiplier: float = 0.5
 @export var wall_slide_initial_velocity_divisor: float = 1000.0
+@export var wall_slide_max_speed: float = 300.0
+@export var wall_jump_vertical_multiplier: float = 0.7
+@export var wall_jump_away_vertical_multiplier: float = 0.2
+@export var wall_jump_away_force_multiplier: float = 0.8
 
 @export_subgroup("Dash")
 @export var dash_speed: float = 1200.0
@@ -143,22 +161,54 @@ class_name CharacterData
 @export var can_chase: bool = false
 @export var can_patrol: bool = false
 @export var ai_enabled: bool = false
+@export var ai_can_strafe: bool = false
+@export var ai_can_retreat: bool = false
+@export var ai_can_flank: bool = false
+@export var ai_can_dash: bool = false
 
 @export_subgroup("AI Detection")
 @export var ai_detection_range: float = 600.0
 @export var ai_attack_range: float = 50.0
+@export var ai_vision_cone_angle: float = 120.0
+@export var ai_lose_sight_time: float = 2.0
 
 @export_subgroup("AI Combat")
 @export var ai_attack_distance_multiplier: float = 0.7
-@export var ai_soft_collision_strength: float = 100.0
-@export var ai_soft_collision_max_force: float = 50.0
+@export var ai_combo_chance: float = 0.6
+@export var ai_combo_window: float = 0.8
+@export var ai_combo_cooldown_multiplier: float = 2.0
+@export var ai_dodge_chance: float = 0.3
+@export var ai_block_chance: float = 0.2
+@export var ai_reaction_time: float = 0.2
+@export var ai_prediction_update_time: float = 0.1
+@export var ai_predict_player_movement: bool = true
 
-@export_subgroup("AI Behavior")
+@export_subgroup("AI Movement")
 @export var ai_patrol_speed_multiplier: float = 0.5
 @export var ai_chase_speed_multiplier: float = 1.0
+@export var ai_search_speed_multiplier: float = 0.6
+@export var ai_strafe_speed_multiplier: float = 0.7
 @export var ai_flee_health_threshold: float = 0.2
+@export var ai_flee_health_threshold_recovery: float = 0.3
+@export var ai_strafe_chance: float = 0.4
+@export var ai_flank_chance: float = 0.3
+@export var ai_jump_when_player_above: bool = true
+@export var ai_jump_height_threshold: float = 50.0
+@export var ai_jump_height_max: float = 360.0
+@export var ai_wall_climb_when_needed: bool = true
+@export var ai_stuck_detection_distance: float = 5.0
+@export var ai_stuck_detection_time: float = 1.0
+@export var ai_dash_distance_threshold: float = 300.0
+@export var ai_dash_cooldown: float = 2.0
+
+@export_subgroup("AI Decision")
 @export var ai_think_time: float = 0.2
-@export var ai_jump_cooldown: float = 1.5
+@export var ai_reconsider_time: float = 0.5
+@export var ai_patience_time: float = 3.0
+@export var ai_strafe_min_time: float = 0.5
+@export var ai_strafe_max_time: float = 1.5
+@export var ai_retreat_time: float = 2.0
+@export var ai_flank_time: float = 1.5
 
 @export_subgroup("AI Patrol")
 @export var ai_patrol_idle_chance: float = 0.3
@@ -166,6 +216,15 @@ class_name CharacterData
 @export var ai_patrol_state_max_time: float = 4.0
 @export var ai_patrol_distance: float = 200.0
 @export var ai_patrol_auto_generate: bool = true
+
+@export_subgroup("AI Group")
+@export var ai_soft_collision_strength: float = 100.0
+@export var ai_soft_collision_max_force: float = 50.0
+@export var ai_maintain_distance_from_allies: float = 100.0
+
+@export_subgroup("AI Cooldowns")
+@export var ai_jump_cooldown: float = 1.5
+@export var ai_attack_cooldown_override: float = 0.0
 
 @export_group("Body Options")
 @export_subgroup("Body Sprites")

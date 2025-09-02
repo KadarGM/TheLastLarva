@@ -38,9 +38,9 @@ func apply_wall_slide_gravity(delta: float) -> void:
 			character.velocity.y = 0
 			return
 	
-	if input.charge_jump:
+	if input.down or (character.character_data.can_wall_slide and input_direction != 0 and sign(input_direction) == -sign(wall_direction)):
 		character.velocity.y += gravity * delta * character.character_data.wall_slide_gravity_multiplier
-		character.velocity.y = min(character.velocity.y, 300)
+		character.velocity.y = min(character.velocity.y, character.character_data.wall_slide_max_speed)
 		if character.big_jump_charged or character.timers_handler.big_jump_timer.time_left > 0:
 			character.cancel_big_jump_charge()
 	else:
@@ -76,7 +76,7 @@ func process_input() -> void:
 
 func execute_wall_jump() -> void:
 	var wall_direction = get_wall_direction()
-	character.velocity.y = character.character_data.jump_velocity * 0.7
+	character.velocity.y = character.character_data.jump_velocity * character.character_data.wall_jump_vertical_multiplier
 	character.velocity.x = wall_direction * character.character_data.wall_jump_force
 	
 	character.reset_air_time()
@@ -89,8 +89,8 @@ func execute_wall_jump() -> void:
 
 func execute_wall_jump_away() -> void:
 	var wall_direction = get_wall_direction()
-	character.velocity.y = character.character_data.jump_velocity * 0.2
-	character.velocity.x = wall_direction * character.character_data.wall_jump_force * (1.0 + character.character_data.wall_jump_away_multiplier) * 0.8
+	character.velocity.y = character.character_data.jump_velocity * character.character_data.wall_jump_away_vertical_multiplier
+	character.velocity.x = wall_direction * character.character_data.wall_jump_force * (1.0 + character.character_data.wall_jump_away_multiplier) * character.character_data.wall_jump_away_force_multiplier
 	
 	character.reset_air_time()
 	character.jump_count = 1

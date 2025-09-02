@@ -6106,9 +6106,9 @@ size = Vector2(400, 141)
 radius = 65.7999
 height = 180.182
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_mol8u"]
-radius = 165.967
-height = 483.582
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_femtu"]
+radius = 152.091
+height = 314.182
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_elw5e"]
 radius = 80.0
@@ -6753,7 +6753,17 @@ collision_mask = 2
 
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="Handlers/AreasHandler/AttackArea"]
 position = Vector2(-152.033, -85.091)
-shape = SubResource("CapsuleShape2D_mol8u")
+shape = SubResource("CapsuleShape2D_femtu")
+
+[node name="CollisionPolygonUp" type="CollisionShape2D" parent="Handlers/AreasHandler/AttackArea"]
+visible = false
+position = Vector2(-12, -251)
+shape = SubResource("CapsuleShape2D_femtu")
+
+[node name="CollisionPolygonDown" type="CollisionShape2D" parent="Handlers/AreasHandler/AttackArea"]
+visible = false
+position = Vector2(1, 124)
+shape = SubResource("CapsuleShape2D_femtu")
 
 [node name="SoftCollisionArea" type="Area2D" parent="Handlers/AreasHandler"]
 position = Vector2(0, -36.3636)

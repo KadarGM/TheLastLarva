@@ -11,6 +11,8 @@ var dash: bool = false
 var dash_pressed: bool = false
 var charge_jump: bool = false
 var charge_jump_pressed: bool = false
+var down: bool = false
+var down_pressed: bool = false
 
 func reset() -> void:
 	move_direction = Vector2.ZERO
@@ -23,6 +25,8 @@ func reset() -> void:
 	dash_pressed = false
 	charge_jump = false
 	charge_jump_pressed = false
+	down = false
+	down_pressed = false
 
 func clone() -> ControllerInput:
 	var new_input = ControllerInput.new()
@@ -36,4 +40,6 @@ func clone() -> ControllerInput:
 	new_input.dash_pressed = dash_pressed
 	new_input.charge_jump = charge_jump
 	new_input.charge_jump_pressed = charge_jump_pressed
+	new_input.down = down
+	new_input.down_pressed = down_pressed
 	return new_input

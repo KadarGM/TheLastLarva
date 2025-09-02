@@ -40,6 +40,7 @@ var air_time: float = 0.0
 var effective_air_time: float = 0.0
 var knockback_velocity: Vector2 = Vector2.ZERO
 var knockback_timer: float = 0.0
+var knockback_immunity_timer: float = 0.0
 
 var dash_attack_damaged_entities: Array = []
 var death_animation_played: bool = false
@@ -107,6 +108,9 @@ func _physics_process(delta: float) -> void:
 	else:
 		if not current_input:
 			current_input = ControllerInput.new()
+	
+	if knockback_immunity_timer > 0:
+		knockback_immunity_timer -= delta
 	
 	if stats_controller:
 		stats_controller.process_stats(delta)
@@ -215,6 +219,19 @@ func reset_air_time() -> void:
 	air_time = 0
 	effective_air_time = 0
 
+func apply_stun(duration: float) -> void:
+	if is_in_group("dead"):
+		return
+	
+	if state_machine and state_machine.current_state:
+		if state_machine.current_state.name == "DeathState":
+			return
+		
+		if state_machine.current_state.name != "StunnedState":
+			if timers_handler and timers_handler.stun_timer:
+				timers_handler.stun_timer.wait_time = duration
+				state_machine.transition_to("StunnedState")
+
 func apply_knockback(force: Vector2) -> void:
 	if is_in_group("dead"):
 		return
@@ -225,9 +242,13 @@ func apply_knockback(force: Vector2) -> void:
 	if not character_data.can_receive_knockback:
 		return
 	
+	if knockback_immunity_timer > 0:
+		return
+	
 	var weight_multiplier = 100.0 / character_data.weight
 	knockback_velocity = force * weight_multiplier
 	knockback_timer = character_data.incoming_knockback_duration
+	knockback_immunity_timer = character_data.incoming_knockback_immunity_time
 	
 	if state_machine.current_state:
 		var knockback_state = state_machine.states.get("KnockbackState")
