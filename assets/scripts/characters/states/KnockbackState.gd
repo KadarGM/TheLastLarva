@@ -15,14 +15,21 @@ func physics_process(delta: float) -> void:
 		
 		if character.knockback_timer <= 0 or character.knockback_velocity.length() < 10:
 			character.knockback_velocity = Vector2.ZERO
-			if character.was_hit_by_damage and character.is_on_floor() and character.character_data.can_be_stunned:
+			
+			if character.pending_death:
+				character.pending_death = false
+				state_machine.transition_to("DeathState")
+			elif character.was_hit_by_damage and character.is_on_floor() and character.character_data.can_be_stunned:
 				character.was_hit_by_damage = false
 				state_machine.transition_to("StunnedState")
 			else:
 				character.was_hit_by_damage = false
 				state_machine.transition_to("IdleState")
 	else:
-		if character.was_hit_by_damage and character.is_on_floor() and character.character_data.can_be_stunned:
+		if character.pending_death:
+			character.pending_death = false
+			state_machine.transition_to("DeathState")
+		elif character.was_hit_by_damage and character.is_on_floor() and character.character_data.can_be_stunned:
 			character.was_hit_by_damage = false
 			state_machine.transition_to("StunnedState")
 		else:

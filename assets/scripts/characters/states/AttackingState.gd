@@ -83,17 +83,13 @@ func determine_attack_direction() -> void:
 		
 		if input.down or input.move_direction.y > 0:
 			attack_direction.y = 1.0
-			print("[DEBUG] Air Attack Direction: DOWN")
 		elif input.jump or input.move_direction.y < 0:
 			attack_direction.y = -1.0
-			print("[DEBUG] Air Attack Direction: UP")
 		else:
 			attack_direction.y = 0.0
-			print("[DEBUG] Air Attack Direction: FORWARD")
 	else:
 		attack_direction.x = character.get_facing_direction()
 		attack_direction.y = 0.0
-		print("[DEBUG] Ground Attack Direction: FORWARD")
 
 func set_attack_area_collision() -> void:
 	if not character.areas_handler or not character.areas_handler.attack_area:
@@ -114,13 +110,10 @@ func set_attack_area_collision() -> void:
 	if not character.is_on_floor() and attack_direction.y != 0:
 		if attack_direction.y > 0:
 			collision_polygon_down.disabled = false
-			print("[DEBUG] Using DOWN collision polygon")
 		else:
 			collision_polygon_up.disabled = false
-			print("[DEBUG] Using UP collision polygon")
 	else:
 		collision_polygon_2d.disabled = false
-		print("[DEBUG] Using FORWARD collision polygon")
 
 func reset_attack_area_collision() -> void:
 	if not character.areas_handler or not character.areas_handler.attack_area:
@@ -149,23 +142,17 @@ func check_combo_input() -> void:
 			can_combo = true
 
 func apply_damage() -> void:
-	print("[DEBUG] apply_damage called!")
-	
 	if character.damage_applied_this_attack:
-		print("[DEBUG] Damage already applied, skipping")
 		return
 	
 	character.damage_applied_this_attack = true
 	
 	if not character.areas_handler or not character.areas_handler.attack_area:
-		print("[DEBUG] No attack area found!")
 		return
 	
 	var overlapping_bodies = character.areas_handler.attack_area.get_overlapping_bodies()
-	print("[DEBUG] Overlapping bodies count: ", overlapping_bodies.size())
 	
 	if overlapping_bodies.is_empty():
-		print("[DEBUG] No bodies to damage")
 		return
 	
 	var damage = 0
@@ -174,8 +161,6 @@ func apply_damage() -> void:
 			damage = character.character_data.attack_1_dmg
 		2:
 			damage = character.character_data.attack_2_dmg
-	
-	print("[DEBUG] Damage to apply: ", damage)
 	
 	var base_knockback_force = character.character_data.outgoing_knockback_force
 	var hit_count = 0
@@ -195,7 +180,6 @@ func apply_damage() -> void:
 			continue
 		
 		hit_count += 1
-		print("[DEBUG] Hit entity: ", entity.name)
 		
 		entity.take_damage(damage, character.global_position)
 		
@@ -239,18 +223,12 @@ func apply_damage() -> void:
 						-abs(character.character_data.jump_velocity * character.character_data.outgoing_knockback_vertical_multiplier * target_weight_multiplier)
 					)
 				
-				print("[DEBUG] Applying knockback to entity: ", knockback_force)
 				entity.apply_knockback(knockback_force)
 				
 				apply_stun_to_entity(entity)
 	
-	print("[DEBUG] Total hit count: ", hit_count)
-	
 	if hit_count > 0 and character.character_data.can_apply_knockback:
-		print("[DEBUG] Applying self knockback...")
 		apply_self_knockback(hit_count)
-	else:
-		print("[DEBUG] No self knockback - hit_count: ", hit_count, ", can_apply_knockback: ", character.character_data.can_apply_knockback)
 
 func apply_stun_to_entity(entity: Node2D) -> void:
 	if not entity.has_method("character_data") or not entity.character_data:
@@ -270,60 +248,39 @@ func apply_stun_to_entity(entity: Node2D) -> void:
 	entity.apply_stun(stun_duration)
 
 func apply_self_knockback(hit_count: int) -> void:
-	# Základní síla by měla být nezávislá na outgoing_knockback_force
 	var base_horizontal_force = character.character_data.self_knockback_multiplier * 100.0
 	var base_vertical_force = abs(character.character_data.jump_velocity) * character.character_data.self_knockback_vertical_multiplier
 	var self_knockback_force = Vector2.ZERO
 	
-	print("[DEBUG] Base horizontal force: ", base_horizontal_force)
-	print("[DEBUG] Base vertical force: ", base_vertical_force)
-	print("[DEBUG] Attack direction: ", attack_direction)
-	
 	if not character.is_on_floor():
 		if attack_direction.y > 0:
-			# Útok dolů - odkopne nahoru
 			self_knockback_force = Vector2(
 				-attack_direction.x * base_horizontal_force * character.character_data.self_knockback_down_horizontal,
 				-base_vertical_force * character.character_data.self_knockback_down_vertical
 			)
-			print("[DEBUG] Self knockback DOWN attack: ", self_knockback_force)
 		elif attack_direction.y < 0:
-			# Útok nahoru - odkopne dolů
 			self_knockback_force = Vector2(
 				-attack_direction.x * base_horizontal_force * character.character_data.self_knockback_up_horizontal,
 				base_vertical_force * character.character_data.self_knockback_up_vertical
 			)
-			print("[DEBUG] Self knockback UP attack: ", self_knockback_force)
 		else:
-			# Útok dopředu ve vzduchu
 			self_knockback_force = Vector2(
 				-attack_direction.x * base_horizontal_force * character.character_data.self_knockback_forward_horizontal,
 				-base_vertical_force * character.character_data.self_knockback_forward_vertical
 			)
-			print("[DEBUG] Self knockback FORWARD air attack: ", self_knockback_force)
 	else:
-		# Útok na zemi
 		self_knockback_force = Vector2(
 			-attack_direction.x * base_horizontal_force * character.character_data.self_knockback_ground_horizontal,
 			-base_vertical_force * character.character_data.self_knockback_ground_vertical
 		)
-		print("[DEBUG] Self knockback GROUND attack: ", self_knockback_force)
 	
-	# Násobení podle počtu zasažených nepřátel
 	var final_multiplier = 1.0 + (hit_count - 1) * character.character_data.self_knockback_hit_multiplier
 	self_knockback_force *= final_multiplier
 	
-	print("[DEBUG] Final multiplier (hit_count ", hit_count, "): ", final_multiplier)
-	print("[DEBUG] Self knockback before limit: ", self_knockback_force)
-	
-	# Limit maximální síly
 	if self_knockback_force.length() > character.character_data.self_knockback_max_force:
 		self_knockback_force = self_knockback_force.limit_length(character.character_data.self_knockback_max_force)
-		print("[DEBUG] Self knockback limited to max force: ", self_knockback_force)
 	
-	print("[DEBUG] Velocity before knockback: ", character.velocity)
 	character.velocity += self_knockback_force
-	print("[DEBUG] Velocity after knockback: ", character.velocity)
 
 func on_animation_finished() -> void:
 	attack_completed = true
@@ -362,13 +319,15 @@ func handle_animation() -> void:
 				anim_name = "Attack_ground_2"
 				character.set_weapon_visibility("front")
 	else:
-		match character.attack_count:
-			1: 
+		if character.attack_count == 1:
+			if attack_direction.y > 0:
+				anim_name = "Attack_air_1_down"
+			else:
 				anim_name = "Attack_air_1"
-				character.set_weapon_visibility("back")
-			2:  
-				anim_name = "Attack_air_2"
-				character.set_weapon_visibility("front")
+			character.set_weapon_visibility("back")
+		elif character.attack_count == 2:
+			anim_name = "Attack_air_2"
+			character.set_weapon_visibility("front")
 	
 	if character.animation_player.current_animation != anim_name:
 		character.play_animation(anim_name)

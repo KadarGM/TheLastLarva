@@ -59,6 +59,7 @@ var stamina_regen_timer: float = 0.0
 var current_input: ControllerInput = ControllerInput.new()
 
 var was_hit_by_damage: bool = false
+var pending_death: bool = false
 
 func _ready() -> void:
 	if not character_data:
@@ -124,6 +125,8 @@ func _physics_process(delta: float) -> void:
 	apply_soft_collisions()
 	move_and_slide()
 	update_ui()
+	
+	check_pending_death()
 
 func _process(delta: float) -> void:
 	update_stamina_regeneration(delta)
@@ -267,9 +270,38 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 	was_hit_by_damage = true
 	
 	if stats_controller:
+		var _health_before = stats_controller.get_health()
 		stats_controller.take_damage(amount, attacker_position)
+		var health_after = stats_controller.get_health()
+		
+		if health_after <= 0:
+			pending_death = true
+		
+		if health_after > 0 and character_data.can_receive_knockback:
+			var knockback_direction: Vector2
+			if attacker_position != Vector2.ZERO:
+				knockback_direction = (global_position - attacker_position).normalized()
+			else:
+				knockback_direction = Vector2(randf_range(-1, 1), 0).normalized()
+			
+			if knockback_direction.x == 0:
+				knockback_direction.x = randf_range(-0.5, 0.5)
+			
+			var weight_multiplier = 100.0 / character_data.weight
+			var damage_knockback = Vector2(
+				knockback_direction.x * character_data.incoming_damage_knockback_force * weight_multiplier,
+				-abs(character_data.incoming_damage_knockback_force * 0.5 * weight_multiplier)
+			)
+			apply_knockback(damage_knockback)
 	else:
 		print("Warning: No stats_controller on ", name)
+
+func check_pending_death() -> void:
+	if pending_death:
+		var current_state_name = state_machine.get_current_state_name() if state_machine else ""
+		if current_state_name != "KnockbackState" and current_state_name != "StunnedState":
+			pending_death = false
+			state_machine.transition_to("DeathState")
 
 func update_ui() -> void:
 	if stamina_bar:
@@ -557,4 +589,4 @@ func _on_stamina_changed(_new_stamina: float) -> void:
 	pass
 
 func _on_death() -> void:
-	state_machine.transition_to("DeathState")
+	pending_death = true

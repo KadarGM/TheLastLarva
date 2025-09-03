@@ -11,7 +11,11 @@ func physics_process(delta: float) -> void:
 	character.apply_gravity(delta)
 	
 	if character.timers_handler.stun_timer.is_stopped():
-		state_machine.transition_to("IdleState")
+		if character.pending_death:
+			character.pending_death = false
+			state_machine.transition_to("DeathState")
+		else:
+			state_machine.transition_to("IdleState")
 	
 	character.velocity.x = move_toward(character.velocity.x, 0, character.character_data.speed * delta)
 
