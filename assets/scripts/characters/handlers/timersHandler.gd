@@ -13,7 +13,6 @@ class_name TimersHandler
 @export var dash_cooldown_timer: Timer
 @export var dash_attack_cooldown_timer: Timer
 @export var wall_jump_control_timer: Timer
-@export var attack_cooldown_timer: Timer
 @export var damage_timer: Timer
 @export var before_attack_timer: Timer
 @export var invulnerability_timer: Timer
@@ -73,15 +72,9 @@ func setup_timers() -> void:
 		big_jump_cooldown_timer.wait_time = character_manager.character_data.big_jump_cooldown
 		big_jump_cooldown_timer.one_shot = true
 		big_jump_cooldown_timer.timeout.connect(_on_big_jump_cooldown_timer_timeout)
-	
-	if attack_cooldown_timer:
-		attack_cooldown_timer.wait_time = character_manager.character_data.attack_combo_reset_time
-		attack_cooldown_timer.one_shot = true
-		attack_cooldown_timer.timeout.connect(_on_attack_cooldown_timer_timeout)
 
 func _on_hide_weapon_timer_timeout() -> void:
 	character_manager.set_weapon_visibility("hide")
-	character_manager.attack_count = 0
 
 func _on_dash_timer_timeout() -> void:
 	pass
@@ -116,7 +109,3 @@ func _on_before_attack_timer_timeout() -> void:
 
 func _on_big_jump_cooldown_timer_timeout() -> void:
 	character_manager.can_big_jump = true
-
-func _on_attack_cooldown_timer_timeout() -> void:
-	character_manager.attack_count = 0
-	character_manager.set_weapon_visibility("hide")

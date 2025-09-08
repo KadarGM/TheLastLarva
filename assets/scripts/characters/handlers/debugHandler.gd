@@ -137,8 +137,8 @@ func update_ui_debug() -> void:
 	if debug_holder.death_animation_played_text:
 		debug_holder.death_animation_played_text.text = str(character.death_animation_played)
 	
-	if debug_holder.attack_count_text:
-		debug_holder.attack_count_text.text = str(character.attack_count)
+	#if debug_holder.attack_count_text:
+		#debug_holder.attack_count_text.text = str(character.attack_count)
 	
 	if debug_holder.damage_applied_text:
 		debug_holder.damage_applied_text.text = str(character.damage_applied_this_attack)
@@ -242,8 +242,8 @@ func update_ui_debug() -> void:
 		if debug_holder.attack_timer_text:
 			debug_holder.attack_timer_text.text = str("%.2f" % character.timers_handler.before_attack_timer.time_left)
 		
-		if debug_holder.attack_cd_text:
-			debug_holder.attack_cd_text.text = str("%.2f" % character.timers_handler.attack_cooldown_timer.time_left)
+		#if debug_holder.attack_cd_text:
+			#debug_holder.attack_cd_text.text = str("%.2f" % character.timers_handler.attack_cooldown_timer.time_left)
 		
 		if debug_holder.stun_timer_text:
 			debug_holder.stun_timer_text.text = str("%.2f" % character.timers_handler.stun_timer.time_left)

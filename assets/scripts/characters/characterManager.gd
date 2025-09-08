@@ -22,7 +22,6 @@ var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
 var dash_count: int = 0
 var jump_count: int = 0
-var attack_count: int = 0
 var has_double_jump: bool = false
 var has_triple_jump: bool = false
 var can_wall_jump: bool = false
@@ -46,7 +45,6 @@ var dash_attack_damaged_entities: Array = []
 var death_animation_played: bool = false
 var previous_state: String = ""
 
-var count_of_attack: int = 0
 var velocity_before_attack: float = 0.0
 var pending_knockback_force: Vector2 = Vector2.ZERO
 var damage_applied_this_attack: bool = false
@@ -363,11 +361,6 @@ func set_weapon_visibility(mode: String) -> void:
 			sword_b.visible = false
 			sword_body_2.visible = true
 			sword_body.visible = true
-		"front":
-			sword_f.visible = true
-			sword_b.visible = false
-			sword_body_2.visible = true
-			sword_body.visible = false
 		"back":
 			sword_f.visible = false
 			sword_b.visible = true
@@ -414,96 +407,8 @@ func execute_big_jump(direction: Vector2) -> void:
 	if big_jump_state:
 		big_jump_state.set_direction(direction)
 
-func execute_damage_to_entities() -> void:
-	if not character_data.can_take_damage:
-		return
-	
-	if not areas_handler or not areas_handler.attack_area:
-		return
-	
-	var overlapping_bodies = areas_handler.attack_area.get_overlapping_bodies()
-	if overlapping_bodies.is_empty():
-		return
-	
-	var damage = 0
-	match attack_count:
-		1:
-			damage = character_data.attack_1_dmg
-		2:
-			damage = character_data.attack_2_dmg
-		3:
-			damage = character_data.attack_3_dmg
-	
-	var base_knockback_force = character_data.outgoing_knockback_force
-	if attack_count == 3:
-		base_knockback_force *= character_data.outgoing_knockback_multiplier_combo3
-	
-	var attack_dir = get_attack_direction()
-	var hit_count = 0
-	
-	for entity in overlapping_bodies:
-		if entity == self:
-			continue
-		
-		if entity.is_in_group("dead"):
-			continue
-		
-		hit_count += 1
-		
-		if entity.has_method("take_damage"):
-			entity.take_damage(damage)
-		
-		if character_data.can_apply_knockback:
-			var target_weight_multiplier = 1.0
-			if entity.has_method("character_data") and entity.character_data:
-				if entity.character_data.has("weight"):
-					target_weight_multiplier = 100.0 / entity.character_data.weight
-			
-			var knockback_force = Vector2(
-				attack_dir * base_knockback_force * character_data.outgoing_knockback_horizontal_multiplier * target_weight_multiplier,
-				-abs(character_data.jump_velocity * character_data.outgoing_knockback_vertical_multiplier * target_weight_multiplier)
-			)
-			
-			if entity.has_method("apply_knockback"):
-				entity.apply_knockback(knockback_force)
-	
-	if hit_count > 0:
-		var reaction_force = Vector2(
-			-attack_dir * base_knockback_force * character_data.self_knockback_multiplier,
-			-abs(character_data.jump_velocity * character_data.self_knockback_vertical_multiplier)
-		)
-		pending_knockback_force = reaction_force
-
 func on_wall_jump() -> void:
 	can_wall_jump = true
-
-func update_attack_animations() -> void:
-	var anim_name = ""
-	if is_on_floor():
-		match attack_count:
-			1: 
-				anim_name = "Attack_ground_1"
-				set_weapon_visibility("back")
-			2:  
-				anim_name = "Attack_ground_2"
-				set_weapon_visibility("front")
-			3:  
-				anim_name = "Attack_ground_3"
-				set_weapon_visibility("both")
-	else:
-		match attack_count:
-			1: 
-				anim_name = "Attack_air_1"
-				set_weapon_visibility("back")
-			2:  
-				anim_name = "Attack_air_2"
-				set_weapon_visibility("front")
-			3:  
-				anim_name = "Attack_air_3"
-				set_weapon_visibility("both")
-	
-	if animation_player.current_animation != anim_name:
-		play_animation(anim_name)
 
 func perform_attack() -> void:
 	if not character_data.can_attack:

@@ -3,8 +3,8 @@ class_name AttackingState
 
 var attack_completed: bool = false
 var animation_started: bool = false
-var can_combo: bool = false
 var attack_direction: Vector2 = Vector2.ZERO
+var pogo_attack: bool = false
 
 func enter() -> void:
 	if not character.character_data.can_attack:
@@ -26,13 +26,9 @@ func enter() -> void:
 	character.stamina_current -= character.character_data.attack_stamina_cost
 	character.stamina_regen_timer = character.character_data.stamina_regen_delay
 	
-	character.attack_count += 1
-	if character.attack_count > 2:
-		character.attack_count = 1
-	
 	attack_completed = false
 	animation_started = false
-	can_combo = false
+	pogo_attack = false
 	character.damage_applied_this_attack = false
 	character.velocity_before_attack = character.velocity.x
 	
@@ -40,12 +36,8 @@ func enter() -> void:
 	set_attack_area_collision()
 	
 	character.timers_handler.hide_weapon_timer.stop()
-	character.timers_handler.attack_cooldown_timer.stop()
-	character.timers_handler.attack_cooldown_timer.start()
-	
 	character.timers_handler.before_attack_timer.wait_time = character.character_data.attack_cooldown
 	character.timers_handler.before_attack_timer.start()
-	
 	character.timers_handler.damage_timer.wait_time = character.character_data.damage_delay
 	character.timers_handler.damage_timer.start()
 	
@@ -54,10 +46,8 @@ func enter() -> void:
 
 func exit() -> void:
 	character.timers_handler.hide_weapon_timer.start()
-	if character.attack_count >= 2:
-		character.attack_count = 0
-	
 	reset_attack_area_collision()
+	pogo_attack = false
 
 func physics_process(delta: float) -> void:
 	if not character.is_on_floor():
@@ -67,9 +57,7 @@ func physics_process(delta: float) -> void:
 		if not character.damage_applied_this_attack:
 			character.velocity.x = 0
 	
-	check_combo_input()
-	
-	if attack_completed and not can_combo:
+	if attack_completed:
 		transition_to_next_state()
 
 func determine_attack_direction() -> void:
@@ -83,13 +71,17 @@ func determine_attack_direction() -> void:
 		
 		if input.down or input.move_direction.y > 0:
 			attack_direction.y = 1.0
+			pogo_attack = true
 		elif input.jump or input.move_direction.y < 0:
 			attack_direction.y = -1.0
+			pogo_attack = false
 		else:
 			attack_direction.y = 0.0
+			pogo_attack = false
 	else:
 		attack_direction.x = character.get_facing_direction()
 		attack_direction.y = 0.0
+		pogo_attack = false
 
 func set_attack_area_collision() -> void:
 	if not character.areas_handler or not character.areas_handler.attack_area:
@@ -131,16 +123,6 @@ func reset_attack_area_collision() -> void:
 	if collision_polygon_down:
 		collision_polygon_down.disabled = true
 
-func check_combo_input() -> void:
-	if attack_completed:
-		return
-	
-	var input = character.get_controller_input()
-	
-	if input.attack_pressed and character.timers_handler.before_attack_timer.is_stopped():
-		if character.attack_count < 2:
-			can_combo = true
-
 func apply_damage() -> void:
 	if character.damage_applied_this_attack:
 		return
@@ -155,13 +137,7 @@ func apply_damage() -> void:
 	if overlapping_bodies.is_empty():
 		return
 	
-	var damage = 0
-	match character.attack_count:
-		1:
-			damage = character.character_data.attack_1_dmg
-		2:
-			damage = character.character_data.attack_2_dmg
-	
+	var damage = character.character_data.attack_1_dmg
 	var base_knockback_force = character.character_data.outgoing_knockback_force
 	var hit_count = 0
 	
@@ -248,45 +224,48 @@ func apply_stun_to_entity(entity: Node2D) -> void:
 	entity.apply_stun(stun_duration)
 
 func apply_self_knockback(hit_count: int) -> void:
-	var base_horizontal_force = character.character_data.self_knockback_multiplier * 100.0
-	var base_vertical_force = abs(character.character_data.jump_velocity) * character.character_data.self_knockback_vertical_multiplier
 	var self_knockback_force = Vector2.ZERO
 	
-	if not character.is_on_floor():
-		if attack_direction.y > 0:
-			self_knockback_force = Vector2(
-				-attack_direction.x * base_horizontal_force * character.character_data.self_knockback_down_horizontal,
-				-base_vertical_force * character.character_data.self_knockback_down_vertical
-			)
-		elif attack_direction.y < 0:
-			self_knockback_force = Vector2(
-				-attack_direction.x * base_horizontal_force * character.character_data.self_knockback_up_horizontal,
-				base_vertical_force * character.character_data.self_knockback_up_vertical
-			)
+	if pogo_attack and not character.is_on_floor():
+		var pogo_force = abs(character.character_data.jump_velocity) * character.character_data.self_knockback_down_vertical
+		self_knockback_force = Vector2(0, -pogo_force)
+		
+		character.velocity.y = -pogo_force
+		character.reset_air_time()
+		
+		if character.has_double_jump == false and character.jump_count >= 1:
+			character.has_double_jump = true
+	else:
+		var base_horizontal_force = character.character_data.self_knockback_multiplier * 100.0
+		var base_vertical_force = abs(character.character_data.jump_velocity) * character.character_data.self_knockback_vertical_multiplier
+		
+		if not character.is_on_floor():
+			if attack_direction.y < 0:
+				self_knockback_force = Vector2(
+					-attack_direction.x * base_horizontal_force * character.character_data.self_knockback_up_horizontal,
+					base_vertical_force * character.character_data.self_knockback_up_vertical
+				)
+			else:
+				self_knockback_force = Vector2(
+					-attack_direction.x * base_horizontal_force * character.character_data.self_knockback_forward_horizontal,
+					-base_vertical_force * character.character_data.self_knockback_forward_vertical
+				)
 		else:
 			self_knockback_force = Vector2(
-				-attack_direction.x * base_horizontal_force * character.character_data.self_knockback_forward_horizontal,
-				-base_vertical_force * character.character_data.self_knockback_forward_vertical
+				-attack_direction.x * base_horizontal_force * character.character_data.self_knockback_ground_horizontal,
+				-base_vertical_force * character.character_data.self_knockback_ground_vertical
 			)
-	else:
-		self_knockback_force = Vector2(
-			-attack_direction.x * base_horizontal_force * character.character_data.self_knockback_ground_horizontal,
-			-base_vertical_force * character.character_data.self_knockback_ground_vertical
-		)
-	
-	var final_multiplier = 1.0 + (hit_count - 1) * character.character_data.self_knockback_hit_multiplier
-	self_knockback_force *= final_multiplier
-	
-	if self_knockback_force.length() > character.character_data.self_knockback_max_force:
-		self_knockback_force = self_knockback_force.limit_length(character.character_data.self_knockback_max_force)
-	
-	character.velocity += self_knockback_force
+		
+		var final_multiplier = 1.0 + (hit_count - 1) * character.character_data.self_knockback_hit_multiplier
+		self_knockback_force *= final_multiplier
+		
+		if self_knockback_force.length() > character.character_data.self_knockback_max_force:
+			self_knockback_force = self_knockback_force.limit_length(character.character_data.self_knockback_max_force)
+		
+		character.velocity += self_knockback_force
 
 func on_animation_finished() -> void:
 	attack_completed = true
-	
-	if can_combo:
-		state_machine.transition_to("AttackingState")
 
 func transition_to_next_state() -> void:
 	if character.is_on_floor():
@@ -311,23 +290,16 @@ func handle_animation() -> void:
 	
 	var anim_name = ""
 	if character.is_on_floor():
-		match character.attack_count:
-			1: 
-				anim_name = "Attack_ground_1"
-				character.set_weapon_visibility("back")
-			2:  
-				anim_name = "Attack_ground_2"
-				character.set_weapon_visibility("front")
+		anim_name = "Attack_ground_1"
+		character.set_weapon_visibility("back")
 	else:
-		if character.attack_count == 1:
-			if attack_direction.y > 0:
-				anim_name = "Attack_air_1_down"
-			else:
-				anim_name = "Attack_air_1"
-			character.set_weapon_visibility("back")
-		elif character.attack_count == 2:
-			anim_name = "Attack_air_2"
-			character.set_weapon_visibility("front")
+		if attack_direction.y > 0:
+			anim_name = "Attack_air_down"
+		elif attack_direction.y < 0:
+			anim_name = "Attack_air_up"
+		else:
+			anim_name = "Attack_air"
+		character.set_weapon_visibility("back")
 	
 	if character.animation_player.current_animation != anim_name:
 		character.play_animation(anim_name)
