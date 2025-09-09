@@ -6,6 +6,7 @@ var previous_attack_state: bool = false
 var previous_dash_state: bool = false
 var previous_charge_jump_state: bool = false
 var previous_down_state: bool = false
+var previous_parry_state: bool = false
 
 func update_input() -> void:
 	input.move_direction.x = Input.get_axis("A_left", "D_right")
@@ -41,3 +42,8 @@ func update_input() -> void:
 	input.down = current_down
 	input.down_pressed = current_down and not previous_down_state
 	previous_down_state = current_down
+	
+	var current_parry = Input.is_action_pressed("K_interact")
+	input.parry = current_parry
+	input.parry_pressed = current_parry and not previous_parry_state
+	previous_parry_state = current_parry

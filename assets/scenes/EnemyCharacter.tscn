@@ -1,9 +1,11 @@
-[gd_scene load_steps=71 format=3 uid="uid://byy3bijj0fxou"]
+[gd_scene load_steps=76 format=3 uid="uid://byy3bijj0fxou"]
 
 [ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://assets/scripts/characters/characterManager.gd" id="1_vmfkx"]
 [ext_resource type="Resource" uid="uid://d125kkggxi83n" path="res://assets/resources/Player.tres" id="2_femtu"]
 [ext_resource type="Resource" uid="uid://cxlupfbjhfrqm" path="res://assets/resources/Enemy.tres" id="2_ypeyy"]
+[ext_resource type="Animation" uid="uid://7fhcxbbb0g2f" path="res://Block_air.res" id="3_u0pul"]
 [ext_resource type="Script" uid="uid://blvqjroan8kap" path="res://assets/scripts/characters/controllers/bodyController.gd" id="3_ypeyy"]
+[ext_resource type="Animation" uid="uid://le1j8cg1hj44" path="res://Block_ground.res" id="4_n50ws"]
 [ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://assets/graphics/player/torso.svg" id="4_ohghg"]
 [ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://assets/graphics/player/sword.svg" id="5_kchr6"]
 [ext_resource type="Texture2D" uid="uid://bmae8nmkwyayq" path="res://assets/graphics/player/leg.svg" id="6_u0pul"]
@@ -37,6 +39,8 @@
 [ext_resource type="Script" uid="uid://c1u6gs01pwy5i" path="res://assets/scripts/characters/states/WallJumpingState.gd" id="34_lloyc"]
 [ext_resource type="Script" uid="uid://c3bnwicgn7l8p" path="res://assets/scripts/characters/states/WallSlidingState.gd" id="35_5fabh"]
 [ext_resource type="Script" uid="uid://bnfvml6hmbsm1" path="res://assets/scripts/characters/controllers/PlayerController.gd" id="36_6eenj"]
+[ext_resource type="Script" uid="uid://xbv2bknnrshu" path="res://assets/scripts/characters/states/ParryState.gd" id="36_ypeyy"]
+[ext_resource type="Script" uid="uid://y044dhvsccrc" path="res://assets/scripts/characters/states/BlockState.gd" id="37_ohghg"]
 [ext_resource type="Script" uid="uid://cnnuxdvjhvw2j" path="res://assets/scripts/characters/controllers/statsController.gd" id="37_onysn"]
 [ext_resource type="Script" uid="uid://b80qm07nxxcap" path="res://assets/scripts/characters/controllers/AiController.gd" id="38_e7fyo"]
 [ext_resource type="Script" uid="uid://ciuxhepgisrjw" path="res://assets/scripts/characters/handlers/rayCastsHandler.gd" id="39_8byg5"]
@@ -4688,6 +4692,18 @@ tracks/22/keys = {
 "update": 0,
 "values": [-3.73732]
 }
+tracks/23/type = "value"
+tracks/23/imported = false
+tracks/23/enabled = true
+tracks/23/path = NodePath("Body/body/swordBody:position")
+tracks/23/interp = 1
+tracks/23/loop_wrap = true
+tracks/23/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(84.6987, -111.074)]
+}
 
 [sub_resource type="Animation" id="Animation_v6f70"]
 resource_name = "Sliding_wall"
@@ -4944,6 +4960,263 @@ tracks/20/keys = {
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
 "values": [0.0106534, -0.0731056, 0.0106534]
+}
+
+[sub_resource type="Animation" id="Animation_femtu"]
+resource_name = "Stun"
+length = 1.2667
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Body/body/head/fellerB_1:rotation")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [-0.398568, -0.564185, -0.398568]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Body/body/head/fellerB_1/fellerB_2:rotation")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.280399, -0.0694776, 0.280399]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Body/body/head/fellerF_1:rotation")
+tracks/2/interp = 2
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.241316, 0.430593, 0.241316]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Body/body/head/fellerF_1/fellerF_2:rotation")
+tracks/3/interp = 2
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.12743, -0.152341, 0.12743]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Body/body/head/mandibleB:rotation")
+tracks/4/interp = 2
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.0681785, 0.21293, 0.0681785]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Body/body/head/mandibleF:rotation")
+tracks/5/interp = 2
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [-0.0877776, -0.192843, -0.0877776]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Body/body:rotation")
+tracks/6/interp = 2
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.168, 0.232341, 0.168]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Body/body:position")
+tracks/7/interp = 2
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(14, -12), Vector2(19, -7), Vector2(14, -12)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Body/body/legF:rotation")
+tracks/8/interp = 2
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.37314, 0.482373, 0.37314]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Body/body/legF/feetF:rotation")
+tracks/9/interp = 2
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [-1.36018, -1.62088, -1.36018]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("Body/body/legB:rotation")
+tracks/10/interp = 2
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0, 1.26667),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.643557, 0.643557]
+}
+tracks/11/type = "value"
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/path = NodePath("Body/body/legB/feetB:rotation")
+tracks/11/interp = 2
+tracks/11/loop_wrap = true
+tracks/11/keys = {
+"times": PackedFloat32Array(0, 1.26667),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [-0.252329, -0.252329]
+}
+tracks/12/type = "value"
+tracks/12/imported = false
+tracks/12/enabled = true
+tracks/12/path = NodePath("Body/body/armF_1:rotation")
+tracks/12/interp = 2
+tracks/12/loop_wrap = true
+tracks/12/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [-0.855937, -1.01735, -0.855937]
+}
+tracks/13/type = "value"
+tracks/13/imported = false
+tracks/13/enabled = true
+tracks/13/path = NodePath("Body/body/armF_1/handF_1:rotation")
+tracks/13/interp = 2
+tracks/13/loop_wrap = true
+tracks/13/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.214482, 0.355822, 0.214482]
+}
+tracks/14/type = "value"
+tracks/14/imported = false
+tracks/14/enabled = true
+tracks/14/path = NodePath("Body/body/armB_1:rotation")
+tracks/14/interp = 2
+tracks/14/loop_wrap = true
+tracks/14/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [-2.10166, -1.79, -2.10166]
+}
+tracks/15/type = "value"
+tracks/15/imported = false
+tracks/15/enabled = true
+tracks/15/path = NodePath("Body/body/armB_1/handB_1:rotation")
+tracks/15/interp = 2
+tracks/15/loop_wrap = true
+tracks/15/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.504282, 0.639431, 0.504282]
+}
+tracks/16/type = "value"
+tracks/16/imported = false
+tracks/16/enabled = true
+tracks/16/path = NodePath("Body/body/armF_2:rotation")
+tracks/16/interp = 2
+tracks/16/loop_wrap = true
+tracks/16/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [-0.7086, -0.936271, -0.7086]
+}
+tracks/17/type = "value"
+tracks/17/imported = false
+tracks/17/enabled = true
+tracks/17/path = NodePath("Body/body/armF_2/handF_2:rotation")
+tracks/17/interp = 2
+tracks/17/loop_wrap = true
+tracks/17/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.441915, 0.525292, 0.441915]
+}
+tracks/18/type = "value"
+tracks/18/imported = false
+tracks/18/enabled = true
+tracks/18/path = NodePath("Body/body/armB_2:rotation")
+tracks/18/interp = 2
+tracks/18/loop_wrap = true
+tracks/18/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [3.6787, 3.88795, 3.6787]
+}
+tracks/19/type = "value"
+tracks/19/imported = false
+tracks/19/enabled = true
+tracks/19/path = NodePath("Body/body/armB_2/handB_2:rotation")
+tracks/19/interp = 2
+tracks/19/loop_wrap = true
+tracks/19/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.460713, 0.548764, 0.460713]
+}
+tracks/20/type = "value"
+tracks/20/imported = false
+tracks/20/enabled = true
+tracks/20/path = NodePath("Body/body/head:rotation")
+tracks/20/interp = 2
+tracks/20/loop_wrap = true
+tracks/20/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.26667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.304514, 0.356946, 0.304514]
 }
 
 [sub_resource type="Animation" id="Animation_mhwdb"]
@@ -5470,6 +5743,8 @@ _data = {
 &"Big_attack_prepare": SubResource("Animation_1kbfi"),
 &"Big_jump_charge": SubResource("Animation_tylr5"),
 &"Big_jump_wall_charge": SubResource("Animation_g1xog"),
+&"Block_air": ExtResource("3_u0pul"),
+&"Block_ground": ExtResource("4_n50ws"),
 &"Dash": SubResource("Animation_sa4r2"),
 &"Dash_attack": SubResource("Animation_imakk"),
 &"Death": SubResource("Animation_mol8u"),
@@ -5479,6 +5754,7 @@ _data = {
 &"Landing": SubResource("Animation_6q2qj"),
 &"RESET": SubResource("Animation_o7glw"),
 &"Sliding_wall": SubResource("Animation_v6f70"),
+&"Stun": SubResource("Animation_femtu"),
 &"Triple_jump": SubResource("Animation_mhwdb"),
 &"Walk": SubResource("Animation_naawg")
 }
@@ -5524,6 +5800,14 @@ health_bar = NodePath("GameUI/MarginContainer/StatsHBox/VBoxContainer/HealthBar"
 metadata/_custom_type_script = "uid://7a8h46pofh27"
 metadata/_edit_horizontal_guides_ = [69.6705]
 metadata/_edit_vertical_guides_ = [60.5697, -62.2498]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_aeyl4")
+}
+autoplay = "Idle"
+playback_auto_capture = false
+playback_default_blend_time = 0.07
 
 [node name="Body" type="Node2D" parent="." node_paths=PackedStringArray("character")]
 script = ExtResource("3_ypeyy")
@@ -5626,7 +5910,7 @@ offset = Vector2(2.73983, 22.1135)
 
 [node name="swordB" type="Sprite2D" parent="Body/body/armB_1/handB_1"]
 self_modulate = Color(0.74327, 0.87, 0.4698, 1)
-z_index = 1
+z_index = 100
 position = Vector2(9.43439, 36.1257)
 rotation = -1.76371
 scale = Vector2(1, -1)
@@ -5729,14 +6013,6 @@ scale = Vector2(0.999815, 0.999815)
 texture = ExtResource("16_4ttff")
 offset = Vector2(-3.25712, 15.8394)
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-&"": SubResource("AnimationLibrary_aeyl4")
-}
-autoplay = "Idle"
-playback_auto_capture = false
-playback_default_blend_time = 0.07
-
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
 position = Vector2(-2.28129, -39.7756)
@@ -5744,6 +6020,7 @@ rotation = 0.00136239
 shape = SubResource("RectangleShape2D_elw5e")
 
 [node name="Camera2D" type="Camera2D" parent="."]
+visible = false
 scale = Vector2(3.33333, 3.33333)
 
 [node name="DebugHelper" parent="." node_paths=PackedStringArray("character", "state_machine") instance=ExtResource("17_e4346")]
@@ -5951,6 +6228,24 @@ script = ExtResource("35_5fabh")
 character = NodePath("../..")
 metadata/_custom_type_script = "uid://c3bnwicgn7l8p"
 
+[node name="ParryState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("36_ypeyy")
+character = NodePath("../..")
+metadata/_custom_type_script = "uid://xbv2bknnrshu"
+
+[node name="BlockState" type="Control" parent="StateMachine" node_paths=PackedStringArray("character")]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("37_ohghg")
+character = NodePath("../..")
+metadata/_custom_type_script = "uid://y044dhvsccrc"
+
 [node name="Controllers" type="Control" parent="."]
 visible = false
 layout_mode = 3
@@ -6063,7 +6358,7 @@ self_modulate = Color(1, 0, 0.380392, 1)
 position = Vector2(-75.8828, -135.988)
 target_position = Vector2(-1274.23, -29.1481)
 
-[node name="TimersHandler" type="Control" parent="Handlers" node_paths=PackedStringArray("character_manager", "between_states_timer", "emergency_timer", "big_jump_timer", "big_jump_cooldown_timer", "hide_weapon_timer", "dash_timer", "stun_timer", "dash_cooldown_timer", "dash_attack_cooldown_timer", "wall_jump_control_timer", "damage_timer", "before_attack_timer", "invulnerability_timer")]
+[node name="TimersHandler" type="Control" parent="Handlers" node_paths=PackedStringArray("character_manager", "between_states_timer", "emergency_timer", "big_jump_timer", "big_jump_cooldown_timer", "hide_weapon_timer", "dash_timer", "stun_timer", "dash_cooldown_timer", "dash_attack_cooldown_timer", "wall_jump_control_timer", "damage_timer", "before_attack_timer", "invulnerability_timer", "parry_cooldown_timer", "parry_invulnerability_timer")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -6083,6 +6378,8 @@ wall_jump_control_timer = NodePath("WallJumpControlTimer")
 damage_timer = NodePath("DamageTimer")
 before_attack_timer = NodePath("BeforeAttackTimer")
 invulnerability_timer = NodePath("InvulnerabilityTimer")
+parry_cooldown_timer = NodePath("ParryCooldownTimer")
+parry_invulnerability_timer = NodePath("ParryInvulnerabilityTimer")
 metadata/_custom_type_script = "uid://du76mpiul5ejs"
 
 [node name="BetweenStatesTimer" type="Timer" parent="Handlers/TimersHandler"]
@@ -6112,6 +6409,10 @@ metadata/_custom_type_script = "uid://du76mpiul5ejs"
 [node name="InvulnerabilityTimer" type="Timer" parent="Handlers/TimersHandler"]
 
 [node name="DashAttackCooldownTimer" type="Timer" parent="Handlers/TimersHandler"]
+
+[node name="ParryCooldownTimer" type="Timer" parent="Handlers/TimersHandler"]
+
+[node name="ParryInvulnerabilityTimer" type="Timer" parent="Handlers/TimersHandler"]
 
 [node name="AreasHandler" type="Control" parent="Handlers" node_paths=PackedStringArray("character_manager", "big_attack_area", "big_attack_area_2", "damage_area", "detection_area", "attack_area")]
 layout_mode = 3
@@ -6173,7 +6474,6 @@ position = Vector2(1, 124)
 shape = SubResource("CapsuleShape2D_mol8u")
 
 [node name="SoftCollisionArea" type="Area2D" parent="Handlers/AreasHandler"]
-visible = false
 position = Vector2(0, -36.3636)
 collision_layer = 4
 collision_mask = 4

@@ -13,6 +13,8 @@ var charge_jump: bool = false
 var charge_jump_pressed: bool = false
 var down: bool = false
 var down_pressed: bool = false
+var parry: bool = false
+var parry_pressed: bool = false
 
 func reset() -> void:
 	move_direction = Vector2.ZERO
@@ -27,6 +29,8 @@ func reset() -> void:
 	charge_jump_pressed = false
 	down = false
 	down_pressed = false
+	parry = false
+	parry_pressed = false
 
 func clone() -> ControllerInput:
 	var new_input = ControllerInput.new()
@@ -42,4 +46,6 @@ func clone() -> ControllerInput:
 	new_input.charge_jump_pressed = charge_jump_pressed
 	new_input.down = down
 	new_input.down_pressed = down_pressed
+	new_input.parry = parry
+	new_input.parry_pressed = parry_pressed
 	return new_input

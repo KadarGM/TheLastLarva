@@ -264,6 +264,13 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 	if state_machine and state_machine.current_state:
 		if state_machine.current_state.name == "DeathState":
 			return
+		
+		if state_machine.current_state.name == "BlockState":
+			var block_state = state_machine.current_state as BlockState
+			if block_state and block_state.has_method("handle_incoming_damage"):
+				amount = block_state.handle_incoming_damage(amount, attacker_position)
+				if amount <= 0:
+					return
 	
 	was_hit_by_damage = true
 	
@@ -276,23 +283,35 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 			pending_death = true
 		
 		if health_after > 0 and character_data.can_receive_knockback:
-			var knockback_direction: Vector2
-			if attacker_position != Vector2.ZERO:
-				knockback_direction = (global_position - attacker_position).normalized()
-			else:
-				knockback_direction = Vector2(randf_range(-1, 1), 0).normalized()
-			
-			if knockback_direction.x == 0:
-				knockback_direction.x = randf_range(-0.5, 0.5)
-			
-			var weight_multiplier = 100.0 / character_data.weight
-			var damage_knockback = Vector2(
-				knockback_direction.x * character_data.incoming_damage_knockback_force * weight_multiplier,
-				-abs(character_data.incoming_damage_knockback_force * 0.5 * weight_multiplier)
-			)
-			apply_knockback(damage_knockback)
+			if state_machine.current_state.name != "BlockState":
+				var knockback_direction: Vector2
+				if attacker_position != Vector2.ZERO:
+					knockback_direction = (global_position - attacker_position).normalized()
+				else:
+					knockback_direction = Vector2(randf_range(-1, 1), 0).normalized()
+				
+				if knockback_direction.x == 0:
+					knockback_direction.x = randf_range(-0.5, 0.5)
+				
+				var weight_multiplier = 100.0 / character_data.weight
+				var damage_knockback = Vector2(
+					knockback_direction.x * character_data.incoming_damage_knockback_force * weight_multiplier,
+					-abs(character_data.incoming_damage_knockback_force * 0.5 * weight_multiplier)
+				)
+				apply_knockback(damage_knockback)
 	else:
 		print("Warning: No stats_controller on ", name)
+
+func cancel_attack() -> void:
+	if state_machine and state_machine.current_state:
+		var current_state_name = state_machine.get_current_state_name()
+		if current_state_name == "AttackingState" or current_state_name == "DashAttackState" or current_state_name == "BigAttackState":
+			damage_applied_this_attack = true
+			
+			if timers_handler.damage_timer:
+				timers_handler.damage_timer.stop()
+			
+			state_machine.transition_to("StunnedState")
 
 func check_pending_death() -> void:
 	if pending_death:

@@ -16,6 +16,8 @@ class_name TimersHandler
 @export var damage_timer: Timer
 @export var before_attack_timer: Timer
 @export var invulnerability_timer: Timer
+@export var parry_cooldown_timer: Timer
+@export var parry_invulnerability_timer: Timer
 
 func setup_timers() -> void:
 	if hide_weapon_timer:
@@ -72,6 +74,16 @@ func setup_timers() -> void:
 		big_jump_cooldown_timer.wait_time = character_manager.character_data.big_jump_cooldown
 		big_jump_cooldown_timer.one_shot = true
 		big_jump_cooldown_timer.timeout.connect(_on_big_jump_cooldown_timer_timeout)
+	
+	if parry_cooldown_timer:
+		parry_cooldown_timer.wait_time = character_manager.character_data.parry_fail_cooldown
+		parry_cooldown_timer.one_shot = true
+		parry_cooldown_timer.timeout.connect(_on_parry_cooldown_timer_timeout)
+	
+	if parry_invulnerability_timer:
+		parry_invulnerability_timer.wait_time = character_manager.character_data.parry_invulnerability_duration
+		parry_invulnerability_timer.one_shot = true
+		parry_invulnerability_timer.timeout.connect(_on_parry_invulnerability_timer_timeout)
 
 func _on_hide_weapon_timer_timeout() -> void:
 	character_manager.set_weapon_visibility("hide")
@@ -109,3 +121,9 @@ func _on_before_attack_timer_timeout() -> void:
 
 func _on_big_jump_cooldown_timer_timeout() -> void:
 	character_manager.can_big_jump = true
+
+func _on_parry_cooldown_timer_timeout() -> void:
+	pass
+
+func _on_parry_invulnerability_timer_timeout() -> void:
+	character_manager.invulnerability_temp = false

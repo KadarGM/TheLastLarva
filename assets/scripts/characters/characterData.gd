@@ -47,6 +47,28 @@ class_name CharacterData
 @export var big_jump_stamina_cost: float = 200.0
 @export var big_jump_cooldown_after_use: float = 1.0
 
+@export_group("Parry & Block Options")
+@export var can_parry: bool = true
+@export var can_block: bool = true
+
+@export_subgroup("Parry Settings")
+@export var parry_window_duration: float = 0.5
+@export var parry_stamina_cost: float = 100.0
+@export var parry_stun_duration: float = 0.8
+@export var parry_fail_cooldown: float = 1.0
+@export var parry_invulnerability_duration: float = 0.5
+@export var parry_knockback_force: float = 300.0
+@export var parry_restores_stamina: bool = true
+@export var parry_stamina_restore: float = 200.0
+@export var parry_heals: bool = false
+@export var parry_heal_amount: int = 50
+
+@export_subgroup("Block Settings")
+@export var block_stamina_drain_rate: float = 200.0
+@export var block_hit_stamina_cost: float = 150.0
+@export var block_damage_reduction: float = 0.3
+@export var block_knockback_force: float = 100.0
+
 @export_group("Combat Options")
 @export var invulnerability: bool = false
 @export var can_attack: bool = true

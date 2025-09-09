@@ -17,7 +17,7 @@
 
 [resource]
 script = ExtResource("13_jpruu")
-health_max = 100
+health_max = 1000
 stamina_max = 1000.0
 stamina_regen_rate = 100.0
 stamina_regen_delay = 1.0
