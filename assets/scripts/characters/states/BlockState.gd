@@ -1,25 +1,25 @@
 extends State
 class_name BlockState
 
-var blocked_this_frame: bool = false
+var block_timer: float = 0.0
+var weapon_visibility_set: bool = false
 
 func enter() -> void:
 	if not character.character_data.can_block:
 		transition_to_appropriate_state()
 		return
 	
-	if character.stamina_current <= 0:
-		transition_to_appropriate_state()
-		return
+	block_timer = 0.0
+	weapon_visibility_set = false
 	
-	character.velocity.x = 0
-	blocked_this_frame = false
-	
+	character.timers_handler.hide_weapon_timer.stop()
 	character.set_weapon_visibility("both")
+	weapon_visibility_set = true
 
 func exit() -> void:
-	character.timers_handler.hide_weapon_timer.wait_time = character.character_data.hide_weapon_time
-	character.timers_handler.hide_weapon_timer.start()
+	if weapon_visibility_set:
+		character.timers_handler.hide_weapon_timer.wait_time = character.character_data.hide_weapon_time
+		character.timers_handler.hide_weapon_timer.start()
 
 func physics_process(delta: float) -> void:
 	character.apply_gravity(delta)
@@ -30,17 +30,7 @@ func physics_process(delta: float) -> void:
 		transition_to_appropriate_state()
 		return
 	
-	character.stamina_current -= character.character_data.block_stamina_drain_rate * delta
-	
-	if blocked_this_frame:
-		character.stamina_current -= character.character_data.block_hit_stamina_cost
-		blocked_this_frame = false
-	
-	character.stamina_current = max(0, character.stamina_current)
-	
-	if character.stamina_current <= 0:
-		state_machine.transition_to("StunnedState")
-		return
+	block_timer += delta
 	
 	if character.is_on_floor():
 		character.velocity.x = move_toward(character.velocity.x, 0, character.character_data.speed * delta * 2)
@@ -48,7 +38,19 @@ func physics_process(delta: float) -> void:
 		character.velocity.x = move_toward(character.velocity.x, 0, character.character_data.speed * delta * 0.5)
 
 func handle_incoming_damage(damage: int, attacker_position: Vector2) -> int:
-	blocked_this_frame = true
+	if character.stamina_current < character.character_data.block_hit_stamina_cost:
+		return damage
+	
+	character.stamina_current -= character.character_data.block_hit_stamina_cost
+	character.stamina_regen_timer = character.character_data.stamina_regen_delay
+	
+	if character.stamina_current <= 0:
+		character.stamina_current = 0
+		if character.timers_handler.stun_timer:
+			character.timers_handler.stun_timer.wait_time = character.character_data.stun_time
+			character.timers_handler.stun_timer.start()
+		state_machine.transition_to("StunnedState")
+		return damage
 	
 	var blocked_damage = int(damage * character.character_data.block_damage_reduction)
 	

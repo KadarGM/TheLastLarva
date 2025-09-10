@@ -68,6 +68,18 @@ func physics_process(_delta: float) -> void:
 func process_input() -> void:
 	var input = character.get_controller_input()
 	
+	if input.parry_pressed:
+		if character.character_data.can_parry:
+			if not character.timers_handler.parry_cooldown_timer or character.timers_handler.parry_cooldown_timer.is_stopped():
+				character.velocity.x = 0
+				state_machine.transition_to("ParryState")
+				return
+	elif input.parry:
+		if character.character_data.can_block:
+			character.velocity.x = 0
+			state_machine.transition_to("BlockState")
+			return
+	
 	if input.jump_pressed and character.character_data.can_jump:
 		character.velocity.y = character.character_data.jump_velocity
 		state_machine.transition_to("JumpingState")

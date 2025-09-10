@@ -34,6 +34,8 @@ var emergency_timer: float = 0.0
 var search_direction: int = 1
 var last_player_height_diff: float = 0.0
 
+var soft_collision_force: Vector2 = Vector2.ZERO
+
 func _ready() -> void:
 	setup_signals()
 	setup_detection()
@@ -75,7 +77,36 @@ func update_input() -> void:
 	update_timers(delta)
 	update_detection()
 	update_ai_state()
+	calculate_soft_collision()
 	generate_input_from_ai_state()
+
+func calculate_soft_collision() -> void:
+	if not character.areas_handler or not character.areas_handler.soft_collision_area:
+		soft_collision_force = Vector2.ZERO
+		return
+	
+	var push_vector = Vector2.ZERO
+	var overlapping_bodies = character.areas_handler.soft_collision_area.get_overlapping_bodies()
+	
+	for body in overlapping_bodies:
+		if body == character:
+			continue
+		
+		if not body.is_in_group("Enemy") and body != target_player:
+			continue
+		
+		var distance_vector = character.global_position - body.global_position
+		var distance = distance_vector.length()
+		
+		if distance < 1.0:
+			distance = 1.0
+		
+		if distance < character.character_data.ai_maintain_distance_from_allies:
+			var push_strength = character.character_data.ai_soft_collision_strength / distance
+			push_strength = min(push_strength, character.character_data.ai_soft_collision_max_force)
+			push_vector += distance_vector.normalized() * push_strength
+	
+	soft_collision_force = push_vector
 
 func update_timers(delta: float) -> void:
 	if state_timer > 0:
@@ -242,6 +273,9 @@ func generate_input_from_ai_state() -> void:
 			handle_search_input()
 		AIState.WAIT:
 			handle_wait_input()
+	
+	if soft_collision_force.length() > 0.1:
+		input.move_direction.x = clamp(input.move_direction.x + soft_collision_force.x * 0.01, -1.0, 1.0)
 
 func handle_patrol_input() -> void:
 	if check_edge_or_wall():

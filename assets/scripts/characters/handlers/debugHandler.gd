@@ -190,7 +190,7 @@ func update_ui_debug() -> void:
 		debug_holder.has_triple_jump_text.text = str(character.has_triple_jump)
 	
 	if debug_holder.is_jump_held_text:
-		debug_holder.is_jump_held_text.text = str(Input.is_action_pressed("W_jump"))
+		debug_holder.is_jump_held_text.text = str(Input.is_action_pressed("jump"))
 	
 	if debug_holder.is_double_jump_held_text:
 		debug_holder.is_double_jump_held_text.text = str(character.is_double_jump_held)

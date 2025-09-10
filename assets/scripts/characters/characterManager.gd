@@ -120,7 +120,9 @@ func _physics_process(delta: float) -> void:
 	
 	update_air_time(delta)
 	update_character_direction()
+	
 	apply_soft_collisions()
+	
 	move_and_slide()
 	update_ui()
 	
@@ -161,16 +163,21 @@ func apply_soft_collisions() -> void:
 		return
 	
 	var current_state_name = state_machine.get_current_state_name() if state_machine else ""
-	if current_state_name == "DeathState" or current_state_name == "AttackingState":
+	if current_state_name == "DeathState" or current_state_name == "AttackingState" or current_state_name == "KnockbackState":
 		return
 	
 	var push_vector = Vector2.ZERO
 	var overlapping_bodies = areas_handler.soft_collision_area.get_overlapping_bodies()
+	var push_count = 0
 	
 	for body in overlapping_bodies:
 		if body == self:
 			continue
-		if not body.is_in_group("Enemy"):
+		
+		if not body.is_in_group("Enemy") and not body.is_in_group("Player"):
+			continue
+		
+		if body.is_in_group("dead"):
 			continue
 		
 		var distance_vector = global_position - body.global_position
@@ -179,13 +186,15 @@ func apply_soft_collisions() -> void:
 		if distance < 1.0:
 			distance = 1.0
 		
-		var push_strength = character_data.ai_soft_collision_strength / distance
-		push_vector += distance_vector.normalized() * push_strength
+		if distance < character_data.ai_maintain_distance_from_allies:
+			var push_strength = character_data.ai_soft_collision_strength / distance
+			push_strength = min(push_strength, character_data.ai_soft_collision_max_force)
+			push_vector += distance_vector.normalized() * push_strength
+			push_count += 1
 	
-	if push_vector.length() > 0:
-		push_vector = push_vector.limit_length(character_data.ai_soft_collision_max_force)
-		velocity.x += push_vector.x
-		velocity.y += push_vector.y * 0.1
+	if push_count > 0 and push_vector.length() > 0:
+		push_vector = push_vector.normalized() * min(push_vector.length(), character_data.ai_soft_collision_max_force)
+		velocity += push_vector
 
 func update_character_direction() -> void:
 	if state_machine.current_state and state_machine.current_state.name == "DeathState":
@@ -228,10 +237,13 @@ func apply_stun(duration: float) -> void:
 		if state_machine.current_state.name == "DeathState":
 			return
 		
+		print("[CHARACTER] Stunned for ", duration, " seconds")
+		
 		if state_machine.current_state.name != "StunnedState":
 			if timers_handler and timers_handler.stun_timer:
 				timers_handler.stun_timer.wait_time = duration
-				state_machine.transition_to("StunnedState")
+				timers_handler.stun_timer.start()
+			state_machine.transition_to("StunnedState")
 
 func apply_knockback(force: Vector2) -> void:
 	if is_in_group("dead"):
@@ -265,25 +277,37 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 		if state_machine.current_state.name == "DeathState":
 			return
 		
+		if state_machine.current_state.name == "ParryState":
+			var parry_state = state_machine.current_state as ParryState
+			if parry_state and parry_state.has_method("handle_incoming_damage"):
+				amount = parry_state.handle_incoming_damage(amount, attacker_position)
+				if amount <= 0:
+					print("[DAMAGE] Parried! No damage taken")
+					return
+		
 		if state_machine.current_state.name == "BlockState":
 			var block_state = state_machine.current_state as BlockState
 			if block_state and block_state.has_method("handle_incoming_damage"):
 				amount = block_state.handle_incoming_damage(amount, attacker_position)
 				if amount <= 0:
+					print("[DAMAGE] Fully blocked! No damage taken")
 					return
+				print("[DAMAGE] Partially blocked! Taking ", amount, " damage")
 	
 	was_hit_by_damage = true
 	
 	if stats_controller:
-		var _health_before = stats_controller.get_health()
+		var health_before = stats_controller.get_health()
 		stats_controller.take_damage(amount, attacker_position)
 		var health_after = stats_controller.get_health()
+		
+		print("[DAMAGE] Health: ", health_before, " -> ", health_after)
 		
 		if health_after <= 0:
 			pending_death = true
 		
 		if health_after > 0 and character_data.can_receive_knockback:
-			if state_machine.current_state.name != "BlockState":
+			if state_machine.current_state.name != "BlockState" or stamina_current <= 0:
 				var knockback_direction: Vector2
 				if attacker_position != Vector2.ZERO:
 					knockback_direction = (global_position - attacker_position).normalized()
@@ -302,6 +326,7 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 	else:
 		print("Warning: No stats_controller on ", name)
 
+
 func cancel_attack() -> void:
 	if state_machine and state_machine.current_state:
 		var current_state_name = state_machine.get_current_state_name()
@@ -312,6 +337,37 @@ func cancel_attack() -> void:
 				timers_handler.damage_timer.stop()
 			
 			state_machine.transition_to("StunnedState")
+
+
+func get_stunned_by_parry(duration: float) -> void:
+	print("[CHARACTER ", name, "] Got parried! Stunned for ", duration, " seconds")
+	
+	if state_machine and state_machine.current_state:
+		if state_machine.current_state.name == "AttackingState":
+			damage_applied_this_attack = true
+			if timers_handler and timers_handler.damage_timer:
+				timers_handler.damage_timer.stop()
+		
+		if timers_handler and timers_handler.stun_timer:
+			timers_handler.stun_timer.wait_time = duration
+			timers_handler.stun_timer.start()
+		
+		state_machine.transition_to("StunnedState")
+
+func log_attack_start() -> void:
+	print("[CHARACTER ", name, "] Starting attack!")
+
+func log_attack_damage() -> void:
+	print("[CHARACTER ", name, "] Applying damage!")
+
+func log_attack_hit(target_name: String, damage: int) -> void:
+	print("[CHARACTER ", name, "] Hit ", target_name, " for ", damage, " damage")
+
+func log_got_blocked() -> void:
+	print("[CHARACTER ", name, "] Attack was blocked!")
+
+func log_got_parried() -> void:
+	print("[CHARACTER ", name, "] Attack was PARRIED!")
 
 func check_pending_death() -> void:
 	if pending_death:
@@ -380,6 +436,11 @@ func set_weapon_visibility(mode: String) -> void:
 			sword_b.visible = false
 			sword_body_2.visible = true
 			sword_body.visible = true
+		"front":
+			sword_f.visible = true
+			sword_b.visible = false
+			sword_body_2.visible = true
+			sword_body.visible = false
 		"back":
 			sword_f.visible = false
 			sword_b.visible = true
