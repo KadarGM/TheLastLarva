@@ -33,44 +33,33 @@ func physics_process(delta: float) -> void:
 	block_timer += delta
 	
 	if character.is_on_floor():
-		character.velocity.x = move_toward(character.velocity.x, 0, character.character_data.speed * delta * 2)
+		character.velocity.x = 0
 	else:
 		character.velocity.x = move_toward(character.velocity.x, 0, character.character_data.speed * delta * 0.5)
 
-func handle_incoming_damage(damage: int, attacker_position: Vector2) -> int:
+func handle_incoming_attack(attacker: Node2D) -> bool:
 	if character.stamina_current < character.character_data.block_hit_stamina_cost:
-		return damage
-	
-	character.stamina_current -= character.character_data.block_hit_stamina_cost
-	character.stamina_regen_timer = character.character_data.stamina_regen_delay
-	
-	if character.stamina_current <= 0:
 		character.stamina_current = 0
 		if character.timers_handler.stun_timer:
 			character.timers_handler.stun_timer.wait_time = character.character_data.stun_time
 			character.timers_handler.stun_timer.start()
 		state_machine.transition_to("StunnedState")
-		return damage
+		return false
 	
-	var blocked_damage = int(damage * character.character_data.block_damage_reduction)
+	character.stamina_current -= character.character_data.block_hit_stamina_cost
+	character.stamina_regen_timer = character.character_data.stamina_regen_delay
 	
-	var knockback_direction: Vector2
-	if attacker_position != Vector2.ZERO:
-		knockback_direction = (character.global_position - attacker_position).normalized()
-	else:
-		knockback_direction = Vector2(randf_range(-1, 1), 0).normalized()
+	print("[BLOCK] ", character.name, " blocked attack from ", attacker.name, " - Stamina: ", character.stamina_current)
 	
-	if knockback_direction.x == 0:
-		knockback_direction.x = randf_range(-0.5, 0.5)
-	
-	var blocked_knockback = Vector2(
-		knockback_direction.x * character.character_data.block_knockback_force,
-		0
-	)
-	
-	character.velocity += blocked_knockback
-	
-	return blocked_damage
+	return true
+
+func get_damage_reduction() -> float:
+	if character.stamina_current > 0:
+		return character.character_data.block_damage_reduction
+	return 1.0
+
+func should_receive_knockback() -> bool:
+	return false
 
 func transition_to_appropriate_state() -> void:
 	if character.is_on_floor():

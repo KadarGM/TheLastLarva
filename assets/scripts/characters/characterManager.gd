@@ -155,6 +155,10 @@ func update_stamina_regeneration(delta: float) -> void:
 		stamina_regen_timer -= delta
 		return
 	
+	if state_machine and state_machine.current_state:
+		if state_machine.current_state.name == "BlockState":
+			return
+	
 	stamina_current += delta * character_data.stamina_regen_rate
 	stamina_current = min(stamina_current, character_data.stamina_max)
 
@@ -255,6 +259,12 @@ func apply_knockback(force: Vector2) -> void:
 	if not character_data.can_receive_knockback:
 		return
 	
+	if state_machine.current_state and state_machine.current_state.name == "BlockState":
+		var block_state = state_machine.current_state
+		if block_state.has_method("should_receive_knockback"):
+			if not block_state.should_receive_knockback():
+				return
+	
 	if knockback_immunity_timer > 0:
 		return
 	
@@ -276,23 +286,6 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 	if state_machine and state_machine.current_state:
 		if state_machine.current_state.name == "DeathState":
 			return
-		
-		if state_machine.current_state.name == "ParryState":
-			var parry_state = state_machine.current_state as ParryState
-			if parry_state and parry_state.has_method("handle_incoming_damage"):
-				amount = parry_state.handle_incoming_damage(amount, attacker_position)
-				if amount <= 0:
-					print("[DAMAGE] Parried! No damage taken")
-					return
-		
-		if state_machine.current_state.name == "BlockState":
-			var block_state = state_machine.current_state as BlockState
-			if block_state and block_state.has_method("handle_incoming_damage"):
-				amount = block_state.handle_incoming_damage(amount, attacker_position)
-				if amount <= 0:
-					print("[DAMAGE] Fully blocked! No damage taken")
-					return
-				print("[DAMAGE] Partially blocked! Taking ", amount, " damage")
 	
 	was_hit_by_damage = true
 	
@@ -307,7 +300,14 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 			pending_death = true
 		
 		if health_after > 0 and character_data.can_receive_knockback:
-			if state_machine.current_state.name != "BlockState" or stamina_current <= 0:
+			var should_apply_knockback = true
+			
+			if state_machine.current_state.name == "BlockState":
+				var block_state = state_machine.current_state
+				if block_state.has_method("should_receive_knockback"):
+					should_apply_knockback = block_state.should_receive_knockback()
+			
+			if should_apply_knockback:
 				var knockback_direction: Vector2
 				if attacker_position != Vector2.ZERO:
 					knockback_direction = (global_position - attacker_position).normalized()
@@ -326,7 +326,6 @@ func take_damage(amount: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 	else:
 		print("Warning: No stats_controller on ", name)
 
-
 func cancel_attack() -> void:
 	if state_machine and state_machine.current_state:
 		var current_state_name = state_machine.get_current_state_name()
@@ -337,7 +336,6 @@ func cancel_attack() -> void:
 				timers_handler.damage_timer.stop()
 			
 			state_machine.transition_to("StunnedState")
-
 
 func get_stunned_by_parry(duration: float) -> void:
 	print("[CHARACTER ", name, "] Got parried! Stunned for ", duration, " seconds")

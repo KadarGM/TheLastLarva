@@ -1,4 +1,4 @@
-[gd_scene load_steps=79 format=3 uid="uid://cj48v8xyc70da"]
+[gd_scene load_steps=78 format=3 uid="uid://cj48v8xyc70da"]
 
 [ext_resource type="Script" uid="uid://7a8h46pofh27" path="res://assets/scripts/characters/characterManager.gd" id="1_31cv2"]
 [ext_resource type="Resource" uid="uid://d125kkggxi83n" path="res://assets/resources/Player.tres" id="2_pf23h"]
@@ -8,7 +8,6 @@
 [ext_resource type="Texture2D" uid="uid://bd7ao8oa4baxx" path="res://assets/graphics/player/torso.svg" id="4_wqfne"]
 [ext_resource type="Animation" uid="uid://bod3rjvhith2p" path="res://assets/animations/Attack_ground_1.res" id="5_tyoy7"]
 [ext_resource type="Texture2D" uid="uid://bey4g8rdm8776" path="res://assets/graphics/player/sword.svg" id="5_wnwbv"]
-[ext_resource type="Animation" uid="uid://bh0d3863qwrgk" path="res://assets/animations/Attack_air_down_2.res" id="5_xa8rf"]
 [ext_resource type="Texture2D" uid="uid://bmae8nmkwyayq" path="res://assets/graphics/player/leg.svg" id="6_gl8cc"]
 [ext_resource type="Animation" uid="uid://dle4dcfh7qnon" path="res://assets/animations/Big_attack.res" id="6_lpj86"]
 [ext_resource type="Texture2D" uid="uid://d3eaaehk4puky" path="res://assets/graphics/player/leg_1.svg" id="7_487ah"]
@@ -75,7 +74,6 @@
 _data = {
 &"Attack_air": ExtResource("3_pdsl2"),
 &"Attack_air_down": ExtResource("21_lx1vy"),
-&"Attack_air_down_2": ExtResource("5_xa8rf"),
 &"Attack_air_up": ExtResource("4_vkhvj"),
 &"Attack_ground_1": ExtResource("5_tyoy7"),
 &"Big_attack": ExtResource("6_lpj86"),

@@ -146,9 +146,10 @@ func apply_damage() -> void:
 	if overlapping_bodies.is_empty():
 		return
 	
-	var damage = character.character_data.attack_1_dmg
+	var base_damage = character.character_data.attack_1_dmg
 	var base_knockback_force = character.character_data.outgoing_knockback_force
 	var hit_count = 0
+	var was_parried = false
 	
 	for entity in overlapping_bodies:
 		if entity == character:
@@ -163,28 +164,52 @@ func apply_damage() -> void:
 			
 			if entity.state_machine.current_state and entity.state_machine.current_state.name == "ParryState":
 				var parry_state = entity.state_machine.current_state
-				if parry_state.parry_window_active and parry_state.parry_window_timer < entity.character_data.parry_window_duration:
-					character.log_got_parried()
-					character.get_stunned_by_parry(entity.character_data.parry_stun_duration)
-					
-					if entity.character_data.parry_restores_stamina:
-						entity.stamina_current += entity.character_data.parry_stamina_restore
-						entity.stamina_current = min(entity.stamina_current, entity.character_data.stamina_max)
-					
-					if entity.character_data.parry_heals and entity.stats_controller:
-						entity.stats_controller.restore_health(entity.character_data.parry_heal_amount)
-					return
+				if parry_state.has_method("handle_incoming_attack"):
+					if parry_state.handle_incoming_attack(character):
+						character.log_got_parried()
+						was_parried = true
+						return
 			
 			if entity.state_machine.current_state and entity.state_machine.current_state.name == "BlockState":
-				character.log_got_blocked()
+				var block_state = entity.state_machine.current_state
+				if block_state.has_method("handle_incoming_attack"):
+					var blocked = block_state.handle_incoming_attack(character)
+					if blocked:
+						character.log_got_blocked()
+						
+						var damage = int(base_damage * entity.character_data.block_damage_reduction)
+						
+						hit_count += 1
+						if entity.has_method("take_damage"):
+							character.log_attack_hit(entity.name, damage)
+							entity.take_damage(damage, character.global_position)
+						continue
+					else:
+						hit_count += 1
+						if entity.has_method("take_damage"):
+							character.log_attack_hit(entity.name, base_damage)
+							entity.take_damage(base_damage, character.global_position)
+						
+						var entity_direction = sign(entity.global_position.x - character.global_position.x)
+						if entity_direction == 0:
+							entity_direction = attack_direction.x
+						
+						var knockback_force = Vector2(
+							entity_direction * base_knockback_force * character.character_data.outgoing_knockback_horizontal_multiplier,
+							-abs(character.character_data.jump_velocity * character.character_data.outgoing_knockback_vertical_multiplier)
+						)
+						
+						entity.apply_knockback(knockback_force)
+						apply_stun_to_entity(entity)
+						continue
 		
 		if not entity.has_method("take_damage"):
 			continue
 		
 		hit_count += 1
-		character.log_attack_hit(entity.name, damage)
+		character.log_attack_hit(entity.name, base_damage)
 		
-		entity.take_damage(damage, character.global_position)
+		entity.take_damage(base_damage, character.global_position)
 		
 		if not entity.is_in_group("dead") and entity.has_method("apply_knockback"):
 			var can_apply_knockback = true
@@ -234,7 +259,7 @@ func apply_damage() -> void:
 				
 				apply_stun_to_entity(entity)
 	
-	if hit_count > 0 and character.character_data.can_apply_knockback and not self_knockback_applied:
+	if hit_count > 0 and character.character_data.can_apply_knockback and not self_knockback_applied and not was_parried:
 		apply_self_knockback()
 		self_knockback_applied = true
 
