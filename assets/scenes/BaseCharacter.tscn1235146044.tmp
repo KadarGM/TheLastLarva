@@ -1,13 +1,15 @@
-[gd_scene load_steps=13 format=3 uid="uid://cj48v8xyc70da"]
+[gd_scene load_steps=14 format=3 uid="uid://cj48v8xyc70da"]
 
 [ext_resource type="Script" uid="uid://7txkaxp67kht" path="res://assets/scripts/characters/BaseCharacter.gd" id="1_rm0y7"]
-[ext_resource type="Resource" uid="uid://61k8v62kkx4q" path="res://assets/resources/Player.tres" id="2_o5vw8"]
-[ext_resource type="Texture2D" uid="uid://t371gx7chvhs" path="res://assets/graphics/player/Idle.png" id="4_61bru"]
-[ext_resource type="Texture2D" uid="uid://mxbj86xhlga1" path="res://assets/graphics/player/Walking.png" id="4_hl8et"]
+[ext_resource type="Resource" uid="uid://bg4hloay6bnqw" path="res://assets/resources/Player.tres" id="2_bys2h"]
+[ext_resource type="Script" uid="uid://f8fhrn780wwk" path="res://assets/scripts/characters/MovementModule.gd" id="2_elw5e"]
+[ext_resource type="Texture2D" uid="uid://t371gx7chvhs" path="res://assets/graphics/player/Larva_Idle.png" id="4_61bru"]
+[ext_resource type="Script" uid="uid://q7mrhvw4oatd" path="res://assets/scripts/characters/StateData.gd" id="4_k5o3k"]
 [ext_resource type="Script" uid="uid://bjuiflculv8ri" path="res://assets/scripts/characters/states/JumpingState.gd" id="8_61bru"]
 [ext_resource type="Script" uid="uid://bmdyfqtsvu50n" path="res://assets/scripts/characters/states/WalkingState.gd" id="9_k5o3k"]
 [ext_resource type="Script" uid="uid://eaer5de2c7s6" path="res://assets/scripts/characters/states/IdleState.gd" id="18_esr54"]
 [ext_resource type="Script" uid="uid://b8sptsapdclmf" path="res://assets/scripts/characters/states/StateMachine.gd" id="19_8vdor"]
+[ext_resource type="Script" uid="uid://dwm30ryox7jbm" path="res://assets/scripts/characters/SurfaceModule.gd" id="20_esr54"]
 
 [sub_resource type="Animation" id="Animation_61bru"]
 resource_name = "Idle"
@@ -17,124 +19,64 @@ step = 0.1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/path = NodePath("Sprite2D:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"update": 0,
+"values": []
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"update": 0,
+"values": []
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Sprite2D:frame")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
 "times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [1, 2, 3, 4, 5, 6]
 }
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Sprite2D:texture")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [ExtResource("4_61bru")]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Sprite2D:hframes")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [2]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("Sprite2D:vframes")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [4]
-}
-
-[sub_resource type="Animation" id="Animation_k5o3k"]
-resource_name = "Walking"
-length = 0.40001
-loop_mode = 1
-step = 0.1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 1,
-"values": [2, 3, 0, 1]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Sprite2D:texture")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [ExtResource("4_hl8et")]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Sprite2D:hframes")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [2]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("Sprite2D:vframes")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [2]
-}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_k5o3k"]
 _data = {
-&"Idle": SubResource("Animation_61bru"),
-&"Walking": SubResource("Animation_k5o3k")
+&"Idle": SubResource("Animation_61bru")
 }
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_elw5e"]
-size = Vector2(89, 244)
+size = Vector2(120, 220)
 
-[node name="BaseCharacter" type="CharacterBody2D" node_paths=PackedStringArray("sprite", "state_machine") groups=["Player"]]
+[node name="BaseCharacter" type="CharacterBody2D" node_paths=PackedStringArray("movement_module", "sprite", "state_machine", "state_data") groups=["Player"]]
 z_index = -100
 collision_layer = 2
 script = ExtResource("1_rm0y7")
+movement_module = NodePath("MovementModule")
 sprite = NodePath("Sprite2D")
 state_machine = NodePath("StateMachine")
-character_data = ExtResource("2_o5vw8")
+character_data = ExtResource("2_bys2h")
+state_data = NodePath("StateData")
 metadata/_edit_horizontal_guides_ = [69.6705]
 metadata/_edit_vertical_guides_ = [71.0, -85.0]
+
+[node name="StateData" type="Node" parent="."]
+script = ExtResource("4_k5o3k")
+character_data = ExtResource("2_bys2h")
+metadata/_custom_type_script = "uid://q7mrhvw4oatd"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
@@ -148,9 +90,9 @@ vframes = 4
 frame = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(-13.4809, 35.9993)
+visible = false
+position = Vector2(-2.28129, -39.7756)
 rotation = 0.00136239
-scale = Vector2(0.999999, 0.999999)
 shape = SubResource("RectangleShape2D_elw5e")
 
 [node name="Camera2D" type="Camera2D" parent="."]
@@ -192,7 +134,14 @@ layout_mode = 2
 step = 1.0
 show_percentage = false
 
-[node name="Modules" type="Node" parent="."]
+[node name="MovementModule" type="Node" parent="." node_paths=PackedStringArray("state_machine")]
+script = ExtResource("2_elw5e")
+state_machine = NodePath("../StateMachine")
+metadata/_custom_type_script = "uid://f8fhrn780wwk"
+
+[node name="SurfaceModule" type="Node" parent="."]
+script = ExtResource("20_esr54")
+metadata/_custom_type_script = "uid://dwm30ryox7jbm"
 
 [node name="Handlers" type="Node" parent="."]
 
@@ -200,10 +149,9 @@ show_percentage = false
 
 [node name="AreasHandler" type="Node" parent="Handlers"]
 
-[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("character")]
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
 script = ExtResource("19_8vdor")
-character = NodePath("..")
-initial_state = "JumpingState"
+initial_state = NodePath("IdleState")
 metadata/_custom_type_script = "uid://b8sptsapdclmf"
 
 [node name="IdleState" type="Node" parent="StateMachine"]
