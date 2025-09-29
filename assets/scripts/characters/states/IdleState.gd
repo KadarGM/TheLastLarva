@@ -6,14 +6,18 @@ func update(delta: float) -> void:
 
 	if h_input != 0 and character.is_on_floor():
 		change_state("WalkingState")
-		character.animation_player.play("Walking")
 		return
 
-	if Input.is_action_just_pressed("jump") and character.is_on_floor():
-		character.velocity.y = character.character_data.jump_velocity
-		change_state("JumpingState")
+	if character.is_on_floor():
+		if Input.is_action_just_pressed("jump"):
+			character.velocity.y = character.character_data.jump_velocity
+			change_state("JumpingState")
+			return
+	
+	if character.velocity.y > 0:
+		change_state("FallingState")
 		return
-
+	
 	if not character.is_on_floor():
 		character.velocity.y += character.character_data.gravity * delta
 

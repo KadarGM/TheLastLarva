@@ -6,5 +6,6 @@
 script = ExtResource("1_hhgm4")
 gravity = 2000.0
 move_speed = 1000.0
-jump_velocity = -850.0
+jump_velocity = -1050.0
+variable_jump_multiplier = 0.2
 metadata/_custom_type_script = "uid://blttbfe55ei7"

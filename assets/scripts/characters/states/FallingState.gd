@@ -1,22 +1,12 @@
 extends State
-class_name JumpingState
+class_name FallingState
 
 func update(delta: float):
 	var h_input = Input.get_axis("left", "right")
 
 	character.velocity.y += character.character_data.gravity * delta
 	character.velocity.x = h_input * character.character_data.move_speed
-	
-	if not character.is_on_floor():
-		if Input.is_action_just_released("jump") or character.is_on_ceiling():
-			character.velocity.y *= character.character_data.variable_jump_multiplier
-			change_state("JumpingState")
-			return
-	
-	if character.velocity.y > 0:
-		change_state("FallingState")
-		return
-	
+
 	if character.is_on_floor():
 		if h_input != 0:
 			change_state("WalkingState")

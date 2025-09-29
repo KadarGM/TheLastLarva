@@ -5,3 +5,4 @@ class_name CharacterData
 @export var gravity: float
 @export var move_speed: float
 @export var jump_velocity: float
+@export var variable_jump_multiplier: float

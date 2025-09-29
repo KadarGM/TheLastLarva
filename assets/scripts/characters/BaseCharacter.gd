@@ -1,8 +1,7 @@
 extends CharacterBody2D
 class_name BaseCharacter
 
-@onready var animation_player: AnimationPlayer = $AnimationPlayer
-
+@export var animation_player: AnimationPlayer
 @export var sprite: Sprite2D
 @export var state_machine: StateMachine
 @export var character_data: CharacterData

@@ -6,7 +6,6 @@ func update(_delta: float):
 
 	if h_input == 0:
 		change_state("IdleState")
-		character.animation_player.play("Idle")
 		return
 		
 	if Input.is_action_just_pressed("jump") and character.is_on_floor():
@@ -14,10 +13,12 @@ func update(_delta: float):
 		change_state("JumpingState")
 		return
 	
+	if character.velocity.y > 0:
+		change_state("FallingState")
+		return
+	
 	if not character.is_on_floor():
 		change_state("JumpingState")
 		return
 
 	character.velocity.x = h_input * character.character_data.move_speed
-
-	char_orientation(character.sprite, h_input)
