@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Concepts" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #000;
+        stroke-width: 0px;
+      }
+    </style>
+  </defs>
+  <g id="concept_4" data-name="concept 4">
+    <path class="cls-1" d="M20.9,32.06c7.2-.33,14.91-.68,21.45,2.86,1.7.92,3.21-1.67,1.51-2.59-7.04-3.81-15.19-3.63-22.96-3.27-1.92.09-1.93,3.09,0,3h0Z"/>
+  </g>
+</svg>

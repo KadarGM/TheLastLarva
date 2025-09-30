@@ -1,24 +1,53 @@
 extends State
 class_name WalkingState
 
-func update(_delta: float):
-	var h_input = Input.get_axis("left", "right")
+func enter() -> void:
+	pass
 
-	if h_input == 0:
-		change_state("IdleState")
-		return
-		
-	if Input.is_action_just_pressed("jump") and character.is_on_floor():
-		character.velocity.y = character.character_data.jump_velocity
-		change_state("JumpingState")
-		return
-	
-	if character.velocity.y > 0:
-		change_state("FallingState")
-		return
+func physics_process(delta: float) -> void:
+	character.apply_gravity(delta)
 	
 	if not character.is_on_floor():
-		change_state("JumpingState")
+		state_machine.transition_to("JumpingState")
 		return
+	
+	var input = character.get_controller_input()
+	var input_direction = input.move_direction.x
+	
+	if abs(input_direction) < 0.1:
+		state_machine.transition_to("IdleState")
+		return
+	
+	character.velocity.x = input_direction * character.character_data.speed
+	
+	process_input()
 
-	character.velocity.x = h_input * character.character_data.move_speed
+func process_input() -> void:
+	var input = character.get_controller_input()
+	
+	if input.jump_pressed:
+		if character.handle_ground_jump():
+			state_machine.transition_to("JumpingState")
+			return
+	
+	if input.dash_pressed:
+		if character.big_jump_charged and input.attack and character.timers_handler.dash_attack_cooldown_timer.is_stopped():
+			state_machine.transition_to("DashAttackState")
+			return
+		elif character.can_dash:
+			state_machine.transition_to("DashingState")
+			return
+	
+	if input.attack_pressed:
+		if character.character_data.can_attack and character.timers_handler.before_attack_timer.is_stopped():
+			state_machine.transition_to("AttackingState")
+		return
+	
+	character.process_big_jump_input()
+
+func handle_animation() -> void:
+	var input = character.get_controller_input()
+	if character.big_jump_charged and input.dash:
+		character.play_animation("Big_jump_charge")
+	else:
+		character.play_animation("Walk")
