@@ -1,0 +1,174 @@
+[gd_scene load_steps=15 format=3 uid="uid://cj48v8xyc70da"]
+
+[ext_resource type="Script" uid="uid://7txkaxp67kht" path="res://assets/scripts/characters/BaseCharacter.gd" id="1_rm0y7"]
+[ext_resource type="Resource" uid="uid://bg4hloay6bnqw" path="res://assets/resources/Player.tres" id="2_bys2h"]
+[ext_resource type="Script" uid="uid://f8fhrn780wwk" path="res://assets/scripts/characters/MovementModule.gd" id="2_elw5e"]
+[ext_resource type="Texture2D" uid="uid://t371gx7chvhs" path="res://assets/graphics/player/Larva_Idle.png" id="4_61bru"]
+[ext_resource type="Script" uid="uid://q7mrhvw4oatd" path="res://assets/scripts/characters/StateData.gd" id="4_k5o3k"]
+[ext_resource type="Script" uid="uid://c37umx83jfdv3" path="res://assets/scripts/characters/ControllerModule.gd" id="5_74ir4"]
+[ext_resource type="Script" uid="uid://bjuiflculv8ri" path="res://assets/scripts/characters/states/JumpingState.gd" id="8_61bru"]
+[ext_resource type="Script" uid="uid://bmdyfqtsvu50n" path="res://assets/scripts/characters/states/WalkingState.gd" id="9_k5o3k"]
+[ext_resource type="Script" uid="uid://eaer5de2c7s6" path="res://assets/scripts/characters/states/IdleState.gd" id="18_esr54"]
+[ext_resource type="Script" uid="uid://b8sptsapdclmf" path="res://assets/scripts/characters/states/StateMachine.gd" id="19_8vdor"]
+[ext_resource type="Script" uid="uid://dwm30ryox7jbm" path="res://assets/scripts/characters/SurfaceModule.gd" id="20_esr54"]
+
+[sub_resource type="Animation" id="Animation_61bru"]
+resource_name = "Idle"
+length = 0.60001
+loop_mode = 1
+step = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"update": 0,
+"values": []
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"update": 0,
+"values": []
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Sprite2D:frame")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [1, 2, 3, 4, 5, 6]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_k5o3k"]
+_data = {
+&"Idle": SubResource("Animation_61bru")
+}
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_elw5e"]
+size = Vector2(120, 220)
+
+[node name="BaseCharacter" type="CharacterBody2D" node_paths=PackedStringArray("movement_module", "sprite", "state_machine", "state_data") groups=["Player"]]
+z_index = -100
+collision_layer = 2
+script = ExtResource("1_rm0y7")
+movement_module = NodePath("Modules/MovementModule")
+sprite = NodePath("Sprite2D")
+state_machine = NodePath("StateMachine")
+character_data = ExtResource("2_bys2h")
+state_data = NodePath("Modules/StateData")
+metadata/_edit_horizontal_guides_ = [69.6705]
+metadata/_edit_vertical_guides_ = [71.0, -85.0]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_k5o3k")
+}
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("4_61bru")
+hframes = 2
+vframes = 4
+frame = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+position = Vector2(-2.28129, -39.7756)
+rotation = 0.00136239
+shape = SubResource("RectangleShape2D_elw5e")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+visible = false
+scale = Vector2(3.33333, 3.33333)
+
+[node name="GameUI" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="MarginContainer" type="MarginContainer" parent="GameUI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="StatsHBox" type="HBoxContainer" parent="GameUI/MarginContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GameUI/MarginContainer/StatsHBox"]
+custom_minimum_size = Vector2(300, 30)
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="StaminaBar" type="ProgressBar" parent="GameUI/MarginContainer/StatsHBox/VBoxContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+max_value = 1000.0
+step = 0.5
+show_percentage = false
+
+[node name="HealthBar" type="ProgressBar" parent="GameUI/MarginContainer/StatsHBox/VBoxContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+step = 1.0
+show_percentage = false
+
+[node name="Modules" type="Node" parent="."]
+
+[node name="StateData" type="Node" parent="Modules"]
+script = ExtResource("4_k5o3k")
+character_data = ExtResource("2_bys2h")
+metadata/_custom_type_script = "uid://q7mrhvw4oatd"
+
+[node name="ControllerModule" type="Node" parent="Modules"]
+script = ExtResource("5_74ir4")
+metadata/_custom_type_script = "uid://c37umx83jfdv3"
+
+[node name="MovementModule" type="Node" parent="Modules" node_paths=PackedStringArray("state_machine")]
+script = ExtResource("2_elw5e")
+state_machine = NodePath("../../StateMachine")
+metadata/_custom_type_script = "uid://f8fhrn780wwk"
+
+[node name="SurfaceModule" type="Node" parent="Modules"]
+script = ExtResource("20_esr54")
+metadata/_custom_type_script = "uid://dwm30ryox7jbm"
+
+[node name="Handlers" type="Node" parent="."]
+
+[node name="TimersHandler" type="Node" parent="Handlers"]
+
+[node name="AreasHandler" type="Node" parent="Handlers"]
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("19_8vdor")
+initial_state = NodePath("IdleState")
+metadata/_custom_type_script = "uid://b8sptsapdclmf"
+
+[node name="IdleState" type="Node" parent="StateMachine"]
+script = ExtResource("18_esr54")
+metadata/_custom_type_script = "uid://eaer5de2c7s6"
+
+[node name="JumpingState" type="Node" parent="StateMachine"]
+script = ExtResource("8_61bru")
+metadata/_custom_type_script = "uid://bjuiflculv8ri"
+
+[node name="WalkingState" type="Node" parent="StateMachine"]
+script = ExtResource("9_k5o3k")
+metadata/_custom_type_script = "uid://bmdyfqtsvu50n"

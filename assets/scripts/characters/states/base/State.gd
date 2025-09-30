@@ -1,25 +1,19 @@
-extends Control
+extends Node
 class_name State
 
-@export var character: CharacterManager
-var state_machine: StateMachine
+var character: BaseCharacter
 
-func _ready():
-	await owner.ready
-	character = owner as CharacterManager
-	state_machine = get_parent() as StateMachine
+func setup(_char: BaseCharacter):
+	character = _char
 
-func enter() -> void:
+func enter():
 	pass
 
-func exit() -> void:
+func exit():
 	pass
 
-func physics_process(_delta: float) -> void:
+func update(_delta: float):
 	pass
 
-func process_input() -> void:
-	pass
-
-func handle_animation() -> void:
-	pass
+func change_state(state_name: String):
+	character.state_machine.change_state(state_name)

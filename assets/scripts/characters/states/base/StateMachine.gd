@@ -1,48 +1,36 @@
-extends Control
+extends Node
 class_name StateMachine
 
-@export var initial_state: State
+@export var character: BaseCharacter
+@export var initial_state: String
 var current_state: State
 var states: Dictionary = {}
 
-signal state_changed(old_state: State, new_state: State)
+func setup(_char: BaseCharacter) -> void:
+	character = _char
 
-func _ready():
 	for child in get_children():
 		if child is State:
+			child.setup(character)
 			states[child.name] = child
 	
 	if initial_state:
-		current_state = initial_state
-		current_state.enter()
+		change_state(initial_state)
 
-func physics_process(delta: float) -> void:
+func update(delta: float) -> void:
 	if current_state:
-		current_state.physics_process(delta)
+		current_state.update(delta)
 
-func process_input() -> void:
-	if current_state:
-		current_state.process_input()
-
-func transition_to(state_name: String) -> void:
+func change_state(state_name: String) -> void:
 	if not states.has(state_name):
 		return
-	
+
 	var new_state = states[state_name]
-	
 	if current_state == new_state:
 		return
-	
-	var old_state = current_state
-	
+
 	if current_state:
 		current_state.exit()
+
 	current_state = new_state
 	current_state.enter()
-
-	state_changed.emit(old_state, current_state)
-
-func get_current_state_name() -> String:
-	if current_state:
-		return current_state.name
-	return ""
